@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "PowerShell(npm install)",
+      "PowerShell($env:PATH += \";C:\\\\Program Files\\\\nodejs\"; npm --version)",
+      "WebFetch(domain:www.finaleinventory.com)",
+      "WebFetch(domain:developer.finaleinventory.com)",
+      "WebFetch(domain:support.finaleinventory.com)",
+      "WebSearch",
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(\\(Get-Command \"C:\\\\Program Files\\\\nodejs\\\\node.exe\"\\).Source)",
+      "Skill(deep-research)",
+      "Skill(deep-research:*)"
+    ]
+  }
+}

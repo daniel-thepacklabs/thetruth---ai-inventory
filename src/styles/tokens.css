@@ -1,0 +1,43 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0f11;
+  --bg2: #13161a;
+  --bg3: #1a1e24;
+  --bg4: #21262e;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaed;
+  --text2: #8b9199;
+  --text3: #555c66;
+  --accent: #e8c547;
+  --accent2: #b89a2e;
+  --red: #e05252;
+  --red-bg: rgba(224,82,82,0.12);
+  --red-border: rgba(224,82,82,0.25);
+  --orange: #e07c3a;
+  --orange-bg: rgba(224,124,58,0.12);
+  --orange-border: rgba(224,124,58,0.25);
+  --purple: #9b7fee;
+  --purple-bg: rgba(155,127,238,0.12);
+  --purple-border: rgba(155,127,238,0.25);
+  --green: #52c97a;
+  --green-bg: rgba(82,201,122,0.1);
+  --green-border: rgba(82,201,122,0.22);
+  --blue: #5ba3e0;
+  --blue-bg: rgba(91,163,224,0.1);
+  --blue-border: rgba(91,163,224,0.22);
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --r: 8px;
+  --r2: 12px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}

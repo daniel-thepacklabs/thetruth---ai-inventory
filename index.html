@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supply Chain Dashboard — The Pack Labs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/styles/tokens.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+  <link rel="stylesheet" href="/src/styles/components.css" />
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://thepacklabs.com/wp-content/uploads/2025/03/packlogo.png" alt="The Pack Labs" style="width:140px;height:auto;display:block;margin-bottom:10px;filter:brightness(0) invert(1);" />
+      <div class="sub">Supply Chain Dashboard</div>
+    </div>
+
+    <div class="nav-label" style="margin-top:1rem;">Views</div>
+    <div class="nav-item" onclick="showView('inventory')" id="nav-inventory" style="font-weight:500;color:var(--accent)">
+      <span class="dot" style="background:var(--accent)"></span> Inventory
+    </div>
+    <div class="nav-item" onclick="showView('sales')" id="nav-sales">
+      <span class="dot" style="background:var(--blue)"></span> Monthly Sales
+    </div>
+    <div class="nav-item" onclick="showView('alerts')" id="nav-alerts">
+      <span class="dot" style="background:var(--red)"></span> Consumption Alerts
+    </div>
+
+    <div class="nav-label">Status</div>
+    <div class="nav-item active" data-filter="all" onclick="setFilter('all',this)">
+      <span class="dot" style="background:var(--text3)"></span>
+      All items <span class="count" id="cnt-all">—</span>
+    </div>
+    <div class="nav-item" data-filter="critical" onclick="setFilter('critical',this)">
+      <span class="dot dot-red"></span> Critical <span class="count" id="cnt-critical">—</span>
+    </div>
+    <div class="nav-item" data-filter="alert" onclick="setFilter('alert',this)">
+      <span class="dot dot-orange"></span> Alert <span class="count" id="cnt-alert">—</span>
+    </div>
+    <div class="nav-item" data-filter="warning" onclick="setFilter('warning',this)">
+      <span class="dot dot-purple"></span> Low stock <span class="count" id="cnt-warning">—</span>
+    </div>
+    <div class="nav-item" data-filter="ok" onclick="setFilter('ok',this)">
+      <span class="dot dot-green"></span> Healthy <span class="count" id="cnt-ok">—</span>
+    </div>
+
+    <div class="nav-label">Category</div>
+    <div class="nav-item" onclick="quickFilter('Packaging')"><span class="dot dot-purple"></span> Packaging</div>
+    <div class="nav-item" onclick="quickFilter('Components')"><span class="dot dot-blue"></span> Components</div>
+    <div class="nav-item" onclick="quickFilter('Raw Material')"><span class="dot dot-green"></span> Raw Material</div>
+    <div class="nav-item" onclick="quickFilter('WIP')"><span class="dot dot-red"></span> WIP</div>
+    <div class="nav-item" onclick="quickFilter('Edibles')"><span class="dot dot-orange"></span> Edibles</div>
+    <div class="nav-item" onclick="quickFilter('Misc')"><span class="dot" style="background:var(--text3)"></span> Misc</div>
+    <div class="nav-item" onclick="quickFilter('Marketing')"><span class="dot" style="background:var(--accent)"></span> Marketing</div>
+
+    <div class="nav-label" style="margin-top:1.25rem;">Quick actions</div>
+    <div class="nav-item" onclick="quickStatusFilter('critical')"><span class="dot dot-red"></span> Show critical only</div>
+    <div class="nav-item" onclick="quickStatusFilter('alert')"><span class="dot dot-orange"></span> Show alerts only</div>
+    <div class="nav-item" onclick="activateReorderOnly()"><span class="dot" style="background:var(--accent)"></span> Needs reorder</div>
+    <div class="nav-item" onclick="resetFilters()"><span class="dot" style="background:var(--text3)"></span> Reset all filters</div>
+
+    <div class="sidebar-footer">
+      Pack Labs · Supply Chain<br>Finale Inventory
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <img src="https://thepacklabs.com/wp-content/uploads/2025/03/packlogo.png" alt="The Pack Labs" style="height:28px;width:auto;filter:brightness(0) invert(1);flex-shrink:0;display:none;" id="topbar-logo" />
+      <span style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;flex-shrink:0;display:none;" id="topbar-title">Supply Chain</span>
+      <div class="search-wrap">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search" placeholder="Search product ID or description…" oninput="render()" />
+      </div>
+      <select id="sortSel" onchange="render()">
+        <option value="urgency">Most urgent first</option>
+        <option value="demand">Highest demand</option>
+        <option value="id">Product ID A–Z</option>
+        <option value="onhand_desc">On-hand ↓</option>
+        <option value="onhand_asc">On-hand ↑</option>
+      </select>
+      <div class="topbar-right">
+        <span class="ts" id="data-timestamp">Not connected</span>
+        <button class="btn btn-accent" id="sync-btn" onclick="syncFromFinale()" style="font-size:11px;padding:3px 10px;">⟳ Sync Finale</button>
+        <span class="ts" id="showing-count">— items</span>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="filter-row">
+        <span class="filter-label">Status</span>
+        <span class="chip chip-red active"    data-status="critical" onclick="toggleChip(this,'status')">Critical</span>
+        <span class="chip chip-orange active" data-status="alert"    onclick="toggleChip(this,'status')">Alert</span>
+        <span class="chip chip-purple active" data-status="warning"  onclick="toggleChip(this,'status')">Low stock</span>
+        <span class="chip chip-green active"  data-status="ok"       onclick="toggleChip(this,'status')">Healthy</span>
+        <div class="filter-divider"></div>
+        <span class="toggle-pill" id="tog-reorder"    onclick="togglePill('reorder')"><span class="toggle-dot"></span>Needs reorder only</span>
+        <span class="toggle-pill" id="tog-nodem"      onclick="togglePill('nodem')"><span class="toggle-dot"></span>Hide zero demand</span>
+        <span class="toggle-pill" id="tog-adjusted"   onclick="togglePill('adjusted')"><span class="toggle-dot"></span>Adjusted only</span>
+        <span class="toggle-pill" id="tog-onorder"    onclick="togglePill('onorder')"><span class="toggle-dot"></span>Has open PO</span>
+        <div class="filter-divider"></div>
+        <span class="toggle-pill active" id="tog-combined"   onclick="togglePill('combined')"   style="background:rgba(232,197,71,0.1);border-color:rgba(232,197,71,0.3);color:var(--accent)"><span class="toggle-dot"></span>Combined SKUs</span>
+        <span class="toggle-pill active" id="tog-individual" onclick="togglePill('individual')" style="background:rgba(91,163,224,0.1);border-color:rgba(91,163,224,0.3);color:var(--blue)"><span class="toggle-dot"></span>Individual SKUs</span>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Category</span>
+        <span class="chip chip-purple active" data-cat="Packaging"    onclick="toggleChip(this,'cat')">Packaging</span>
+        <span class="chip chip-blue active"   data-cat="Components"   onclick="toggleChip(this,'cat')">Components</span>
+        <span class="chip chip-green active"  data-cat="Raw Material" onclick="toggleChip(this,'cat')">Raw Material</span>
+        <span class="chip chip-red active"    data-cat="WIP"          onclick="toggleChip(this,'cat')">WIP</span>
+        <span class="chip chip-orange active" data-cat="Edibles"      onclick="toggleChip(this,'cat')">Edibles</span>
+        <span class="chip active"             data-cat="Misc"         onclick="toggleChip(this,'cat')">Misc</span>
+        <span class="chip chip-accent active" data-cat="Marketing"    onclick="toggleChip(this,'cat')">Marketing</span>
+        <div class="filter-divider"></div>
+        <span class="chip" onclick="selectAllChips('cat')">All</span>
+        <span class="chip" onclick="clearAllChips('cat')">None</span>
+      </div>
+
+      <div class="filter-row" id="subcat-row" style="padding-left:72px;">
+        <span class="filter-label" style="font-size:9px;min-width:52px;">Sub</span>
+        <span id="subcat-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></span>
+        <span class="chip" id="subcat-all"  onclick="selectAllSubcats()" style="font-size:10px;padding:2px 8px;">All</span>
+        <span class="chip" id="subcat-none" onclick="clearAllSubcats()"  style="font-size:10px;padding:2px 8px;">None</span>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Max months</span>
+        <div class="range-wrap">
+          <input type="range" id="maxMonths" min="0" max="12" step="0.5" value="12" oninput="updateRangeLabel();render()" />
+          <span class="range-val" id="maxMonthsVal">All</span>
+        </div>
+        <div class="filter-divider"></div>
+        <span class="filter-label">Min demand</span>
+        <div class="range-wrap">
+          <input type="range" id="minDemand" min="0" max="50000" step="500" value="0" oninput="updateRangeLabel();render()" />
+          <span class="range-val" id="minDemandVal">Any</span>
+        </div>
+        <div class="filter-divider"></div>
+        <button class="btn btn-sm" onclick="resetFilters()" style="font-size:11px;padding:3px 10px;">↺ Reset filters</button>
+      </div>
+    </div>
+
+    <div class="content" id="main-content">
+      <!-- Stat cards -->
+      <div class="stat-row">
+        <div class="stat-card s-red"    id="sc-critical" onclick="setFilter('critical')" title="Total supply below 1 month">
+          <div class="stat-label">Critical <span style="font-weight:400;opacity:.7">(&lt;1mo)</span></div>
+          <div class="stat-val c-red"    id="sv-critical">—</div>
+        </div>
+        <div class="stat-card s-orange" id="sc-alert"    onclick="setFilter('alert')"    title="Total supply below 2 months">
+          <div class="stat-label">Alert <span style="font-weight:400;opacity:.7">(1–2mo)</span></div>
+          <div class="stat-val c-orange" id="sv-alert">—</div>
+        </div>
+        <div class="stat-card s-purple" id="sc-warning"  onclick="setFilter('warning')"  title="Total supply below reorder point">
+          <div class="stat-label">Low stock <span style="font-weight:400;opacity:.7">(2mo–reorder)</span></div>
+          <div class="stat-val c-purple" id="sv-warning">—</div>
+        </div>
+        <div class="stat-card s-green"  id="sc-ok"       onclick="setFilter('ok')"       title="Total supply above reorder point">
+          <div class="stat-label">Healthy <span style="font-weight:400;opacity:.7">(&gt;reorder)</span></div>
+          <div class="stat-val c-green"  id="sv-ok">—</div>
+        </div>
+        <div class="stat-card s-blue"   id="sc-adjusted" title="Manually adjusted items">
+          <div class="stat-label">Adjusted</div>
+          <div class="stat-val c-blue"  id="sv-adjusted">0</div>
+        </div>
+      </div>
+
+      <!-- Bulk action bar -->
+      <div class="bulk-bar" id="bulk-bar">
+        <span class="bulk-info" id="bulk-info">0 items selected</span>
+        <button class="btn btn-sm btn-accent" onclick="selectAllVisible()">Select all visible</button>
+        <button class="btn btn-sm"            onclick="clearSelection()">Clear selection</button>
+        <div class="filter-divider"></div>
+        <button class="btn btn-sm btn-danger" onclick="removeSelected()">✕ Remove selected from list</button>
+        <button class="btn btn-sm"            onclick="exportSelected()">↓ Export selected (CSV)</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <span style="color:var(--text3);font-size:11px;">Burn bar:</span>
+        <span class="legend-item"><span class="legend-tick" style="background:var(--green);width:10px;height:4px;border-radius:1px;display:inline-block;vertical-align:middle"></span> On hand</span>
+        <span class="legend-item"><span class="legend-tick" style="background:var(--blue);width:10px;height:4px;border-radius:1px;display:inline-block;vertical-align:middle;opacity:.7"></span> On order</span>
+        <span class="legend-item"><span class="legend-tick t-safety"></span> Safety stock (2mo)</span>
+        <span class="legend-item"><span class="legend-tick t-reorder"></span> Reorder point (Packaging/Components/Misc 3mo · Edibles 1mo · Raw Material 0.75mo · WIP 0.5mo · Marketing 6mo)</span>
+        <div class="filter-divider" style="margin:0 4px;"></div>
+        <span style="font-size:11px;color:var(--text3);">☑ Click checkbox to select · Click row to expand</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--text3);" id="showing-count-legend"></span>
+      </div>
+
+      <!-- Items list -->
+      <div class="items-list" id="items-list"></div>
+
+      <!-- Empty state -->
+      <div class="empty" id="empty-state">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/>
+        </svg>
+        <div style="margin-bottom:.5rem">No data loaded</div>
+        <div style="font-size:12px;opacity:.6">Connect the Finale API in <code>src/data/finaleApi.js</code> to load inventory</div>
+      </div>
+
+      <!-- Sales view -->
+      <div id="sales-view" style="display:none;padding:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+          <div>
+            <div style="font-size:15px;font-weight:500;color:var(--text)">Monthly Sales</div>
+            <div style="font-size:12px;color:var(--text3)" id="sales-date-range">Connect Finale API to view sales data</div>
+          </div>
+        </div>
+
+        <!-- KPI cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem" id="sales-kpis">
+          <div class="stat-card s-blue">  <div class="stat-label">Total Revenue</div>     <div class="stat-val c-blue"   id="kpi-revenue">—</div></div>
+          <div class="stat-card s-green"> <div class="stat-label">Total Units</div>       <div class="stat-val c-green"  id="kpi-units">—</div></div>
+          <div class="stat-card s-orange"><div class="stat-label">Avg Monthly Rev</div>   <div class="stat-val c-orange" id="kpi-avg-rev">—</div></div>
+          <div class="stat-card s-purple"><div class="stat-label">Avg Monthly Units</div> <div class="stat-val c-purple" id="kpi-avg-units">—</div></div>
+        </div>
+
+        <!-- Monthly breakdown -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text)">Monthly Breakdown</div>
+          <div style="overflow-x:auto">
+            <table id="sales-monthly-table" style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="background:var(--bg3)">
+                  <th style="padding:.6rem 1rem;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap">Month</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Revenue</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Units Sold</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Orders</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Avg Order Value</th>
+                  <th style="padding:.6rem 1rem;text-align:left;color:var(--text3);font-weight:500">vs Prior Month</th>
+                </tr>
+              </thead>
+              <tbody id="sales-monthly-body">
+                <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text3)">No data — connect Finale API</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Monthly by product type -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+            <span style="font-size:12px;font-weight:500;color:var(--text)">Monthly Revenue by Product Type &amp; Subcategory</span>
+          </div>
+          <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px" id="by-type-table">
+              <thead id="by-type-head" style="position:sticky;top:0;z-index:2"></thead>
+              <tbody id="by-type-body">
+                <tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--text3)">No data — connect Finale API</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Edibles pieces report -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-top:1rem">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+            <span style="font-size:14px">🍬</span>
+            <span style="font-size:12px;font-weight:500;color:var(--text)">Edibles — Individual Pieces Report</span>
+            <span style="font-size:11px;color:var(--text3)">All SKUs converted to individual gummy pieces · RAW=1pc · 5ct bag=5pc · 20ct bag=20pc</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:.4rem">
+                <span style="font-size:11px;color:var(--text3)">Reorder point</span>
+                <select id="edible-reorder-mo" onchange="renderEdiblePieces()" style="font-size:11px;padding:2px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2)">
+                  <option value="1">1 month</option><option value="2">2 months</option>
+                  <option value="3" selected>3 months</option><option value="4">4 months</option><option value="6">6 months</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:center;gap:.4rem">
+                <span style="font-size:11px;color:var(--text3)">Safety stock</span>
+                <select id="edible-ss-mo" onchange="renderEdiblePieces()" style="font-size:11px;padding:2px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2)">
+                  <option value="0.5">0.5 month</option><option value="1" selected>1 month</option>
+                  <option value="1.5">1.5 months</option><option value="2">2 months</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">
+              <thead id="edible-pieces-head" style="position:sticky;top:0;z-index:1"></thead>
+              <tbody id="edible-pieces-body">
+                <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text3)">Connect Finale API to see individual pieces data</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- end sales-view -->
+    </div><!-- end content -->
+  </div><!-- end main -->
+</div><!-- end shell -->
+
+<!-- Consumption Alerts view (outside shell so it can be full-width) -->
+<div id="alerts-view" style="display:none;padding:1rem">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:.65rem 1rem;margin-bottom:.75rem;display:flex;flex-direction:column;gap:.5rem">
+    <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+      <div style="position:relative;flex:1;min-width:160px;max-width:280px">
+        <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none">🔍</span>
+        <input type="text" id="alert-search" placeholder="Search product ID or description…"
+          oninput="renderAlerts()"
+          style="width:100%;padding:.35rem .65rem .35rem 26px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:12px;outline:none"/>
+      </div>
+      <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap" id="alert-cat-chips">
+        <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Cat</span>
+        <span class="chip active" data-acat="Packaging"    onclick="toggleAlertChip(this,'cat')">Packaging</span>
+        <span class="chip active" data-acat="Components"   onclick="toggleAlertChip(this,'cat')">Components</span>
+        <span class="chip active" data-acat="Raw Material" onclick="toggleAlertChip(this,'cat')">Raw Material</span>
+        <span class="chip active" data-acat="WIP"          onclick="toggleAlertChip(this,'cat')">WIP</span>
+        <span class="chip active" data-acat="Edibles"      onclick="toggleAlertChip(this,'cat')">Edibles</span>
+        <span class="chip active" data-acat="Misc"         onclick="toggleAlertChip(this,'cat')">Misc</span>
+        <span class="chip active" data-acat="Marketing"    onclick="toggleAlertChip(this,'cat')">Marketing</span>
+        <span class="chip" onclick="document.querySelectorAll('[data-acat]').forEach(c=>{window._alertActiveCats&&window._alertActiveCats.add(c.dataset.acat);c.classList.add('active')});renderAlerts()" style="font-size:10px;padding:1px 7px">All</span>
+        <span class="chip" onclick="document.querySelectorAll('[data-acat]').forEach(c=>c.classList.remove('active'));renderAlerts()" style="font-size:10px;padding:1px 7px">None</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+      <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Sub</span>
+      <div id="alert-subcat-chips" style="display:flex;gap:5px;flex-wrap:wrap;flex:1"></div>
+      <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <span style="font-size:11px;color:var(--red)">🔺</span>
+          <input type="range" id="spike-threshold" min="5" max="100" step="5" value="15" oninput="updateAlertThresholds()" style="width:90px">
+          <span style="font-size:11px;font-weight:500;color:var(--red);font-family:var(--font-mono);min-width:34px" id="spike-val">+15%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <span style="font-size:11px;color:var(--green)">🔻</span>
+          <input type="range" id="drop-threshold" min="5" max="100" step="5" value="20" oninput="updateAlertThresholds()" style="width:90px">
+          <span style="font-size:11px;font-weight:500;color:var(--green);font-family:var(--font-mono);min-width:34px" id="drop-val">-20%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+    <div style="background:var(--bg2);border:1px solid rgba(224,82,82,.3);border-radius:var(--r2);overflow:hidden">
+      <div style="padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem;background:rgba(224,82,82,.07)">
+        <span>🔺</span>
+        <span style="font-size:12px;font-weight:600;color:var(--red)">Consumption Spikes</span>
+        <span style="margin-left:auto;font-size:11px;background:rgba(224,82,82,.15);color:var(--red);padding:1px 8px;border-radius:20px;font-family:var(--font-mono)" id="spike-count">—</span>
+      </div>
+      <div style="overflow-y:auto;max-height:calc(100vh - 340px)">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead style="position:sticky;top:0;z-index:1">
+            <tr style="background:var(--bg3)">
+              <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Product</th>
+              <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Sub</th>
+              <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Run rate</th>
+              <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Last 30d</th>
+              <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Change</th>
+            </tr>
+          </thead>
+          <tbody id="spikes-body">
+            <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text3)">Connect Finale API to see spikes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid rgba(82,201,122,.25);border-radius:var(--r2);overflow:hidden">
+      <div style="padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem;background:rgba(82,201,122,.07)">
+        <span>🔻</span>
+        <span style="font-size:12px;font-weight:600;color:var(--green)">Consumption Drops</span>
+        <span style="margin-left:auto;font-size:11px;background:rgba(82,201,122,.15);color:var(--green);padding:1px 8px;border-radius:20px;font-family:var(--font-mono)" id="drop-count">—</span>
+      </div>
+      <div style="overflow-y:auto;max-height:calc(100vh - 340px)">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead style="position:sticky;top:0;z-index:1">
+            <tr style="background:var(--bg3)">
+              <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Product</th>
+              <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Sub</th>
+              <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Run rate</th>
+              <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Last 30d</th>
+              <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Change</th>
+            </tr>
+          </thead>
+          <tbody id="drops-body">
+            <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text3)">Connect Finale API to see drops</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div><!-- end alerts-view -->
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="modal-wrap" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div class="modal-id"   id="m-id">—</div>
+        <div class="modal-desc" id="m-desc">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="lbl">On hand</div>       <div class="val" id="m-onhand">—</div></div>
+      <div class="modal-stat"><div class="lbl">Months on-hand</div><div class="val" id="m-months">—</div></div>
+    </div>
+    <div class="modal-controls">
+      <div class="control-group">
+        <label>Safety stock (months) <span id="m-ss-val">1.75</span></label>
+        <input type="range" id="m-ss" min="0.25" max="6" step="0.25" value="1.75" oninput="updateModalPreview()" />
+      </div>
+      <div class="control-group">
+        <label>Reorder point (months) <span id="m-rp-val">1.75</span></label>
+        <input type="range" id="m-rp" min="0.25" max="6" step="0.25" value="1.75" oninput="updateModalPreview()" />
+      </div>
+      <div class="control-group">
+        <label>Monthly demand override <span id="m-dem-val">—</span></label>
+        <input type="range" id="m-dem" min="1" max="1000" step="1" value="100" oninput="updateModalPreview()" />
+        <div class="sys-note" id="m-sys-dem">System value: —</div>
+      </div>
+      <div class="control-group">
+        <label>Notes</label>
+        <textarea id="m-notes" placeholder="Add context for this adjustment…"></textarea>
+      </div>
+    </div>
+    <div class="modal-result">
+      <div class="reorder-preview">
+        <div class="lbl">Suggested reorder qty (adjusted)</div>
+        <div class="val" id="m-rqty">—</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="saveModal()" style="flex:1">Save adjustments</button>
+      <button class="btn btn-danger" id="m-reset-btn" onclick="resetOverride()" style="display:none">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
