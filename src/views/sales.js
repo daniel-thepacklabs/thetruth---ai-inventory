@@ -1,25 +1,27 @@
 import { state } from '../data/state.js';
-import { fmt, getEdibleFlavor, getPiecesPerUnit, getSalesProductType, getPackSize } from '../data/parsers.js';
+import { fmt, getSalesProductType, getPackSize } from '../data/parsers.js';
 
 export function renderSalesView() {
-  if (!state.SALES_DATA.length) return;
-  const months = [...new Set(state.SALES_DATA.map(r => r.month))].sort();
+  const hasMonthly = state.MONTHLY_TOTALS && state.MONTHLY_TOTALS.length > 0;
+  if (!hasMonthly && !state.SALES_DATA.length) return;
+
+  const monthlyData = hasMonthly ? state.MONTHLY_TOTALS : [];
+  const months = monthlyData.map(m => m.period);
 
   document.getElementById('sales-date-range').textContent =
-    `${months[0]} to ${months[months.length - 1]} · ${state.SALES_DATA.length.toLocaleString()} line items`;
+    `${months[0]} to ${months[months.length - 1]} · ${months.length} months`;
 
   const byMonth = {};
-  state.SALES_DATA.forEach(r => {
-    if (!byMonth[r.month]) byMonth[r.month] = { rev:0, units:0, orders:new Set() };
-    byMonth[r.month].rev   += r.subtotal;
-    byMonth[r.month].units += r.qty;
-    byMonth[r.month].orders.add(r.date + r.pid);
+  monthlyData.forEach(m => {
+    byMonth[m.period] = { rev: m.revenue, units: m.units, orders: m.orders };
   });
 
-  const totalRev   = Object.values(byMonth).reduce((s, m) => s + m.rev,   0);
-  const totalUnits = Object.values(byMonth).reduce((s, m) => s + m.units, 0);
-  const avgRev     = totalRev   / months.length;
-  const avgUnits   = totalUnits / months.length;
+  const totalRev   = monthlyData.reduce((s, m) => s + m.revenue, 0);
+  const totalUnits = monthlyData.reduce((s, m) => s + m.units, 0);
+  const totalOrders = monthlyData.reduce((s, m) => s + m.orders, 0);
+  const fullMonths = monthlyData.filter(m => m.period !== '2026-06');
+  const avgRev     = fullMonths.length ? fullMonths.reduce((s, m) => s + m.revenue, 0) / fullMonths.length : 0;
+  const avgUnits   = fullMonths.length ? fullMonths.reduce((s, m) => s + m.units, 0) / fullMonths.length : 0;
   const $f = v => '$' + v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
 
   document.getElementById('kpi-revenue').textContent   = $f(totalRev);
@@ -31,6 +33,7 @@ export function renderSalesView() {
   const monthList = months.map((m, i) => ({ m, ...byMonth[m], prev: i > 0 ? byMonth[months[i-1]] : null }));
   tbody.innerHTML = monthList.map(({ m, rev, units, orders, prev }) => {
     const aov     = units > 0 ? rev / units : 0;
+    const isPartial = m === '2026-06';
     const vsLabel = m === months[0] ? '—' : (() => {
       const diff = rev - (prev ? prev.rev : 0);
       const pct  = prev && prev.rev > 0 ? (diff / prev.rev * 100).toFixed(1) : '0';
@@ -39,11 +42,11 @@ export function renderSalesView() {
     })();
     const maxRev = Math.max(...months.map(mo => byMonth[mo].rev));
     const pct    = (rev / maxRev * 100).toFixed(1);
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:.6rem 1rem;color:var(--text);font-weight:500">${m}</td>
+    return `<tr style="border-bottom:1px solid var(--border)${isPartial ? ';opacity:.7' : ''}">
+      <td style="padding:.6rem 1rem;color:var(--text);font-weight:500">${m}${isPartial ? ' <span style="font-size:10px;color:var(--text3)">(partial)</span>' : ''}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--green)">${$f(rev)}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${units.toLocaleString()}</td>
-      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${orders.size.toLocaleString()}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${orders.toLocaleString()}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${$f(aov)}</td>
       <td style="padding:.6rem 1rem">
         <div style="display:flex;align-items:center;gap:8px">
@@ -56,8 +59,17 @@ export function renderSalesView() {
     </tr>`;
   }).join('');
 
+  const avgAov = totalUnits > 0 ? totalRev / totalUnits : 0;
+  tbody.innerHTML += `<tr style="background:var(--bg3);border-top:2px solid var(--border2)">
+    <td style="padding:.6rem 1rem;font-weight:700;color:var(--accent)">TOTAL (12 mo)</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--green)">${$f(totalRev)}</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${totalUnits.toLocaleString()}</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${totalOrders.toLocaleString()}</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${$f(avgAov)}</td>
+    <td></td>
+  </tr>`;
+
   renderByProductType();
-  renderEdiblePieces();
 }
 
 function renderByProductType() {
@@ -163,99 +175,3 @@ function renderByProductType() {
   tbody.innerHTML = html;
 }
 
-export function renderEdiblePieces() {
-  if (!state.SALES_DATA.length) return;
-  const rp = parseFloat(document.getElementById('edible-reorder-mo')?.value || 3);
-  const ss = parseFloat(document.getElementById('edible-ss-mo')?.value || 1);
-
-  const edibleRows = state.SALES_DATA.filter(r => /^(EG|ECC)/i.test(r.pid));
-  if (!edibleRows.length) return;
-
-  const months = [...new Set(edibleRows.map(r => r.month))].sort();
-  const flavorMap = {};
-  edibleRows.forEach(r => {
-    const flavor = getEdibleFlavor(r.pid, r.desc);
-    const ppu    = getPiecesPerUnit(r.pid, r.desc);
-    if (!flavorMap[flavor]) flavorMap[flavor] = {};
-    flavorMap[flavor][r.month] = (flavorMap[flavor][r.month] || 0) + r.qty * ppu;
-  });
-
-  const flavors = Object.keys(flavorMap).sort((a, b) => {
-    const ta = Object.values(flavorMap[a]).reduce((s, v) => s + v, 0);
-    const tb = Object.values(flavorMap[b]).reduce((s, v) => s + v, 0);
-    return tb - ta;
-  });
-
-  document.getElementById('edible-pieces-head').innerHTML = `<tr style="background:var(--bg3)">
-    <th style="padding:.55rem 1rem;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap;position:sticky;left:0;background:var(--bg3);min-width:160px">Flavor</th>
-    ${months.map(m => `<th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">${m}</th>`).join('')}
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">Total</th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Avg/mo</th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--blue);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">On hand<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--blue);font-weight:500;white-space:nowrap">On order<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--blue);font-weight:500;white-space:nowrap">Total supply<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Months<br><span style="font-weight:400;font-size:10px;opacity:.8">supply</span></th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--orange);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">Safety stock<br><span style="font-weight:400;font-size:10px;opacity:.8">${ss}mo</span></th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--red);font-weight:500;white-space:nowrap">Reorder point<br><span style="font-weight:400;font-size:10px;opacity:.8">${rp}mo</span></th>
-    <th style="padding:.55rem 1rem;text-align:right;color:var(--green);font-weight:500;white-space:nowrap">Order qty<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
-  </tr>`;
-
-  let html = '';
-  const grandByMonth = {};
-
-  flavors.forEach(flavor => {
-    const fd    = flavorMap[flavor];
-    const total = Object.values(fd).reduce((s, v) => s + v, 0);
-    if (total === 0) return;
-    const avgMo  = total / months.length;
-    const ssQty  = Math.round(ss * avgMo);
-    const rpQty  = Math.round(rp * avgMo);
-    const lastMo = fd[months[months.length - 1]] || 0;
-    const trend  = avgMo > 0 ? lastMo / avgMo : 1;
-    const trendCol   = trend > 1.15 ? 'var(--red)' : trend < 0.85 ? 'var(--green)' : 'var(--text3)';
-    const trendLabel = trend > 1.15 ? '↑' : trend < 0.85 ? '↓' : '→';
-    const oh         = state.EDIBLE_ONHAND[flavor] || { onHand:0, onOrder:0, reserved:0 };
-    const ohPieces   = Math.max(0, oh.onHand - oh.reserved);
-    const ooPieces   = oh.onOrder;
-    const totalSupply = ohPieces + ooPieces;
-    const moSupply   = avgMo > 0 ? totalSupply / avgMo : 0;
-    const orderQty   = Math.max(0, Math.round(rpQty - totalSupply));
-    const moCol = moSupply < ss ? 'var(--red)' : moSupply < rp ? 'var(--orange)' : 'var(--green)';
-
-    months.forEach(m => { grandByMonth[m] = (grandByMonth[m] || 0) + (fd[m] || 0); });
-
-    html += `<tr style="border-bottom:0.5px solid var(--border)">
-      <td style="padding:.55rem 1rem;font-weight:500;color:var(--text);position:sticky;left:0;background:var(--bg2)">
-        ${flavor} <span style="font-size:10px;color:${trendCol};margin-left:4px" title="Last month vs avg">${trendLabel}</span>
-      </td>
-      ${months.map(m => {
-        const v = fd[m] || 0;
-        const isLast = m === months[months.length - 1];
-        const hi = v > avgMo * 1.15, lo = v < avgMo * 0.85;
-        const col = hi ? 'var(--red)' : lo ? 'var(--green)' : (isLast ? 'var(--text)' : 'var(--text2)');
-        return `<td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:${col}${hi || lo ? ';font-weight:600' : ''}">${fmt(v)}</td>`;
-      }).join('')}
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--text);border-left:1px solid var(--border2)">${fmt(total)}</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--accent)">${fmt(avgMo)}</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--blue);border-left:1px solid var(--border2)">${fmt(ohPieces)}</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--blue)">${fmt(ooPieces)}</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--blue)">${fmt(totalSupply)}</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${moCol}">${moSupply.toFixed(2)}mo</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--orange);border-left:1px solid var(--border2)">${fmt(ssQty)}</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--red)">${fmt(rpQty)}</td>
-      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:${orderQty > 0 ? 'var(--red)' : 'var(--green)'}">${orderQty > 0 ? '+' + fmt(orderQty) + ' ⚠' : '✓ Covered'}</td>
-    </tr>`;
-  });
-
-  const grandTotal = Object.values(grandByMonth).reduce((s, v) => s + v, 0);
-  const grandAvg   = grandTotal / months.length;
-  html += `<tr style="background:var(--bg3);border-top:2px solid var(--border2)">
-    <td style="padding:.6rem 1rem;font-weight:700;color:var(--accent);position:sticky;left:0;background:var(--bg3)">Grand Total</td>
-    ${months.map(m => `<td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent)">${fmt(grandByMonth[m] || 0)}</td>`).join('')}
-    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent);border-left:1px solid var(--border2)">${fmt(grandTotal)}</td>
-    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent)">${fmt(grandAvg)}</td>
-    <td colspan="3" style="padding:.6rem 1rem;text-align:center;font-size:11px;color:var(--text3)">Order qty = (reorder − safety stock) × avg/mo</td>
-  </tr>`;
-
-  document.getElementById('edible-pieces-body').innerHTML = html;
-}

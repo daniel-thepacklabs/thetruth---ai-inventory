@@ -12,6 +12,9 @@ async function finaleGet(path) {
 import stockData from './zoey-stock.json';
 import salesData from './zoey-sales.json';
 import consumptionData from './finale-consumption.json';
+import inventoryData from './finale-inventory.json';
+import monthlyTotals from './zoey-monthly-sales.json';
+import productSales from './zoey-product-sales.json';
 
 export async function fetchProducts() {
   const data = await finaleGet('/product');
@@ -28,23 +31,26 @@ export async function fetchProducts() {
 }
 
 function buildStockCSV(products) {
-  const stockBySku = {};
+  const zoeyBySku = {};
   for (const s of stockData) {
-    stockBySku[s.sku] = s.qty;
+    zoeyBySku[s.sku] = s.qty;
   }
 
+  const finaleInv = inventoryData.inventory || {};
   const finaleOnOrder = consumptionData.onOrder || {};
 
   const rows = products.map(p => {
-    const qty = stockBySku[p.productId] ?? 0;
-    const oo = finaleOnOrder[p.productId] || 0;
+    const fi = finaleInv[p.productId];
+    const onHand = fi ? fi.onHand : (zoeyBySku[p.productId] ?? 0);
+    const onOrder = fi ? fi.onOrder : (finaleOnOrder[p.productId] || 0);
+    const reserved = fi ? fi.reserved : 0;
     return {
       'Location': 'SFS-HQ',
       'Product ID': p.productId,
       'Description': p.internalName,
-      'On hand': qty,
-      'On order': oo,
-      'Reserved': 0,
+      'On hand': onHand,
+      'On order': onOrder,
+      'Reserved': reserved,
     };
   });
   return toCSV(rows);
@@ -151,6 +157,8 @@ export async function fetchAll() {
     consume,
     consume30,
     salesOrder,
+    monthlyTotals: monthlyTotals.months || [],
+    productSalesData: productSales.data || [],
   };
 }
 

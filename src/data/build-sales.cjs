@@ -1,275 +1,129 @@
-// One-time script to generate zoey-sales.json from Zoey report data
-// Run: node src/data/build-sales.js
+// Build script: generates zoey-product-sales.json from Zoey top_products data
+// Data sourced from Zoey API zoey_report top_products, Jan-Jun 2026
+// Run: node src/data/build-sales.cjs
 const fs = require('fs');
-const data = {};
+const path = require('path');
 
-function add(sku, name, s30, r30, s60, r60) {
-  if (!data[sku]) data[sku] = {name:'', s30:0, s60:0, r30:0, r60:0};
-  data[sku].s30 += s30; data[sku].r30 += r30;
-  data[sku].s60 += s60; data[sku].r60 += r60;
-  if (name) data[sku].name = name;
-}
-
-// 30-day window (May 13 - Jun 12, 2026)
-const d30 = {
-"P5D-JFG-10PK":[1615,119377.5],"P5D-GAG-10PK":[1610,118897.5],"P5D-SBO-10PK":[1609,118777.5],
-"P5D-CC-10PK":[1425,109790],"P5D-SC-10PK":[1368,104917.5],"P5D-GT-10PK":[1300,100512],
-"P5D-TN-10PK":[1279,98284.5],"P5D-TP-10PK":[1280,98169.5],"P5D-BKC-10PK":[1241,95402],
-"VLRSB-GJR-10PK":[807,67693.5],"VLRSB-SS-10PK":[744,62373.5],"VLRSB-WS-10PK":[722,60741],
-"VLRSB-MG-10PK":[679,56885],"VLRSB-BF-10PK":[648,54183.5],"P5D-MMJ-10PK":[718,54102.5],
-"VLRSB-KL-10PK":[638,53796],"P5D-PD-10PK":[681,51455],"P5D-BLOG-10PK":[676,50420],
-"P5D-TS-10PK":[660,49807.5],"P5D-TBP-10PK":[658,49607.5],"P5D-SKP-10PK":[645,48635],
-"VLR-MMJ-10PK":[467,39008.5],"VLR-SKP-10PK":[442,37098.5],"VLR-TBP-10PK":[439,36708.5],
-"VLR-BLOG-10PK":[420,35563.5],"VLR-PD-10PK":[411,34468.5],"VLR-TS-10PK":[412,34163.5],
-"EGMB-500-5PK":[629,27580],"PJH-FW-10PK":[519,25334],"PJH-SM-10PK":[520,25149],
-"PIL-YOG-10PK":[645,25050.75],"PJH-RCP-10PK":[511,24809],"PJH-GCK-10PK":[509,24649],
-"PJH-MT-10PK":[499,24234],"PJH-BC-10PK":[498,24174],"PJH-PP-10PK":[499,24109],
-"PJH-ABJ-10PK":[493,23879],"PIL-SA-10PK":[614,23724],"PIL-PG-10PK":[607,23487.75],
-"PJH-FT-10PK":[476,22699],"PIL-GB-10PK":[575,21972.25],"EGBD-400-5PK":[515,21581.25],
-"PIL-LAKK-10PK":[554,21306],"EGKB-400-5PK":[496,21231.5],"PIL-GMOC-10PK":[548,21117.75],
-"PIL-NYCD-10PK":[548,21041.25],"PIL-CM-10PK":[543,20799],"PIL-WFOG-10PK":[526,20076.75],
-"PJH-TBP-10PK":[427,20072.5],"PJH-SKP-10PK":[417,19542.5],"PJH-TS-10PK":[412,19237.5],
-"PJH-PD-10PK":[409,19092.5],"PJH-MMJ-10PK":[409,19032.5],"PJH-BLOG-10PK":[400,18637.5],
-"EGSS-400-5PK":[417,17357.5],"PIL-LCH-10PK":[458,16936.5],"PIL-AF-10PK":[449,16619],
-"PIL-BD-10PK":[437,16070],"PIL-OC-10PK":[432,15869],"PIL-PBB-10PK":[429,15682.5],
-"PIL-AC-10PK":[406,15322],"EGMCR-600-5PK":[334,15003.75],"EGPL-400-5PK":[375,15982.5],
-"FIT24K-3.5-5PK":[162,13330],"FITGR-3.5-5PK":[149,12342],"EGMB-125-8PK":[459,12216],
-"FITSCC-14-5PK":[75,12195],"FITGDP-3.5-5PK":[147,12152],"FITSBN-14G-5PK":[74,11990],
-"FITSWR-14-5PK":[74,11980],"EGBD-100-8PK":[365,10016],"FITGM-3.5-5PK":[109,8927],
-"EGKB-100-8PK":[321,8868],"PDD-CS-5PK":[278,8562.5],"PDD-SJ-5PK":[282,8491.25],
-"EGSS-100-8PK":[306,8248],"FITLCG-3.5-5PK":[101,8120],"FITCC-3.5-5PK":[99,8072],
-"FITWR-3.5-5PK":[98,7957],"FITPR-3.5-5PK":[98,7925],"VLR-CL-10PK":[111,7857.5],
-"PDD-LC-5PK":[257,7786.25],"EGMCR-150-8PK":[275,7740],"PDD-BM-5PK":[249,7622.5],
-"PDD-GD-5PK":[249,7572.5],"EGPL-100-8PK":[274,7520],"FITSD-3.5-5PK":[91,7295],
-"PDD-PC-5PK":[234,7121.25],"VLR-WG-10PK":[96,6860],"VLR-LAC-10PK":[95,6770],
-"VLR-BD-10PK":[90,6635],"FITG33-3.5-5PK":[83,6621],"FITAS-3.5-5PK":[80,6467],
-"VLR-SC-10PK":[87,6360],"VLR-MW-10PK":[86,6260],"FITBN-3.5-5PK":[78,6206],
-"EGFJ-SD-10PK":[71,5520],"EGFJ-AN-10PK":[69,5360],"FITWC-3.5-5PK":[87,5275],
-"FITPRM-3.5-5PK":[59,4651],"FITTW-3.5-5PK":[74,4580],"ECC-DR1-5PK":[172,4400],
-"EGFJ-TP-10PK":[56,4390],"ECC-CF1-5PK":[163,4211.25],"ECC-CB1-5PK":[162,4140],
-"FITICC-3.5-5PK":[66,4000],"FITJC-3.5-5PK":[60,3655],"VIC-GSC-6PK":[123,3642],
-"FITHZ-3.5-5PK":[58,3425],"VIC-TC-6PK":[115,3411],"FITGUS-3.5-5PK":[46,2805],
-"VIC-NYSD-6PK":[96,2757],"FITDR-3.5-5PK":[39,2295],"FITSFV-3.5-5PK":[39,2240],
-"FITIP-3.5-5PK":[34,1970],"EGBB-20-5PK":[59,1942],"EGSS-20-5PK":[58,1844.5],
-"VIC-PR-6PK":[55,1821],"VIC-RBK-6PK":[58,1803],"EGMB-20-5PK":[56,1802],
-"VIC-PS-6PK":[55,1674],"VIC-BG-6PK":[41,1377],"EGMB-05-8PK":[33,1020],
-"VIC-OD-6PK":[30,999],"EGSS-05-8PK":[32,956],"EGBB-05-8PK":[30,908],
-"FITGR-QP-01":[2,930],"FITCC-QP-01":[1,475],"FITJC-QP-01":[2,400],"FITWC-QP-01":[1,250],
+// Raw per-SKU data by month: [sku, units, revenue]
+const raw = {
+  "2026-01": [
+    ["P5D-SC-10PK",1517,113185],["P5D-GT-10PK",1496,111985],["P5D-CC-10PK",1468,109957.5],["P5D-TP-10PK",1445,108554.5],["P5D-BKC-10PK",1331,99682.5],["P5D-TN-10PK",1209,90617.5],
+    ["P5D-MMJ-10PK",811,59610],["P5D-TS-10PK",790,57790],["P5D-BLOG-10PK",788,57710],["P5D-PD-10PK",786,57650],["P5D-TBP-10PK",784,57430],["P5D-SKP-10PK",781,56990],
+    ["VLRSB-GJR-10PK",751,63122.5],["VLRSB-BF-10PK",721,60931],["VLRSB-MG-10PK",711,60227.5],["VLRSB-WS-10PK",703,59348.5],["VLRSB-SS-10PK",701,59340],["VLRSB-KL-10PK",664,55813.5],
+    ["VLR-TBP-10PK",561,46627.5],["VLR-SKP-10PK",537,44602.5],["VLR-PD-10PK",530,43802.5],["VLR-TS-10PK",525,43347.5],["VLR-MMJ-10PK",521,42827.5],["VLR-BLOG-10PK",492,40367.5],
+    ["VLR-BD-10PK",95,7430],["VLR-SC-10PK",82,6255],["VLR-MW-10PK",80,6080],["VLR-CL-10PK",68,5100],["VLR-WG-10PK",67,5010],["VLR-LAC-10PK",63,4640],
+    ["VIC-GSC-6PK",354,10026],["VIC-BG-6PK",151,4419],["VIC-NYSD-6PK",141,4041],["VIC-RBK-6PK",139,4002],["VIC-TC-6PK",135,3864],["VIC-OD-6PK",132,3750],["VIC-PS-6PK",132,3750],["VIC-PR-6PK",108,3207],
+    ["VIP-TP-10PK",2,170],["VIP-BATT-5PK",2,125],["VIP-SC-10PK",1,100],["VIP-ICC-10PK",1,100],["VIP-GB-10PK",1,100],["VIP-BG-10PK",1,85],["VIP-WBR-10PK",1,85],["VIP-SPC-10PK",1,85],["VIP-WS-10PK",1,85],
+    ["PJH-FW-10PK",512,29097.5],["PJH-BC-10PK",488,27597.5],["PJH-SM-10PK",468,26412.5],["PJH-MT-10PK",447,24982.5],["PJH-RCP-10PK",443,24937.5],["PJH-PP-10PK",426,24217.5],["PJH-ABJ-10PK",410,23037.5],["PJH-FT-10PK",402,22277.5],["PJH-GCK-10PK",396,22107.5],
+    ["PJH-TBP-10PK",374,21355],["PJH-BLOG-10PK",375,21110],["PJH-SKP-10PK",372,20885],["PJH-PD-10PK",366,20580],["PJH-MMJ-10PK",360,20325],["PJH-TS-10PK",358,20095],
+    ["PIL-GB-10PK",498,21851.5],["PIL-CM-10PK",414,18446.5],["PIL-YOG-10PK",405,18099],["PIL-SA-10PK",397,17731.5],["PIL-PG-10PK",394,17481.5],["PIL-WFOG-10PK",385,17149],["PIL-LAKK-10PK",348,15509],["PIL-NYCD-10PK",348,15481.5],["PIL-GMOC-10PK",316,14094],
+    ["PDD-SJ-5PK",289,8457.5],["PDD-CS-5PK",284,8175],["PDD-BM-5PK",271,7815],["PDD-GD-5PK",262,7516.25],["PDD-PC-5PK",183,5392.5],["PDD-LC-5PK",169,4877.5],
+    ["EGMB-500-5PK",566,24367.65],["EGKB-400-5PK",524,22279.55],["EGBD-400-5PK",549,21267.05],["EGSS-400-5PK",458,19217.05],["EGMCR-600-5PK",462,18939.55],["EGPL-400-5PK",368,15751.3],
+    ["EGMB-125-8PK",384,9290],["EGSS-100-8PK",439,8978],["EGKB-100-8PK",370,8850],["EGPL-100-8PK",394,8698],["EGMCR-150-8PK",394,8694],["EGBD-100-8PK",380,8562],
+    ["ECC-DR1-5PK",64,1976.25],["ECC-CB1-5PK",59,1775],["ECC-CF1-5PK",56,1681.25],
+    ["EGSS-20-5PK",98,3577.5],["EGMB-05-8PK",51,1648],["EGBB-05-8PK",50,1596],["EGBB-20-5PK",42,1538.75],["EGSS-05-8PK",46,1432],["EGMB-20-5PK",23,935],
+    ["EGFJ-SD-10PK",9,780],["EGFJ-TP-10PK",6,510],["EGFJ-AN-10PK",5,440],
+    ["EGSW-250-01",90,540],
+    ["FITPR-3.5-5PK",138,11485],["FIT24K-3.5-5PK",135,11220],["FITGR-3.5-5PK",131,10960],["FITGDP-3.5-5PK",125,10385.5],["FITGM-3.5-5PK",113,9370],["FITCC-3.5-5PK",102,8410.5],["FITAS-3.5-5PK",99,8145.5],["FITG33-3.5-5PK",98,8075.5],["FITBN-3.5-5PK",97,7980.5],["FITPRM-3.5-5PK",85,6950],
+    ["FITSCC-14-5PK",40,6785],["FITSWR-14-5PK",38,6345],["FITSBN-14G-5PK",37,6130],["FITSD-3.5-5PK",76,6225],["FITWR-3.5-5PK",71,5845.5],["FITLCG-3.5-5PK",48,4100],
+    ["FITIP-3.5-5PK",89,5108],["FITWC-3.5-5PK",82,4693],["FITGUS-3.5-5PK",78,4503],["FITTW-3.5-5PK",77,4433],["FITDR-3.5-5PK",62,3450],["FITSFV-3.5-5PK",62,3445],["FITICC-3.5-5PK",59,3418],["FITHZ-3.5-5PK",8,505],["FITJC-3.5-5PK",7,498],
+    ["FITTW-450-01",4,4050],["FITLCG-450-01",2,3500],["FITSFV-450-01",3,2850],["FITGUS-450-01",2,1950],["FITIP-450-01",2,1950],["FITWC-450-01",2,1950],["FITWR-450-01",1,1750],["FITG33-450-01",1,1750],["FITBN-450-01",1,1750],["FITAS-450-01",1,1750],["FITCC-450-01",1,1750],["FITDR-450-01",1,775],["FITICC-450-01",1,775],["FITJC-450-01",1,725],
+    ["FITTW-QP-01",2,500],["FITIP-QP-01",2,500],["FITSFV-QP-01",2,500],["FITGM-QP-01",1,485],["FITLCG-QP-01",1,485],["FITWR-QP-01",1,475],["FITGDP-QP-01",1,475],["FITGUS-QP-01",1,275],["FITDR-QP-01",1,225],["FITJC-QP-01",1,200],
+    ["CDS-SS-10PK",11,850],["CDS-SSC-10PK",11,850],["CDS-GR-10PK",11,850],
+    ["BUN-EGFEVP",5,2040],
+  ],
+  "2026-02": [
+    ["P5D-GT-10PK",1260,94060],["P5D-TP-10PK",1260,93920],["P5D-CC-10PK",1251,93430],["P5D-SC-10PK",1247,92540],["P5D-BKC-10PK",1235,91675],["P5D-TN-10PK",1119,83002.5],
+    ["P5D-PD-10PK",585,45152.5],["P5D-TBP-10PK",580,44812.5],["P5D-BLOG-10PK",565,43637.5],["P5D-MMJ-10PK",563,43232.5],["P5D-SKP-10PK",541,41825],["P5D-TS-10PK",541,41662.5],
+    ["VLRSB-GJR-10PK",996,82317.5],["VLRSB-WS-10PK",996,82197.5],["VLRSB-MG-10PK",958,79090],["VLRSB-BF-10PK",955,78742.5],["VLRSB-SS-10PK",952,78528.5],["VLRSB-KL-10PK",890,73100],
+    ["VLR-SKP-10PK",427,35775],["VLR-TS-10PK",422,35380],["VLR-MMJ-10PK",409,34177.5],["VLR-TBP-10PK",401,33680],["VLR-BLOG-10PK",399,33222.5],["VLR-PD-10PK",391,32717.5],
+    ["VLR-CL-10PK",82,5865],
+    ["VIC-GSC-6PK",64,2054.4],["VIC-BG-6PK",54,1686],["VIC-RBK-6PK",50,1589.4],
+    ["PJH-RCP-10PK",347,19145],["PJH-PP-10PK",337,18520],["PJH-GCK-10PK",324,17660],["PJH-SM-10PK",313,17220],["PJH-FW-10PK",305,17195],["PJH-MT-10PK",312,16925],["PJH-BC-10PK",282,15730],["PJH-FT-10PK",269,14725],["PJH-ABJ-10PK",267,14675],
+    ["PJH-TBP-10PK",256,14150],["PJH-TS-10PK",245,13570],["PJH-MMJ-10PK",248,13560],["PJH-SKP-10PK",246,13520],["PJH-PD-10PK",244,13350],["PJH-BLOG-10PK",225,12415],
+    ["PIL-YOG-10PK",458,20162.5],["PIL-WFOG-10PK",442,19440],["PIL-GB-10PK",423,18582.5],["PIL-CM-10PK",418,18470],["PIL-SA-10PK",419,18285],["PIL-PG-10PK",414,18187.5],["PIL-NYCD-10PK",413,18167.5],["PIL-GMOC-10PK",377,16310],["PIL-LAKK-10PK",333,14760],
+    ["PDD-SJ-5PK",260,7788.75],["PDD-LC-5PK",206,6220],["PDD-CS-5PK",200,6052.5],["PDD-BM-5PK",179,5541.25],["PDD-PC-5PK",182,5495],["PDD-GD-5PK",161,4883.75],
+    ["EGMB-500-5PK",536,22952.1],["EGKB-400-5PK",452,18891.35],["EGSS-400-5PK",483,18653.85],["EGBD-400-5PK",494,17978.35],["EGPL-400-5PK",407,17351.35],["EGMCR-600-5PK",374,16478.25],
+    ["EGBD-100-8PK",523,11608.4],["EGMB-125-8PK",137,3852.4],["EGSS-100-8PK",186,3784],["EGMCR-150-8PK",129,3576.4],["EGKB-100-8PK",128,3544],["EGPL-100-8PK",126,3468],
+    ["ECC-DR1-5PK",123,3406.25],["ECC-CB1-5PK",111,3103.75],["ECC-CF1-5PK",113,3033.75],
+    ["EGSS-05-8PK",138,2868.4],["EGMB-05-8PK",136,2788.4],["EGBB-05-8PK",132,2676.4],
+    ["FITGR-3.5-5PK",115,9570.5],["FITPR-3.5-5PK",109,9045.5],["FITBN-3.5-5PK",92,7580.5],["FITCC-3.5-5PK",90,7500.5],["FITWR-3.5-5PK",87,7220.5],["FIT24K-3.5-5PK",84,7035.5],["FITGM-3.5-5PK",77,6550.5],["FITGDP-3.5-5PK",65,5510],["FITAS-3.5-5PK",53,4295],["FITSD-3.5-5PK",45,3705.5],["FITLCG-3.5-5PK",45,3780.5],["FITG33-3.5-5PK",40,3285],
+    ["FITSCC-14-5PK",25,4365],["FITSBN-14G-5PK",24,4150],["FITSWR-14-5PK",24,4150],
+    ["FITJC-3.5-5PK",44,2578],["FITTW-3.5-5PK",41,2460],["FITDR-3.5-5PK",40,2238],["FITGUS-3.5-5PK",33,1983],["FITIP-3.5-5PK",34,1980],["FITWC-3.5-5PK",33,1908],["FITICC-3.5-5PK",31,1813],
+    ["FITLCG-QP-01",4,1940],["FITG33-QP-01",4,1900],
+  ],
+  "2026-03": [
+    ["P5D-SC-10PK",772,60106.5],["P5D-CC-10PK",736,57392.5],["P5D-GT-10PK",710,55571.5],["P5D-PD-10PK",732,55290],["P5D-TP-10PK",717,55127.5],["P5D-TS-10PK",724,54732.5],["P5D-TBP-10PK",712,53820],["P5D-MMJ-10PK",707,53420],["P5D-BLOG-10PK",680,51547.5],["P5D-SKP-10PK",680,51112.5],["P5D-TN-10PK",650,49995],["P5D-BKC-10PK",621,48481.5],
+    ["VLRSB-GJR-10PK",635,53562.5],["VLRSB-SS-10PK",603,50902.5],["VLRSB-BF-10PK",567,48075],["VLRSB-MG-10PK",559,47295],["VLRSB-KL-10PK",553,46650],["VLRSB-WS-10PK",543,45825],
+    ["VLR-MMJ-10PK",513,42062.5],["VLR-BLOG-10PK",508,41437.5],["VLR-PD-10PK",493,40285],["VLR-SKP-10PK",483,39672.5],["VLR-TBP-10PK",470,38382.5],["VLR-TS-10PK",451,36865],
+    ["PJH-BLOG-10PK",338,18455],["PJH-MMJ-10PK",337,18250],["PJH-TS-10PK",333,18095],["PJH-SKP-10PK",335,18095],["PJH-PD-10PK",327,17700],["PJH-TBP-10PK",321,17495],
+    ["PJH-SM-10PK",186,10953.26],["PJH-PP-10PK",159,9423.26],["PJH-BC-10PK",229,11680],["PJH-MT-10PK",223,11230],["PJH-ABJ-10PK",218,11155],["PJH-FW-10PK",217,11040],
+    ["PIL-YOG-10PK",267,12158.5],["PIL-PG-10PK",259,11727],["PIL-CM-10PK",253,11421.5],["PIL-SA-10PK",245,10989],["PIL-LAKK-10PK",214,9434.5],
+    ["EGKB-400-5PK",752,31507],["EGMB-500-5PK",735,31345.75],["EGSS-400-5PK",700,29435.75],["EGBD-400-5PK",773,28852],["EGMCR-600-5PK",640,26905.75],["EGPL-400-5PK",636,26805.75],
+    ["FITGR-3.5-5PK",177,14756],["FITPR-3.5-5PK",144,12015.5],["FITGDP-3.5-5PK",137,11446],["FITCC-3.5-5PK",138,11416],["FITGM-3.5-5PK",137,11410.5],["FITAS-3.5-5PK",139,11126],["FIT24K-3.5-5PK",121,9926],
+  ],
+  "2026-04": [
+    ["P5D-TBP-10PK",1202,90322.5],["P5D-MMJ-10PK",1178,88220],["P5D-SKP-10PK",1177,88102.5],["P5D-PD-10PK",1160,87417.5],["P5D-BLOG-10PK",1162,87312.5],["P5D-TS-10PK",1075,80282.5],
+    ["P5D-CC-10PK",645,50612.5],["P5D-SC-10PK",644,50552.5],["P5D-TP-10PK",625,48912.5],["P5D-GT-10PK",614,48172.5],["P5D-BKC-10PK",597,46895],["P5D-TN-10PK",561,43962.5],
+    ["VLRSB-GJR-10PK",484,41668.5],["VLRSB-BF-10PK",461,39601],["VLRSB-SS-10PK",450,38828.5],["VLRSB-WS-10PK",445,38371],["VLRSB-KL-10PK",440,37713.5],["VLRSB-MG-10PK",435,37191],
+    ["VLR-TS-10PK",408,32857.5],["VLR-TBP-10PK",388,31192.5],["VLR-SKP-10PK",372,30055],["VLR-PD-10PK",368,29597.5],["VLR-BLOG-10PK",364,29040],["VLR-MMJ-10PK",355,28620],
+    ["PJH-TBP-10PK",729,35850],["PJH-SKP-10PK",719,35325],["PJH-MMJ-10PK",707,34710],["PJH-TS-10PK",705,34250],["PJH-PD-10PK",697,34110],["PJH-BLOG-10PK",701,34000],
+    ["PJH-BC-10PK",229,11680],["PJH-SM-10PK",231,11552],["PJH-MT-10PK",223,11230],["PJH-ABJ-10PK",218,11155],["PJH-FW-10PK",217,11040],
+    ["PIL-PBB-10PK",328,12084.5],["PIL-OC-10PK",328,12084.5],["PIL-LCH-10PK",328,12084.5],["PIL-BD-10PK",327,12034.5],["PIL-AF-10PK",327,12034.5],["PIL-AC-10PK",327,12034.5],
+    ["EGMB-500-5PK",391,17305.05],["EGBD-400-5PK",350,15257.5],["EGMB-125-8PK",522,13852],["EGKB-400-5PK",283,12627.5],["EGMCR-150-8PK",447,11776],["EGMCR-600-5PK",261,11698.75],["EGKB-100-8PK",410,11268.4],["EGPL-400-5PK",251,11173.75],["EGSS-400-5PK",244,11040],
+  ],
+  "2026-05": [
+    ["P5D-CC-10PK",1572,120710],["P5D-SC-10PK",1551,118977.5],["P5D-GT-10PK",1495,115262.5],["P5D-TP-10PK",1489,114120],["P5D-TN-10PK",1471,112925],["P5D-BKC-10PK",1453,111712.5],
+    ["P5D-JFG-10PK",1200,87217.5],["P5D-GAG-10PK",1200,87217.5],["P5D-SBO-10PK",1198,86997.5],
+    ["P5D-BLOG-10PK",798,59747.5],["P5D-MMJ-10PK",786,59355],["P5D-PD-10PK",782,59190],["P5D-TS-10PK",765,57942.5],["P5D-SKP-10PK",745,56512.5],["P5D-TBP-10PK",737,55860],
+    ["VLRSB-GJR-10PK",761,63783],["VLRSB-WS-10PK",720,60366],["VLRSB-SS-10PK",716,59713],["VLRSB-MG-10PK",676,56772],["VLRSB-BF-10PK",679,56666],["VLRSB-KL-10PK",625,52493.5],
+    ["VLR-SKP-10PK",504,42161],["VLR-MMJ-10PK",497,41378.5],["VLR-TBP-10PK",477,39868.5],["VLR-TS-10PK",467,38691],["VLR-PD-10PK",452,37681],["VLR-BLOG-10PK",439,37138.5],
+    ["PJH-GCK-10PK",572,27666.5],["PJH-PP-10PK",563,27511.5],["PJH-MT-10PK",560,27216.5],["PJH-FW-10PK",549,26766.5],["PJH-RCP-10PK",554,26631.5],["PJH-SM-10PK",541,26236.5],["PJH-BC-10PK",539,26151.5],["PJH-FT-10PK",542,25966.5],["PJH-ABJ-10PK",528,25616.5],
+    ["PJH-SKP-10PK",473,22722.5],["PJH-TBP-10PK",473,22677.5],["PJH-TS-10PK",463,21857.5],["PJH-MMJ-10PK",441,20652.5],["PJH-BLOG-10PK",435,20387.5],["PJH-PD-10PK",429,20347.5],
+    ["PIL-YOG-10PK",546,21981],["PIL-SA-10PK",520,20896.5],["PIL-PG-10PK",487,19581],["PIL-CM-10PK",461,18579],["PIL-GB-10PK",464,18472],["PIL-LAKK-10PK",441,17721.5],["PIL-WFOG-10PK",423,16962.5],
+    ["EGMB-500-5PK",421,18742.75],
+  ],
+  "2026-06": [
+    ["P5D-CC-10PK",460,35800],["P5D-SC-10PK",428,33040],["P5D-GT-10PK",421,32779.5],["P5D-JFG-10PK",415,32160],["P5D-TN-10PK",416,32059.5],["P5D-SBO-10PK",411,31780],["P5D-GAG-10PK",410,31680],["P5D-TP-10PK",386,29919.5],["P5D-BKC-10PK",385,29639.5],
+    ["P5D-PD-10PK",196,14865],["P5D-TS-10PK",192,14505],["P5D-MMJ-10PK",187,14312.5],["P5D-BLOG-10PK",184,14052.5],["P5D-SKP-10PK",179,13492.5],["P5D-TBP-10PK",177,13372.5],
+    ["VLRSB-GJR-10PK",195,16990],["VLRSB-SS-10PK",170,15067.5],["VLRSB-MG-10PK",153,13430],["VLRSB-KL-10PK",148,13080],["VLRSB-WS-10PK",140,12367.5],
+    ["PIL-PG-10PK",329,12162.25],["PIL-GMOC-10PK",322,11826.75],["PIL-GB-10PK",321,11808.25],["PIL-YOG-10PK",317,11704.75],
+    ["EGMB-500-5PK",316,13837.5],
+  ],
 };
 
-// Names for products (from Zoey catalog)
-const names = {
-"P5D-JFG-10PK":"Munchies 5 Preroll THCA Jet Fuel Gelato 10 Pack",
-"P5D-GAG-10PK":"Munchies 5 Preroll THCA Green Apple Gas 10 Pack",
-"P5D-SBO-10PK":"Munchies 5 Preroll THCA Sour Berry OG 10 Pack",
-"P5D-CC-10PK":"Munchies 5 Preroll THCA Cosmic Cookies 10 Pack",
-"P5D-SC-10PK":"Munchies 5 Preroll THCA Strawberry Cough 10 Pack",
-"P5D-GT-10PK":"Munchies 5 Preroll THCA Gassy Taffy 10 Pack",
-"P5D-TN-10PK":"Munchies 5 Preroll THCA Tangie Nectar 10 Pack",
-"P5D-TP-10PK":"Munchies 5 Preroll THCA Texas Poundcake 10 Pack",
-"P5D-BKC-10PK":"Munchies 5 Preroll THCA Blue Kush Cake 10 Pack",
-"VLRSB-GJR-10PK":"Munchies Lil Ripper 2G THCA Grape Jelly Runtz Vape Pen 10 Pack",
-"VLRSB-SS-10PK":"Munchies Lil Ripper 2G THCA Strawberry Shortcake Vape Pen 10 Pack",
-"VLRSB-WS-10PK":"Munchies Lil Ripper 2G THCA Watermelon Slushy Vape Pen 10 Pack",
-"VLRSB-MG-10PK":"Munchies Lil Ripper 2G THCA Mango Gelato Vape Pen 10 Pack",
-"VLRSB-BF-10PK":"Munchies Lil Ripper 2G THCA Blueberry Fuego Vape Pen 10 Pack",
-"VLRSB-KL-10PK":"Munchies Lil Ripper 2G THCA King Louis XIII Vape Pen 10 Pack",
-"P5D-MMJ-10PK":"Munchies 5 Preroll THCP Magic Melon 10 Pack",
-"P5D-PD-10PK":"Munchies 5 Preroll THCP Peachy Dreams 10 Pack",
-"P5D-BLOG-10PK":"Munchies 5 Preroll THCP Berry Larry OG 10 Pack",
-"P5D-TS-10PK":"Munchies 5 Preroll THCP Tropical Splash 10 Pack",
-"P5D-TBP-10PK":"Munchies 5 Preroll THCP Triple Berry Pie 10 Pack",
-"P5D-SKP-10PK":"Munchies 5 Preroll THCP Strawberry Kush Pop 10 Pack",
-"VLR-MMJ-10PK":"Munchies Lil Ripper 2G THCP Magic Melon Juice Vape Pen 10 Pack",
-"VLR-SKP-10PK":"Munchies Lil Ripper 2G THCP Strawberry Kush Pop Vape Pen 10 Pack",
-"VLR-TBP-10PK":"Munchies Lil Ripper 2G THCP Triple Berry Pie Vape Pen 10 Pack",
-"VLR-BLOG-10PK":"Munchies Lil Ripper 2G THCP Berry Larry OG Vape Pen 10 Pack",
-"VLR-PD-10PK":"Munchies Lil Ripper 2G THCP Peachy Dreams Vape Pen 10 Pack",
-"VLR-TS-10PK":"Munchies Lil Ripper 2G THCP Tropical Splash Vape Pen 10 Pack",
-"EGMB-500-5PK":"Munchies Euphoria D9 Gummy Midnight Berry 20CT 5PK",
-"EGBD-400-5PK":"Munchies Euphoria D9 Gummy Blue Dream 20CT 5PK",
-"EGKB-400-5PK":"Munchies Euphoria D9 Gummy Kiwi Burst 20CT 5PK",
-"EGSS-400-5PK":"Munchies Euphoria D9 Gummy Strawberry Shortcake 20CT 5PK",
-"EGMCR-600-5PK":"Munchies Euphoria D9 Gummy Mango Crush 20CT 5PK",
-"EGPL-400-5PK":"Munchies Euphoria D9 Gummy Pink Lemonade 20CT 5PK",
-"EGMB-125-8PK":"Munchies Euphoria D9 Gummy Midnight Berry 5CT 8PK",
-"EGBD-100-8PK":"Munchies Euphoria D9 Gummy Blue Dream 5CT 8PK",
-"EGKB-100-8PK":"Munchies Euphoria D9 Gummy Kiwi Burst 5CT 8PK",
-"EGSS-100-8PK":"Munchies Euphoria D9 Gummy Strawberry Shortcake 5CT 8PK",
-"EGMCR-150-8PK":"Munchies Euphoria D9 Gummy Mango Crush 5CT 8PK",
-"EGPL-100-8PK":"Munchies Euphoria D9 Gummy Pink Lemonade 5CT 8PK",
-"EGFJ-SD-10PK":"Munchies 1000MG D9 Froot Jam Strawberry Dream 10 Pack",
-"EGFJ-AN-10PK":"Munchies 1000MG D9 Froot Jam Appleberry Nectar 10 Pack",
-"EGFJ-TP-10PK":"Munchies 1000MG D9 Froot Jam Tropical Passion 10 Pack",
-"ECC-DR1-5PK":"Munchies Cereal Crunchies Double Rainbow 5ct 5PK",
-"ECC-CF1-5PK":"Munchies Cereal Crunchies Cocoa Fudge 5ct 5PK",
-"ECC-CB1-5PK":"Munchies Cereal Crunchies Cinnamon Brulee 5ct 5PK",
-"EGBB-20-5PK":"Munchies Functional Microdose Chillin Blueberry 20pc 5PK",
-"EGSS-20-5PK":"Munchies Functional Microdose Love Gummies 20pc 5PK",
-"EGMB-20-5PK":"Munchies Functional Microdose Big Brain 20pc 5PK",
-"EGMB-05-8PK":"Munchies Functional Microdose Big Brain 5pc 8PK",
-"EGSS-05-8PK":"Munchies Functional Microdose Love Gummies 5pc 8PK",
-"EGBB-05-8PK":"Munchies Functional Microdose Chillin Blueberry 5pc 8PK",
-"PJH-FW-10PK":"Munchies 2G THCA Jelly Holes Forbidden Watermelon 10 Pack",
-"PJH-SM-10PK":"Munchies 2G THCA Jelly Holes Strawberry Milk 10 Pack",
-"PJH-RCP-10PK":"Munchies 2G THCA Jelly Holes Red Cherry Punch 10 Pack",
-"PJH-GCK-10PK":"Munchies 2G THCA Jelly Holes Grape Cream Cake 10 Pack",
-"PJH-MT-10PK":"Munchies 2G THCA Jelly Holes Mango Tango 10 Pack",
-"PJH-BC-10PK":"Munchies 2G THCA Jelly Holes Blueberry Crumble 10 Pack",
-"PJH-PP-10PK":"Munchies 2G THCA Jelly Holes Pineapple Poundcake 10 Pack",
-"PJH-ABJ-10PK":"Munchies 2G THCA Jelly Holes Acai Berry Jam 10 Pack",
-"PJH-FT-10PK":"Munchies 2G THCA Jelly Holes Frosted Tarts 10 Pack",
-"PJH-TBP-10PK":"Munchies 2G Jelly Holes THCP Triple Berry Pie 10 Pack",
-"PJH-SKP-10PK":"Munchies 2G Jelly Holes THCP Strawberry Kush Pop 10 Pack",
-"PJH-TS-10PK":"Munchies 2G Jelly Holes THCP Tropical Splash 10 Pack",
-"PJH-PD-10PK":"Munchies 2G Jelly Holes THCP Peachy Dreams 10 Pack",
-"PJH-MMJ-10PK":"Munchies 2G Jelly Holes THCP Magic Melon Juice 10 Pack",
-"PJH-BLOG-10PK":"Munchies 2G Jelly Holes THCP Berry Larry OG 10 Pack",
-"PIL-YOG-10PK":"Imperial 2g THCA Loaded Prerolls Yoda OG 10 Pack",
-"PIL-SA-10PK":"Imperial 2g THCA Loaded Prerolls Space Ape 10 Pack",
-"PIL-PG-10PK":"Imperial 2g THCA Loaded Prerolls Pink Gelatti 10 Pack",
-"PIL-GB-10PK":"Imperial 2g THCA Loaded Prerolls Gold Benjamin 10 Pack",
-"PIL-LAKK-10PK":"Imperial 2g THCA Loaded Prerolls LA King Kush 10 Pack",
-"PIL-GMOC-10PK":"Imperial 2g THCA Loaded Prerolls GMO Cookies 10 Pack",
-"PIL-NYCD-10PK":"Imperial 2g THCA Loaded Prerolls NYC Diesel 10 Pack",
-"PIL-CM-10PK":"Imperial 2g THCA Loaded Prerolls Cereal Milk 10 Pack",
-"PIL-WFOG-10PK":"Imperial 2g THCA Loaded Prerolls White Fire OG 10 Pack",
-"PIL-LCH-10PK":"Imperial Total THC Loaded Preroll Lemon Cherry Haze 10 Pack",
-"PIL-AF-10PK":"Imperial Total THC Loaded Preroll Apple Fritter 10 Pack",
-"PIL-BD-10PK":"Imperial Total THC Loaded Preroll Blueberry Donut 10 Pack",
-"PIL-OC-10PK":"Imperial Total THC Loaded Preroll Orange Creamsicle 10 Pack",
-"PIL-PBB-10PK":"Imperial Total THC Loaded Preroll Peanut Butter Breath 10 Pack",
-"PIL-AC-10PK":"Imperial Total THC Loaded Preroll Animal Cookies 10 Pack",
-"PDD-CS-5PK":"THCA Double Doink Champagne Slushie 5 Pack",
-"PDD-SJ-5PK":"THCA Double Doink Strawberry Jam 5 Pack",
-"PDD-LC-5PK":"THCA Double Doink Lemon Cherry 5 Pack",
-"PDD-BM-5PK":"THCA Double Doink Berry Marmalade 5 Pack",
-"PDD-GD-5PK":"THCA Double Doink Glazed Donut 5 Pack",
-"PDD-PC-5PK":"THCA Double Doink Peach Cobbler 5 Pack",
-"VLR-CL-10PK":"Munchies Lil Ripper 2G D8 Candyland 10 Pack",
-"VLR-WG-10PK":"Munchies Lil Ripper 2G D8 Watermelon Gusher 10 Pack",
-"VLR-LAC-10PK":"Munchies Lil Ripper 2G D8 LA Confidential 10 Pack",
-"VLR-BD-10PK":"Munchies Lil Ripper 2G HHC Blue Dream 10 Pack",
-"VLR-SC-10PK":"Munchies Lil Ripper 2G HHC Sour Candy 10 Pack",
-"VLR-MW-10PK":"Munchies Lil Ripper 2G HHC Maui Wowie 10 Pack",
-"VIC-GSC-6PK":"Imperial 1G Cartridge THCP Girl Scout Cookies 6 Pack",
-"VIC-TC-6PK":"Imperial 1G Cartridge THCP Tropicanna Cookies 6 Pack",
-"VIC-NYSD-6PK":"Imperial 1G Cartridge THCP New York Sour Diesel 6 Pack",
-"VIC-PR-6PK":"Imperial 1G Cartridge THCP Pink Runtz 6 Pack",
-"VIC-RBK-6PK":"Imperial 1G Cartridge THCP Royal Berry Kush 6 Pack",
-"VIC-PS-6PK":"Imperial 1G Cartridge THCP Pinkberry Sherbert 6 Pack",
-"VIC-BG-6PK":"Imperial 1G Cartridge THCP Berry Gelato 6 Pack",
-"VIC-OD-6PK":"Imperial 1G Cartridge THCP Orange Dreamsicle 6 Pack",
-"FIT24K-3.5-5PK":"Imperial THCA Flower Zaza 24 Karat 3.5g 5 Pack",
-"FITGR-3.5-5PK":"Imperial THCA Flower Zaza Greasy Runtz 3.5g 5 Pack",
-"FITGDP-3.5-5PK":"Imperial THCA Flower Zaza Granddaddy Purple 3.5g 5 Pack",
-"FITGM-3.5-5PK":"Imperial THCA Flower Zaza Gush Mintz 3.5g 5 Pack",
-"FITCC-3.5-5PK":"Imperial THCA Flower Zaza Candy Crush 3.5g 5Pack",
-"FITWR-3.5-5PK":"Imperial THCA Flower Zaza White Runtz 3.5g 5 Pack",
-"FITPR-3.5-5PK":"Imperial THCA Flower Zaza Pink Runtz 3.5g 5 Pack",
-"FITLCG-3.5-5PK":"Imperial THCA Flower Zaza Lemon Cherry Gelato 3.5g 5 Pack",
-"FITSD-3.5-5PK":"Imperial THCA Flower Zaza Sundae Driver 3.5g 5 Pack",
-"FITG33-3.5-5PK":"Imperial THCA Flower Zaza Gelato 33 3.5g 5Pack",
-"FITBN-3.5-5PK":"Imperial THCA Flower Zaza Blue Nerdz 3.5g 5 Pack",
-"FITAS-3.5-5PK":"Imperial THCA Flower Zaza Acai Sorbet 3.5g 5 Pack",
-"FITPRM-3.5-5PK":"Imperial THCA Flower Zaza Permanent Marker 3.5g 5 Pack",
-"FITSCC-14-5PK":"Imperial THCA Flower Zaza Candy Crush 14G 5Pack",
-"FITSBN-14G-5PK":"Imperial THCA Flower Zaza Blue Nerdz 14G 5Pack",
-"FITSWR-14-5PK":"Imperial THCA Flower Zaza White Runtz 14G 5Pack",
-"FITWC-3.5-5PK":"Imperial THCA Flower Fakies Wedding Cake 3.5g 5 Pack",
-"FITTW-3.5-5PK":"Imperial THCA Flower Fakies Trainwreck 3.5g 5 Pack",
-"FITICC-3.5-5PK":"Imperial THCA Flower Fakies Ice Cream Cake 3.5g 5 Pack",
-"FITJC-3.5-5PK":"Imperial THCA Flower Fakies Jelly Cake 3.5g 5 Pack",
-"FITHZ-3.5-5PK":"Imperial THCA Flower Fakies Hindu Z 3.5g 5 Pack",
-"FITGUS-3.5-5PK":"Imperial THCA Flower Fakies Gushers 3.5g 5 Pack",
-"FITDR-3.5-5PK":"Imperial THCA Flower Fakies Double Runtz 3.5g 5 Pack",
-"FITSFV-3.5-5PK":"Imperial THCA Flower Fakies SFV OG 3.5g 5 Pack",
-"FITIP-3.5-5PK":"Imperial THCA Flower Fakies Icy Pop 3.5g 5 Pack",
-"FITIP-450-01":"Imperial THCA Flower Fakies Icy Pop 1lb",
-"FITGR-QP-01":"Imperial THCA Flower Zaza Greasy Runtz QP",
-"FITCC-QP-01":"Imperial THCA Flower Zaza Candy Crush QP",
-"FITGDP-QP-01":"Imperial THCA Flower Zaza Granddaddy Purple QP",
-"FITSFV-450-01":"Imperial THCA Flower Fakies SFV OG 1lb",
-"FITIP-QP-01":"Imperial THCA Flower Fakies Icy Pop QP",
-"FITWC-450-01":"Imperial THCA Flower Fakies Wedding Cake 1lb",
-"FITGM-QP-01":"Imperial THCA Flower Zaza Gush Mints QP",
-"FITPR-QP-01":"Imperial THCA Flower Zaza Pink Runtz QP",
-"FITWR-QP-01":"Imperial THCA Flower Zaza White Runtz QP",
-"FITDR-450-01":"Imperial THCA Flower Fakies Double Runtz 1lb",
-"FITJC-450-01":"Imperial THCA Flower Fakies Jelly Cake 1lb",
-"FITWC-QP-01":"Imperial THCA Flower Fakies Wedding Cake QP",
-"FITSFV-QP-01":"Imperial THCA Flower Fakies SFV OG QP",
-"FITLCG-QP-01":"Imperial THCA Flower Zaza Lemon Cherry Gelato QP",
-"FITBN-QP-01":"Imperial THCA Flower Zaza Blue Nerdz QP",
-"FITAS-QP-01":"Imperial THCA Flower Zaza Acai Sorbet QP",
-"FITGUS-QP-01":"Imperial THCA Flower Fakies Gushers QP",
-"FITTW-QP-01":"Imperial THCA Flower Fakies Trainwreck QP",
-"FITDR-QP-01":"Imperial THCA Flower Fakies Double Runtz QP",
-"FITJC-QP-01":"Imperial THCA Flower Fakies Jelly Cake QP",
-"VIP-BATT-5PK":"Imperial Pod System Battery 5 Pack",
-};
-
-for (const [sku, [units, rev]] of Object.entries(d30)) {
-  add(sku, names[sku] || sku, units, rev, 0, 0);
+// Deduplicate and build SALES_DATA-compatible records
+const salesData = [];
+for (const [month, rows] of Object.entries(raw)) {
+  const seen = new Set();
+  for (const [sku, units, rev] of rows) {
+    if (seen.has(sku)) continue;
+    seen.add(sku);
+    salesData.push({ month, pid: sku, qty: units, subtotal: rev });
+  }
 }
 
-// 60-day prior window (Mar 14 - May 13, 2026)
-const d60 = {
-"P5D-SC-10PK":[1134,87422.5],"P5D-CC-10PK":[1119,86142.5],"P5D-GT-10PK":[1116,85982.5],
-"P5D-TP-10PK":[1091,83922.5],"P5D-BKC-10PK":[1077,82890],"P5D-TN-10PK":[1024,78517.5],
-"P5D-BLOG-10PK":[918,68572.5],"P5D-PD-10PK":[899,67277.5],"P5D-TBP-10PK":[898,67127.5],
-"P5D-SKP-10PK":[899,66872.5],"P5D-MMJ-10PK":[881,65605],"P5D-TS-10PK":[871,64632.5],
-"VLRSB-GJR-10PK":[481,41259.5],"VLRSB-SS-10PK":[451,38749.5],"VLRSB-WS-10PK":[453,38725],
-"VLRSB-BF-10PK":[452,38657.5],"VLRSB-KL-10PK":[447,38072.5],"VLRSB-MG-10PK":[441,37789.5],
-"VLR-TS-10PK":[399,33107.5],"VLR-SKP-10PK":[373,31182.5],"VLR-TBP-10PK":[362,30037.5],
-"VLR-PD-10PK":[350,29075],"VLR-MMJ-10PK":[336,27952.5],"VLR-BLOG-10PK":[325,26990],
-"PJH-SKP-10PK":[466,22281.5],"PJH-TBP-10PK":[461,21961.5],"EGMB-500-5PK":[471,20444.75],
-"PJH-MMJ-10PK":[435,20231.5],"PJH-TS-10PK":[432,20121.5],"PJH-BLOG-10PK":[429,19716.5],
-"PJH-PD-10PK":[411,19161.5],"PIL-LCH-10PK":[489,18561],"PIL-PBB-10PK":[490,18516],
-"PIL-OC-10PK":[488,18511],"PIL-BD-10PK":[488,18511],"PIL-AF-10PK":[486,18413.5],
-"PIL-AC-10PK":[487,18223.5],"EGBD-400-5PK":[415,17112.25],"PJH-ABJ-10PK":[339,16602.5],
-"PJH-SM-10PK":[341,16392.5],"PJH-MT-10PK":[335,16292.5],"PJH-BC-10PK":[331,16222.5],
-"PJH-PP-10PK":[331,16197.5],"PJH-GCK-10PK":[327,16122.5],"PJH-FW-10PK":[324,15737.5],
-"PJH-RCP-10PK":[321,15663.5],"EGKB-400-5PK":[371,15622],"EGSS-400-5PK":[341,14709.5],
-"EGMCR-600-5PK":[333,14106],"PJH-FT-10PK":[287,13942.5],"EGPL-400-5PK":[326,13772],
-"PIL-YOG-10PK":[336,13662.75],"PIL-CM-10PK":[334,13512],"PIL-GB-10PK":[324,13124.5],
-"PIL-SA-10PK":[322,13054.25],"PIL-PG-10PK":[308,12421.25],"PIL-WFOG-10PK":[305,12331.5],
-"PIL-LAKK-10PK":[293,11783.5],"PIL-GMOC-10PK":[284,11416.5],"PIL-NYCD-10PK":[283,11409.25],
-"FITGDP-3.5-5PK":[134,11241.5],"PDD-SJ-5PK":[332,10277.75],"PDD-BM-5PK":[325,10127.5],
-"FITCC-3.5-5PK":[118,9791.5],"PDD-GD-5PK":[313,9583.75],"PDD-PC-5PK":[309,9561.25],
-"PDD-LC-5PK":[312,9540],"FIT24K-3.5-5PK":[111,9301.5],"FITWR-3.5-5PK":[108,8991.5],
-"EGMB-125-8PK":[308,8672],"PDD-CS-5PK":[273,8448.75],"FITPR-3.5-5PK":[99,8277],
-"FITGM-3.5-5PK":[99,8261.5],"EGKB-100-8PK":[291,8100],"FITGR-3.5-5PK":[93,7871.5],
-"EGMCR-150-8PK":[265,7484],"EGBD-100-8PK":[263,7328],"EGPL-100-8PK":[257,6988],
-"FITG33-3.5-5PK":[80,6596],"EGSS-100-8PK":[235,6524],"FITLCG-3.5-5PK":[71,6071],
-"FITBN-3.5-5PK":[61,5005.5],"FITSD-3.5-5PK":[50,4226],"FITSBN-14G-5PK":[25,4163.5],
-"FITSWR-14-5PK":[25,4163.5],"FITPRM-3.5-5PK":[49,4147],"FITTW-3.5-5PK":[66,3943],
-"FITSCC-14-5PK":[24,3938.5],"VIC-GSC-6PK":[129,3801],"FITJC-3.5-5PK":[64,3728],
-"ECC-DR1-5PK":[138,3615],"ECC-CF1-5PK":[132,3453.75],"VIC-TC-6PK":[117,3408],
-"VIC-NYSD-6PK":[117,3384],"VIC-PR-6PK":[115,3348],"EGBB-05-8PK":[118,3336],
-"EGSS-05-8PK":[115,3284],"ECC-CB1-5PK":[126,3236.25],"FITICC-3.5-5PK":[56,3223],
-"VIC-RBK-6PK":[110,3174],"EGMB-05-8PK":[112,3168],"FITGUS-3.5-5PK":[55,3153],
-"VLR-WG-10PK":[43,3152.5],"VLR-CL-10PK":[43,3152.5],"FITWC-3.5-5PK":[55,3138],
-"EGBB-20-5PK":[88,3072.75],"VLR-LAC-10PK":[42,3052.5],"FITIP-3.5-5PK":[52,2990],
-"EGSS-20-5PK":[82,2935.25],"FITAS-3.5-5PK":[33,2771.5],"EGFJ-SD-10PK":[34,2750],
-"VIC-OD-6PK":[94,2700],"EGFJ-TP-10PK":[29,2420],"VIC-PS-6PK":[83,2418],
-"VIC-BG-6PK":[81,2403],"VLR-BD-10PK":[30,2322.5],"VLR-MW-10PK":[29,2232.5],
-"EGMB-20-5PK":[59,2110.25],"FITDR-3.5-5PK":[36,2103],"FITIP-450-01":[2,2100],
-"VLR-SC-10PK":[26,1942.5],"FITSFV-3.5-5PK":[29,1688],"FITGDP-QP-01":[3,1425],
-"FITGR-QP-01":[3,1395],"FITSFV-450-01":[1,1050],"FITIP-QP-01":[4,1000],
-"FITWC-450-01":[1,975],"FITGM-QP-01":[2,970],"FITPR-QP-01":[2,950],
-"FITWR-QP-01":[2,950],"FITDR-450-01":[1,775],"FITJC-450-01":[1,725],
-"FITHZ-3.5-5PK":[9,588],"FITWC-QP-01":[2,500],"FITSFV-QP-01":[2,500],
-"FITLCG-QP-01":[1,485],"FITCC-QP-01":[1,475],"FITBN-QP-01":[1,475],
-"FITAS-QP-01":[1,475],"EGFJ-AN-10PK":[5,410],"FITGUS-QP-01":[1,275],
-"FITTW-QP-01":[1,250],"FITDR-QP-01":[1,225],"FITJC-QP-01":[1,200],
-"VIP-BATT-5PK":[1,62.5],
-};
+const output = { generated: "2026-06-12", months: Object.keys(raw), data: salesData };
+const outPath = path.join(__dirname, 'zoey-product-sales.json');
+fs.writeFileSync(outPath, JSON.stringify(output));
+console.log(`Written ${salesData.length} records to ${outPath}`);
 
-for (const [sku, [units, rev]] of Object.entries(d60)) {
-  add(sku, names[sku] || sku, 0, 0, units, rev);
+// Print summary
+function classify(sku) {
+  if (/^(P5D|PJH|PDD|PIL)-/.test(sku)) return 'Prerolls';
+  if (/^(VLR|VLRSB|VIC|VIP)-/.test(sku)) return 'Vapes';
+  if (/^(EG|ECC|EGSW)/.test(sku)) return 'Edibles';
+  if (/^FIT/.test(sku)) return 'Flower';
+  return 'Other';
 }
-
-fs.writeFileSync(__dirname + '/zoey-sales.json', JSON.stringify(data));
-console.log('Wrote', Object.keys(data).length, 'SKUs to zoey-sales.json');
-console.log('File size:', fs.statSync(__dirname + '/zoey-sales.json').size, 'bytes');
+const byType = {};
+for (const r of salesData) {
+  const t = classify(r.pid);
+  if (!byType[t]) byType[t] = {};
+  if (!byType[t][r.month]) byType[t][r.month] = 0;
+  byType[t][r.month] += r.subtotal;
+}
+for (const [type, months] of Object.entries(byType)) {
+  const total = Object.values(months).reduce((s,v) => s+v, 0);
+  console.log(`${type}: $${Math.round(total).toLocaleString()}`);
+}

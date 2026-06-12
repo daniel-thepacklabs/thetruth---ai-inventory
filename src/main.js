@@ -1,9 +1,10 @@
 import { processData, processSalesReport, buildSubcatIndex } from './data/parsers.js';
+import { state } from './data/state.js';
 import { fetchAll } from './data/finaleApi.js';
 import { updateRangeLabel, renderSubcatChips, setRenderFn as setFilterRender, toggleChip, togglePill, resetFilters, selectAllChips, clearAllChips, toggleSubcat, selectAllSubcats, clearAllSubcats, quickFilter, quickStatusFilter, setFilter, activateReorderOnly } from './ui/filters.js';
 import { openModal, closeModal, saveModal, resetOverride, updateModalPreview, setRenderFn as setModalRender } from './ui/modal.js';
 import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView } from './views/inventory.js';
-import { renderSalesView, renderEdiblePieces } from './views/sales.js';
+import { renderSalesView } from './views/sales.js';
 import { renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds } from './views/alerts.js';
 
 // ── Inject render() into modules that need it ──
@@ -22,7 +23,7 @@ Object.assign(window, {
   toggleSubcat, selectAllSubcats, clearAllSubcats, quickFilter,
   quickStatusFilter, setFilter, activateReorderOnly, updateRangeLabel,
   // Sales
-  renderSalesView, renderEdiblePieces,
+  renderSalesView,
   // Alerts
   renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds,
   // View switching
@@ -76,7 +77,7 @@ async function syncFromFinale() {
   if (btn) { btn.textContent = '⟳ Syncing…'; btn.disabled = true; }
 
   try {
-    const { stock, salesHistory, consume, consume30, salesOrder } = await fetchAll();
+    const { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData } = await fetchAll();
 
     if (!stock || !salesHistory) {
       if (ts) { ts.textContent = 'Finale API not connected'; ts.style.color = 'var(--text3)'; }
@@ -85,12 +86,14 @@ async function syncFromFinale() {
 
     processData(stock, salesHistory, consume, consume30);
     if (salesOrder) processSalesReport(salesOrder);
+    if (monthlyTotals) state.MONTHLY_TOTALS = monthlyTotals;
+    if (productSalesData && productSalesData.length) state.SALES_DATA = productSalesData;
 
     buildSubcatIndex();
     updateRangeLabel();
     renderSubcatChips();
     render();
-    if (salesOrder) renderSalesView();
+    if (salesOrder || monthlyTotals || productSalesData) renderSalesView();
 
     if (ts) {
       ts.textContent = 'Synced ' + new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });

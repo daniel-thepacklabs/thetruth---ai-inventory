@@ -3,6 +3,7 @@ import { ALL_CATEGORIES } from './constants.js';
 export const state = {
   RAW_DATA: [],
   SALES_DATA: [],
+  MONTHLY_TOTALS: [],
   EDIBLE_ONHAND: {},
   overrides: {},
   removedIds: new Set(),

@@ -262,38 +262,6 @@
           </div>
         </div>
 
-        <!-- Edibles pieces report -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-top:1rem">
-          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
-            <span style="font-size:14px">🍬</span>
-            <span style="font-size:12px;font-weight:500;color:var(--text)">Edibles — Individual Pieces Report</span>
-            <span style="font-size:11px;color:var(--text3)">All SKUs converted to individual gummy pieces · RAW=1pc · 5ct bag=5pc · 20ct bag=20pc</span>
-            <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
-              <div style="display:flex;align-items:center;gap:.4rem">
-                <span style="font-size:11px;color:var(--text3)">Reorder point</span>
-                <select id="edible-reorder-mo" onchange="renderEdiblePieces()" style="font-size:11px;padding:2px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2)">
-                  <option value="1">1 month</option><option value="2">2 months</option>
-                  <option value="3" selected>3 months</option><option value="4">4 months</option><option value="6">6 months</option>
-                </select>
-              </div>
-              <div style="display:flex;align-items:center;gap:.4rem">
-                <span style="font-size:11px;color:var(--text3)">Safety stock</span>
-                <select id="edible-ss-mo" onchange="renderEdiblePieces()" style="font-size:11px;padding:2px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2)">
-                  <option value="0.5">0.5 month</option><option value="1" selected>1 month</option>
-                  <option value="1.5">1.5 months</option><option value="2">2 months</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">
-              <thead id="edible-pieces-head" style="position:sticky;top:0;z-index:1"></thead>
-              <tbody id="edible-pieces-body">
-                <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text3)">Connect Finale API to see individual pieces data</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div><!-- end sales-view -->
     </div><!-- end content -->
   </div><!-- end main -->

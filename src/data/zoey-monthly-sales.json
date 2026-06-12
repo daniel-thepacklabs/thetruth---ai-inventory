@@ -1,0 +1,17 @@
+{
+  "generated": "2026-06-12",
+  "months": [
+    { "period": "2025-07", "orders": 378, "revenue": 2491302.12, "units": 45426 },
+    { "period": "2025-08", "orders": 405, "revenue": 2232256.57, "units": 43991 },
+    { "period": "2025-09", "orders": 443, "revenue": 2657905.68, "units": 49489 },
+    { "period": "2025-10", "orders": 500, "revenue": 1758921.61, "units": 37344 },
+    { "period": "2025-11", "orders": 359, "revenue": 1893689.37, "units": 35594 },
+    { "period": "2025-12", "orders": 425, "revenue": 1836233.74, "units": 36488 },
+    { "period": "2026-01", "orders": 466, "revenue": 2556611.74, "units": 48010 },
+    { "period": "2026-02", "orders": 312, "revenue": 2210696.18, "units": 43675 },
+    { "period": "2026-03", "orders": 392, "revenue": 2041471.30, "units": 40597 },
+    { "period": "2026-04", "orders": 475, "revenue": 2170071.73, "units": 44987 },
+    { "period": "2026-05", "orders": 444, "revenue": 2904308.90, "units": 54953 },
+    { "period": "2026-06", "orders": 183, "revenue": 937010.33, "units": 21383 }
+  ]
+}

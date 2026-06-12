@@ -75,7 +75,21 @@ export function catSubcat(pid) {
   if (p.startsWith('ISO - ')) return ['Raw Material','ISO'];
   if (p.startsWith('Oil - ')) return ['Raw Material','Oil'];
   if (p.startsWith('TRP-')) return ['Raw Material','TRP'];
-  return [null, null];
+  if (p.startsWith('Diamond - ')) return ['Raw Material','Diamond'];
+  if (p.startsWith('FIT') || p.startsWith('CDS-')) return ['WIP','FIT'];
+  if (p.startsWith('VIP-')) return ['WIP','VIP'];
+  if (p.startsWith('MM-') || p.startsWith('MMCC-')) return ['Marketing','MM'];
+  if (p.startsWith('MIC') || p.startsWith('MIPS-')) return ['Marketing','Merch'];
+  if (p.startsWith('LBT-')) return ['Packaging','LBT'];
+  if (p.startsWith('OIL-')) return ['Raw Material','Oil'];
+  if (p.startsWith('BUN-')) return ['WIP','BUN'];
+  if (p.startsWith('FIB-')) return ['WIP','FIB'];
+  if (p.startsWith('TPLM-')) return ['Components','TPLM'];
+  if (/^BOXES?\s/i.test(p) || p.includes('Bubble') || p.includes('Shipping Supplies') || p.includes('Direct Thermal') || p.includes('FOIL BAG') || p.includes('Pallet') || p.includes('Supplies -') || p.includes('SILVER LINING')) return ['Misc','Shipping'];
+  if (p.startsWith('Mylar - ')) return ['Packaging','MYL'];
+  if (p.startsWith('Filled ')) return ['WIP','Filled'];
+  if (p.startsWith('Triangle Cannabis')) return ['Packaging','LBL'];
+  return ['Misc','Other'];
 }
 
 // ── Edible helpers ──
@@ -151,7 +165,7 @@ export function getSalesProductType(pid, desc) {
     return ['Prerolls','Jelly Hole THCA'];
   }
   if (pu.startsWith('PIL')) {
-    if (d.includes('total thc')) return ['Prerolls','Imperial Loaded THCP'];
+    if (d.includes('total thc') || ['PIL-PBB','PIL-OC','PIL-LCH','PIL-BD','PIL-AF','PIL-AC'].some(x => pu.startsWith(x))) return ['Prerolls','Imperial Loaded THCP'];
     return ['Prerolls','Imperial Loaded THCA'];
   }
   if (pu.startsWith('VLRSB')) return ['Vapes','Lil Ripper Liquid Diamonds'];
@@ -250,7 +264,7 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
       const actual30   = consume30Map[pid] != null ? consume30Map[pid] : sl.s30;
       const remaining = st.onHand - st.reserved;
-      if (st.onHand === 0 && st.onOrder === 0 && consumed90 === 0) return null;
+      if (consumed90 === 0) return null;
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
       return {
         id: pid, desc: st.desc, cat, subcat,
