@@ -37,7 +37,7 @@ function showView(view) {
 
   document.getElementById('sales-view').style.display  = isSales   ? 'block' : 'none';
   document.getElementById('alerts-view').style.display = isAlerts  ? 'block' : 'none';
-  document.getElementById('items-list').style.display  = isInv     ? 'block' : 'none';
+  document.getElementById('items-list').style.display  = isInv     ? '' : 'none';
   document.getElementById('empty-state').style.display = 'none';
 
   const inventoryOnly = [

@@ -1,11 +1,3 @@
-/**
- * Finale Inventory API connector
- *
- * Current API key has access to: /product, /facility
- * TODO: Get API key upgraded with access to: /order, /inventoryitem
- *       (need those for stock quantities and sales data)
- */
-
 const BASE_URL = '/finale-api';
 const AUTH     = 'Basic ' + btoa(`${import.meta.env.VITE_FINALE_API_KEY}:${import.meta.env.VITE_FINALE_API_SECRET}`);
 
@@ -17,7 +9,10 @@ async function finaleGet(path) {
   return res.json();
 }
 
-// ── Fetch product catalog (single request, returns all product IDs + names) ──
+import stockData from './zoey-stock.json';
+import salesData from './zoey-sales.json';
+import consumptionData from './finale-consumption.json';
+
 export async function fetchProducts() {
   const data = await finaleGet('/product');
   const ids    = data.productId || [];
@@ -32,32 +27,105 @@ export async function fetchProducts() {
   return products;
 }
 
-// ── Build CSV from product data for processData() ──
-// Stock quantities not available with current API key —
-// dashboard will show items with 0 inventory until /inventoryitem access is granted
-function productsToStockCSV(products) {
-  const rows = products.map(p => ({
-    'Location': 'SFS-HQ',
-    'Product ID': p.productId,
-    'Description': p.internalName,
-    'On hand': 0,
-    'On order': 0,
-    'Reserved': 0,
-  }));
+function buildStockCSV(products) {
+  const stockBySku = {};
+  for (const s of stockData) {
+    stockBySku[s.sku] = s.qty;
+  }
+
+  const finaleOnOrder = consumptionData.onOrder || {};
+
+  const rows = products.map(p => {
+    const qty = stockBySku[p.productId] ?? 0;
+    const oo = finaleOnOrder[p.productId] || 0;
+    return {
+      'Location': 'SFS-HQ',
+      'Product ID': p.productId,
+      'Description': p.internalName,
+      'On hand': qty,
+      'On order': oo,
+      'Reserved': 0,
+    };
+  });
   return toCSV(rows);
 }
 
-function productsToSalesCSV(products) {
-  const rows = products.map(p => ({
-    'Product ID': p.productId,
-    'Sales last 90 days': 0,
-    'Sales last 30 days': 0,
-    'Sales last month': 0,
-  }));
+function buildSalesCSV(products) {
+  const rows = products.map(p => {
+    const c90 = consumptionData.consume90[p.productId] || 0;
+    const c30 = consumptionData.consume30[p.productId] || 0;
+    const s = salesData[p.productId];
+    const s30 = c30 || (s ? s.s30 : 0);
+    const s90 = c90 || (s ? s.s30 + s.s60 : 0);
+    return {
+      'Product ID': p.productId,
+      'Sales last 90 days': s90,
+      'Sales last 30 days': s30,
+      'Sales last month': s30,
+    };
+  });
   return toCSV(rows);
 }
 
-// ── Main fetch ──
+function buildSalesOrderCSV() {
+  const rows = [];
+  const now = new Date();
+  for (const [sku, s] of Object.entries(salesData)) {
+    if (s.s30 > 0) {
+      rows.push({
+        'Order date': new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10),
+        'Status': 'Completed',
+        'Category': '',
+        'Product ID': sku,
+        'Description': s.name,
+        'Quantity': s.s30,
+        'Unit price': s.s30 > 0 ? (s.r30 / s.s30).toFixed(2) : '0',
+        'Subtotal sum': s.r30.toFixed(2),
+      });
+    }
+    if (s.s60 > 0) {
+      const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      rows.push({
+        'Order date': prevMonth.toISOString().slice(0, 10),
+        'Status': 'Completed',
+        'Category': '',
+        'Product ID': sku,
+        'Description': s.name,
+        'Quantity': Math.round(s.s60 / 2),
+        'Unit price': s.s60 > 0 ? (s.r60 / s.s60).toFixed(2) : '0',
+        'Subtotal sum': (s.r60 / 2).toFixed(2),
+      });
+      const prevMonth2 = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      rows.push({
+        'Order date': prevMonth2.toISOString().slice(0, 10),
+        'Status': 'Completed',
+        'Category': '',
+        'Product ID': sku,
+        'Description': s.name,
+        'Quantity': Math.round(s.s60 / 2),
+        'Unit price': s.s60 > 0 ? (s.r60 / s.s60).toFixed(2) : '0',
+        'Subtotal sum': (s.r60 / 2).toFixed(2),
+      });
+    }
+  }
+  return toCSV(rows);
+}
+
+function buildConsumeCSV(products, days) {
+  const src = days === 30 ? consumptionData.consume30 : consumptionData.consume90;
+  const rows = [];
+  for (const p of products) {
+    const finaleQty = src[p.productId] || 0;
+    const zoeyS = salesData[p.productId];
+    const zoeyQty = days === 30 ? (zoeyS ? zoeyS.s30 : 0) : (zoeyS ? zoeyS.s30 + zoeyS.s60 : 0);
+    const qty = finaleQty || zoeyQty;
+    if (qty > 0) {
+      rows.push({ 'Product ID': p.productId, 'Quantity sum': qty });
+    }
+  }
+  return rows.length ? toCSV(rows) : null;
+}
+
 export async function fetchAll() {
   if (!import.meta.env.VITE_FINALE_API_KEY) {
     console.warn('Finale API credentials not set — add VITE_FINALE_API_KEY, VITE_FINALE_API_SECRET to .env');
@@ -67,16 +135,25 @@ export async function fetchAll() {
   const products = await fetchProducts();
   console.log(`Loaded ${products.length} active products from Finale`);
 
+  const stock = buildStockCSV(products);
+  const salesHistory = buildSalesCSV(products);
+  const salesOrder = buildSalesOrderCSV();
+  const consume = buildConsumeCSV(products, 90);
+  const consume30 = buildConsumeCSV(products, 30);
+
+  const matchedZoey = products.filter(p => salesData[p.productId]).length;
+  const matchedFinale = products.filter(p => consumptionData.consume90[p.productId]).length;
+  console.log(`Matched ${matchedZoey} products with Zoey sales, ${matchedFinale} with Finale consumption`);
+
   return {
-    stock: productsToStockCSV(products),
-    salesHistory: productsToSalesCSV(products),
-    consume: null,
-    consume30: null,
-    salesOrder: null,
+    stock,
+    salesHistory,
+    consume,
+    consume30,
+    salesOrder,
   };
 }
 
-// ── Utility: array of objects → CSV string ──
 function toCSV(rows) {
   if (!rows.length) return '';
   const headers = Object.keys(rows[0]);

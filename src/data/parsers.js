@@ -249,8 +249,8 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const consumed90 = consumeMap[pid] != null ? consumeMap[pid] : sl.s90;
       const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
       const actual30   = consume30Map[pid] != null ? consume30Map[pid] : sl.s30;
-      if (consumeCSV && consumed90 === 0) return null;
       const remaining = st.onHand - st.reserved;
+      if (st.onHand === 0 && st.onOrder === 0 && consumed90 === 0) return null;
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
       return {
         id: pid, desc: st.desc, cat, subcat,

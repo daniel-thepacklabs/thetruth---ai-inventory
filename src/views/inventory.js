@@ -191,7 +191,7 @@ export function render() {
     const displayId   = item.isEdibleFlavor ? '🍬 ' + item.flavorName : item.id;
     const displayDesc = item.isEdibleFlavor ? 'All SKUs combined · individual pieces · demand from sales data' : (item.desc || '—');
 
-    return `<div class="item-row" id="row-${CSS.escape(item.id)}" style="animation-delay:${Math.min(idx, 20) * 0.025}s;${isSel ? 'outline:1.5px solid rgba(232,197,71,0.5)' : ''}">
+    return `<div class="item-row" id="row-${CSS.escape(item.id)}" style="${isSel ? 'outline:1.5px solid rgba(232,197,71,0.5)' : ''}">
       <div class="item-header">
         <label style="display:flex;align-items:center;padding:.75rem 0 .75rem .875rem;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation()">
           <input type="checkbox" id="cb-${CSS.escape(item.id)}" ${isSel ? 'checked' : ''} onchange="toggleSelect('${sid}',event)" style="width:13px;height:13px;cursor:pointer;accent-color:var(--accent)"/>
