@@ -80,7 +80,7 @@ export function catSubcat(pid) {
   if (p.startsWith('VIP-')) return ['WIP','VIP'];
   if (p.startsWith('MM-') || p.startsWith('MMCC-')) return ['Marketing','MM'];
   if (p.startsWith('MIC') || p.startsWith('MIPS-')) return ['Marketing','Merch'];
-  if (p.startsWith('LBT-')) return ['Packaging','LBT'];
+  if (p.startsWith('LBT-')) return ['WIP','LBT'];
   if (p.startsWith('OIL-')) return ['Raw Material','Oil'];
   if (p.startsWith('BUN-')) return ['WIP','BUN'];
   if (p.startsWith('FIB-')) return ['WIP','FIB'];

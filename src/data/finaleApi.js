@@ -1,6 +1,7 @@
 import stockData from './finale-stock.json';
 import salesData from './finale-sales.json';
 import consumptionData from './finale-consumption.json';
+import monthlyData from './finale-monthly.json';
 
 function toCSV(rows) {
   if (!rows.length) return '';
@@ -101,5 +102,5 @@ export async function fetchAll() {
   const withSales = Object.keys(salesData).length;
   console.log(`Loaded ${stockData.length} products from Finale (${withStock} with stock, ${withSales} with sales)`);
 
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: [], productSalesData: [] };
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData: [] };
 }

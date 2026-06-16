@@ -145,76 +145,58 @@ function aggregateConsumption(records) {
   return byProduct;
 }
 
-// ── Fetch sales orders via REST (paginated) ──
-async function fetchSalesOrders() {
-  const BATCH = 5000;
-  let allItems = [];
-  let offset = 0;
-
-  while (true) {
-    const data = await rest(`/order?limit=${BATCH}&offset=${offset}&typeId=SALES_ORDER`);
-    const orderUrls = data.orderUrl || [];
-    if (!orderUrls.length) break;
-
-    process.stdout.write(`\r  Orders: fetched ${offset + orderUrls.length} order headers...`);
-
-    // For the product sales breakdown, we need order items with dates
-    // The collection endpoint has orderDate but not items, so we use the item data
-    // from the collection response
-    const dates = data.orderDate || [];
-    const statuses = data.statusId || [];
-    const itemLists = data.orderItemListTotal || [];
-
-    // We need to get individual order details for items
-    // But that's 5000+ API calls. Instead, use the bulk data from headers.
-    // Actually the collection doesn't include items. Let's batch-fetch details.
-
-    offset += orderUrls.length;
-    if (orderUrls.length < BATCH) break;
-  }
-
-  // Getting individual order details would be too many API calls.
-  // Instead, use the GraphQL orderViewConnection for sales data.
-  console.log(`\r  Orders: using GraphQL for sales data...                    `);
-
+// ── Fetch monthly sales totals from order headers (12 months) ──
+async function fetchMonthlyTotals() {
   const PAGE = 200;
   let cursor = null;
+  let all = [];
   let page = 0;
-  allItems = [];
+  const beginDate = new Date();
+  beginDate.setMonth(beginDate.getMonth() - 11);
+  beginDate.setDate(1);
+  const begin = `${beginDate.getMonth() + 1}/1/${beginDate.getFullYear()}`;
 
   while (true) {
     const afterClause = cursor ? `, after: "${cursor}"` : '';
     const q = `{
-      orderViewConnection(first: ${PAGE}${afterClause}) {
+      orderViewConnection(first: ${PAGE}${afterClause}, orderDate: { begin: "${begin}" }) {
         pageInfo { hasNextPage endCursor }
         edges {
           node {
-            orderId
             orderDate
+            type
             status
-            orderType
+            subtotal
+            totalUnits
           }
         }
       }
     }`;
 
-    try {
-      const data = await gql(q);
-      const conn = data.orderViewConnection;
-      const nodes = conn.edges.map(e => e.node);
-      allItems.push(...nodes);
-      page++;
-      process.stdout.write(`\r  Orders: ${allItems.length} fetched (page ${page})...`);
+    const data = await gql(q);
+    const conn = data.orderViewConnection;
+    all.push(...conn.edges.map(e => e.node));
+    page++;
+    process.stdout.write(`\r  Orders: ${all.length} fetched (page ${page})...`);
 
-      if (!conn.pageInfo.hasNextPage) break;
-      cursor = conn.pageInfo.endCursor;
-    } catch (e) {
-      console.log('\n  Order GraphQL error:', e.message.slice(0, 200));
-      break;
-    }
+    if (!conn.pageInfo.hasNextPage) break;
+    cursor = conn.pageInfo.endCursor;
   }
-  console.log(`\r  Orders: ${allItems.length} total                    `);
-  return allItems;
+
+  const sales = all.filter(o => o.type === 'Sale' && o.status !== 'Canceled');
+  const byMonth = {};
+  sales.forEach(o => {
+    const parts = o.orderDate.split('/');
+    const m = parts[2] + '-' + parts[0].padStart(2, '0');
+    if (!byMonth[m]) byMonth[m] = { period: m, revenue: 0, units: 0, orders: 0 };
+    byMonth[m].revenue += num(o.subtotal);
+    byMonth[m].units += num(o.totalUnits);
+    byMonth[m].orders++;
+  });
+
+  const months = Object.values(byMonth).sort((a, b) => a.period.localeCompare(b.period));
+  console.log(`\r  Orders: ${all.length} total, ${sales.length} completed sales, ${months.length} months`);
+  return months;
 }
 
 // ── Main ──
@@ -299,8 +281,12 @@ async function fetchSalesOrders() {
   // Build consumption JSON (same format as existing finale-consumption.json)
   const consumptionData = { consume90, consume30, onOrder: inventoryData.onOrder };
 
-  // 3. Write output files
-  console.log('\n4. Writing JSON files...');
+  // 3. Monthly sales totals
+  console.log('\n4. Monthly sales totals (12 months):');
+  const monthlyTotals = await fetchMonthlyTotals();
+
+  // 4. Write output files
+  console.log('\n5. Writing JSON files...');
 
   const write = (name, data) => {
     const fp = path.join(outDir, name);
@@ -312,6 +298,7 @@ async function fetchSalesOrders() {
   write('finale-sales.json', salesData);
   write('finale-inventory.json', inventoryData);
   write('finale-consumption.json', consumptionData);
+  write('finale-monthly.json', { months: monthlyTotals });
 
   // Summary
   const activeProducts = products.filter(p => p.status === 'Active').length;
@@ -322,5 +309,6 @@ async function fetchSalesOrders() {
 
   console.log(`\n✓ Done! ${activeProducts} active products, ${withStock} with stock on hand`);
   console.log(`  ${withSales} with sales history, ${consumed90Count} consumed (90d), ${consumed30Count} consumed (30d)`);
+  console.log(`  ${monthlyTotals.length} months of sales data`);
   console.log(`  Generated: ${new Date().toISOString()}`);
 })();
