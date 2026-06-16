@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       open: true,
+      allowedHosts: ['.ngrok-free.dev'],
       proxy: {
         '/finale-api': {
           target: `https://app.finaleinventory.com/${env.VITE_FINALE_ACCOUNT}/api`,
