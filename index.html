@@ -225,9 +225,41 @@
           <div class="stat-card s-purple"><div class="stat-label">Avg Monthly Units</div> <div class="stat-val c-purple" id="kpi-avg-units">—</div></div>
         </div>
 
+        <!-- Forecast cards -->
+        <div id="forecast-section" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:12px;font-weight:500;color:var(--text)">Forecast</span>
+            <span style="font-size:10px;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:3px" id="forecast-basis">—</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:.75rem 1rem" id="forecast-kpis">
+            <div class="stat-card" style="border-left:3px solid var(--blue)"><div class="stat-label">Projected Revenue</div><div class="stat-val c-blue" id="fc-rev">—</div></div>
+            <div class="stat-card" style="border-left:3px solid var(--green)"><div class="stat-label">Projected Units</div><div class="stat-val c-green" id="fc-units">—</div></div>
+            <div class="stat-card" style="border-left:3px solid var(--orange)"><div class="stat-label">Projected Orders</div><div class="stat-val c-orange" id="fc-orders">—</div></div>
+            <div class="stat-card" style="border-left:3px solid var(--text3)"><div class="stat-label">Last Month Rev</div><div class="stat-val" id="fc-lastmo">—</div></div>
+            <div class="stat-card" style="border-left:3px solid var(--purple)"><div class="stat-label">vs Last Month</div><div class="stat-val" id="fc-vs-lastmo">—</div></div>
+          </div>
+          <div id="forecast-factors" style="padding:0 1rem .5rem;display:none">
+            <div style="display:flex;flex-wrap:wrap;gap:6px" id="forecast-factor-pills"></div>
+          </div>
+          <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px" id="forecast-type-table">
+              <thead id="forecast-type-head"></thead>
+              <tbody id="forecast-type-body"></tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Monthly breakdown -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
-          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text)">Monthly Breakdown</div>
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+            <span style="font-size:12px;font-weight:500;color:var(--text)">Monthly Breakdown</span>
+            <div style="display:flex;gap:.5rem;align-items:center" id="monthly-filters">
+              <select id="filter-monthly-year" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer"></select>
+              <select id="filter-monthly-month" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer">
+                <option value="">All Months</option>
+              </select>
+            </div>
+          </div>
           <div style="overflow-x:auto">
             <table id="sales-monthly-table" style="width:100%;border-collapse:collapse;font-size:12px">
               <thead>
@@ -249,8 +281,14 @@
 
         <!-- Monthly by product type -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
-          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem">
             <span style="font-size:12px;font-weight:500;color:var(--text)">Monthly Revenue by Product Type &amp; Subcategory</span>
+            <div style="display:flex;gap:.5rem;align-items:center" id="bytype-filters">
+              <select id="filter-bytype-year" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer"></select>
+              <select id="filter-bytype-month" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer">
+                <option value="">All Months</option>
+              </select>
+            </div>
           </div>
           <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
             <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px" id="by-type-table">

@@ -199,6 +199,79 @@ async function fetchMonthlyTotals() {
   return months;
 }
 
+// ── Fetch order line items with revenue (paginated, 12 months) ──
+async function fetchOrderItems() {
+  const PAGE = 50;
+  let cursor = null;
+  let allItems = [];
+  let orderCount = 0;
+  const beginDate = new Date();
+  beginDate.setMonth(beginDate.getMonth() - 11);
+  beginDate.setDate(1);
+  const begin = `${beginDate.getMonth() + 1}/1/${beginDate.getFullYear()}`;
+
+  while (true) {
+    const afterClause = cursor ? `, after: "${cursor}"` : '';
+    const q = `{
+      orderViewConnection(first: ${PAGE}${afterClause}, orderDate: { begin: "${begin}" }) {
+        pageInfo { hasNextPage endCursor }
+        edges {
+          node {
+            orderId
+            orderDate
+            type
+            status
+            shipTo { name }
+            itemList(first: 100) {
+              edges {
+                node {
+                  product { productId description }
+                  productUnitsOrdered
+                  unitPrice
+                  subtotal
+                }
+              }
+            }
+          }
+        }
+      }
+    }`;
+
+    const data = await gql(q);
+    const conn = data.orderViewConnection;
+    for (const edge of conn.edges) {
+      const o = edge.node;
+      if (o.type !== 'Sale' || o.status === 'Canceled') continue;
+      const parts = o.orderDate.split('/');
+      const month = parts[2] + '-' + parts[0].padStart(2, '0');
+      const date = parts[2] + '-' + parts[0].padStart(2, '0') + '-' + parts[1].padStart(2, '0');
+      const customer = o.shipTo?.name || '';
+      const orderId = o.orderId || '';
+      orderCount++;
+      for (const ie of (o.itemList?.edges || [])) {
+        const item = ie.node;
+        allItems.push({
+          month,
+          date,
+          orderId,
+          customer,
+          pid: item.product?.productId || '',
+          desc: item.product?.description || '',
+          qty: num(item.productUnitsOrdered),
+          price: num(item.unitPrice),
+          subtotal: num(item.subtotal),
+        });
+      }
+    }
+    process.stdout.write(`\r  Order items: ${allItems.length} items from ${orderCount} orders...`);
+
+    if (!conn.pageInfo.hasNextPage) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  console.log(`\r  Order items: ${allItems.length} total from ${orderCount} orders                    `);
+  return allItems;
+}
+
 // ── Main ──
 (async () => {
   const outDir = path.resolve(__dirname);
@@ -285,8 +358,12 @@ async function fetchMonthlyTotals() {
   console.log('\n4. Monthly sales totals (12 months):');
   const monthlyTotals = await fetchMonthlyTotals();
 
-  // 4. Write output files
-  console.log('\n5. Writing JSON files...');
+  // 4. Order line items with revenue
+  console.log('\n5. Order line items (12 months):');
+  const orderItems = await fetchOrderItems();
+
+  // 5. Write output files
+  console.log('\n6. Writing JSON files...');
 
   const write = (name, data) => {
     const fp = path.join(outDir, name);
@@ -299,6 +376,7 @@ async function fetchMonthlyTotals() {
   write('finale-inventory.json', inventoryData);
   write('finale-consumption.json', consumptionData);
   write('finale-monthly.json', { months: monthlyTotals });
+  write('finale-order-items.json', { data: orderItems });
 
   // Summary
   const activeProducts = products.filter(p => p.status === 'Active').length;

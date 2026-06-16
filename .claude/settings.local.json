@@ -45,7 +45,29 @@
       "Bash(node -e \"process.stdin.setEncoding\\('utf8'\\);let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('Keys:',Object.keys\\(j\\)\\);const k=Object.keys\\(j\\)[0];console.log\\('First key length:',Array.isArray\\(j[k]\\)?j[k].length:typeof j[k]\\)}\\)\")",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:v[:2] if isinstance\\(v,list\\) else v for k,v in d.items\\(\\)}, indent=2\\)\\)\")",
       "PowerShell($AUTH = [Convert]::ToBase64String\\([Text.Encoding]::ASCII.GetBytes\\('tNngck8ZsJ0I:RV8aqm0MIhJeUCs3976Jpe0WUPuHlhSB'\\)\\); $headers = @{Authorization=\"Basic $AUTH\"; 'Content-Type'='application/json'}; @\\('inventorylevel','inventory','stock','productinventory','facilityinventory'\\) | ForEach-Object { $url = \"https://app.finaleinventory.com/deltamunchies/api/$_`?limit=1\"; try { $null = Invoke-WebRequest $url -Headers $headers; Write-Output \"$_ = OK\" } catch { Write-Output \"$_ = $\\($_.Exception.Response.StatusCode.value__\\)\" } })",
-      "mcp__1bbc0ef7-e240-40cc-af54-f255e87cb7e8__zoey_paginate"
+      "mcp__1bbc0ef7-e240-40cc-af54-f255e87cb7e8__zoey_paginate",
+      "Bash(ngrok http *)",
+      "Bash(curl -s http://127.0.0.1:4040/api/tunnels)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['tunnels'][0]['public_url']\\)\")",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\); where.exe ngrok)",
+      "PowerShell($ngrok = \"C:\\\\Users\\\\Daniel Kim\\\\AppData\\\\Local\\\\Microsoft\\\\WinGet\\\\Packages\\\\Ngrok.Ngrok_Microsoft.Winget.Source_8wekyb3d8bbwe\\\\ngrok.exe\"; & $ngrok update)",
+      "Bash(npx vite *)",
+      "Read(//c/Users/Daniel Kim/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/32f5e907-adad-424b-af74-5a14efba65ee/8ea5225b-d94c-4c92-a80b-e171aac21a42/skills/xlsx/**)",
+      "Bash(python -c ' *)",
+      "Bash(ls /c/Python*/python.exe)",
+      "Read(//c/Users/Daniel Kim/AppData/Local/Programs/**)",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_in_Chrome__switch_browser",
+      "mcp__Claude_in_Chrome__select_browser",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__tabs_create_mcp",
+      "mcp__Claude_in_Chrome__find",
+      "Bash(node src/data/build-finale.cjs)",
+      "Bash(timeout 5 bash -c 'sleep 3 && cat \"C:\\\\Users\\\\DANIEL~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Daniel-Kim-OneDrive-Desktop-thetruth\\\\3f9877a0-a3fd-4ba6-8e24-896f9c2f1777\\\\tasks\\\\bq4sz5wwm.output\"')",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\" -Recurse -Filter \"*.js\" -File)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Format-Table FullName)"
     ]
   }
 }
