@@ -15,6 +15,7 @@ const SECRET = process.env.VITE_FINALE_API_SECRET;
 if (!KEY || !SECRET) { console.error('Missing VITE_FINALE_API_KEY / VITE_FINALE_API_SECRET in .env'); process.exit(1); }
 
 const AUTH = 'Basic ' + Buffer.from(`${KEY}:${SECRET}`).toString('base64');
+const num = v => parseFloat(String(v || '0').replace(/,/g, '')) || 0;
 const GQL_URL = `https://app.finaleinventory.com/${ACCOUNT}/api/graphql`;
 const REST_URL = `https://app.finaleinventory.com/${ACCOUNT}/api`;
 
@@ -104,6 +105,9 @@ async function fetchConsumption(beginDate, endDate) {
         edges {
           node {
             transactionType
+            transactionUpdateType
+            transactionDescription
+            stockType
             quantity
             unitsOut
             recordDate
@@ -131,9 +135,12 @@ async function fetchConsumption(beginDate, endDate) {
 function aggregateConsumption(records) {
   const byProduct = {};
   for (const r of records) {
+    const rawQty = num(r.quantity || 0);
+    if (rawQty >= 0) continue;
+    if (r.transactionUpdateType !== 'Build consume started') continue;
+    if (r.stockType !== 'In stock') continue;
     const pid = r.product?.productId || 'unknown';
-    const qty = Math.abs(parseFloat(r.unitsOut || r.quantity || 0));
-    byProduct[pid] = (byProduct[pid] || 0) + qty;
+    byProduct[pid] = (byProduct[pid] || 0) + Math.abs(rawQty);
   }
   return byProduct;
 }
@@ -228,31 +235,31 @@ async function fetchSalesOrders() {
       sku: p.productId,
       desc: p.description,
       category: p.category,
-      onHand: parseFloat(p.stockQuantityOnHandUnits) || 0,
-      reserved: parseFloat(p.stockReservationsUnits) || 0,
-      onOrder: parseFloat(p.stockOnOrderUnits) || 0,
-      available: parseFloat(p.stockAvailableToPromiseUnits) || 0,
-      remaining: parseFloat(p.stockRemainingAfterReservationsUnits) || 0,
-      cost: parseFloat(p.lastPurchaseLandedCostPerUnit) || 0,
+      onHand: num(p.stockQuantityOnHandUnits) || 0,
+      reserved: num(p.stockReservationsUnits) || 0,
+      onOrder: num(p.stockOnOrderUnits) || 0,
+      available: num(p.stockAvailableToPromiseUnits) || 0,
+      remaining: num(p.stockRemainingAfterReservationsUnits) || 0,
+      cost: num(p.lastPurchaseLandedCostPerUnit) || 0,
     }));
 
   // Build sales history JSON
   const salesData = {};
   for (const p of products) {
     if (p.status !== 'Active') continue;
-    const s30 = parseFloat(p.salesLast30Days) || 0;
-    const s60 = parseFloat(p.salesLast60Days) || 0;
-    const s90 = parseFloat(p.salesLast90Days) || 0;
-    const sLastMonth = parseFloat(p.salesLastMonth) || 0;
-    const sThisMonth = parseFloat(p.salesThisMonth) || 0;
+    const s30 = num(p.salesLast30Days) || 0;
+    const s60 = num(p.salesLast60Days) || 0;
+    const s90 = num(p.salesLast90Days) || 0;
+    const sLastMonth = num(p.salesLastMonth) || 0;
+    const sThisMonth = num(p.salesThisMonth) || 0;
     if (s30 || s60 || s90 || sLastMonth || sThisMonth) {
       salesData[p.productId] = {
         name: p.description,
-        s7: parseFloat(p.salesLast7Days) || 0,
+        s7: num(p.salesLast7Days) || 0,
         s30,
         s60: s60 - s30,
         s90,
-        s180: parseFloat(p.salesLast180Days) || 0,
+        s180: num(p.salesLast180Days) || 0,
         sLastMonth,
         sThisMonth,
         r30: 0, r60: 0, // revenue not available in this query
@@ -264,9 +271,9 @@ async function fetchSalesOrders() {
   const inventoryData = { inventory: {}, onOrder: {} };
   for (const p of products) {
     if (p.status !== 'Active') continue;
-    const onHand = parseFloat(p.stockQuantityOnHandUnits) || 0;
-    const onOrder = parseFloat(p.stockOnOrderUnits) || 0;
-    const reserved = parseFloat(p.stockReservationsUnits) || 0;
+    const onHand = num(p.stockQuantityOnHandUnits) || 0;
+    const onOrder = num(p.stockOnOrderUnits) || 0;
+    const reserved = num(p.stockReservationsUnits) || 0;
     if (onHand || onOrder || reserved) {
       inventoryData.inventory[p.productId] = { onHand, onOrder, reserved };
       if (onOrder) inventoryData.onOrder[p.productId] = onOrder;

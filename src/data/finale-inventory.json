@@ -1,22 +1,22 @@
 {
   "inventory": {
     "2\" x 0.75\" Direct Thermal White Label": {
-      "onHand": 70,
+      "onHand": 70040,
       "onOrder": 0,
       "reserved": 0
     },
     "Auto L-Bar Sealer Film": {
-      "onHand": 122,
+      "onHand": 122471,
       "onOrder": 0,
       "reserved": 0
     },
     "Box - Imperial Pod Battery - Booklet": {
-      "onHand": 49,
+      "onHand": 49189,
       "onOrder": 0,
       "reserved": 0
     },
     "Box - Imperial Pod Battery - Boxlet": {
-      "onHand": 46,
+      "onHand": 46213,
       "onOrder": 0,
       "reserved": 0
     },
@@ -66,7 +66,7 @@
       "reserved": 0
     },
     "BOXES 24x14x4": {
-      "onHand": 2,
+      "onHand": 2800,
       "onOrder": 0,
       "reserved": 0
     },
@@ -116,72 +116,72 @@
       "reserved": 0
     },
     "CON-DKI-CTM": {
-      "onHand": 369,
+      "onHand": 369600,
       "onOrder": 0,
       "reserved": 0
     },
     "CON-DKI-D": {
-      "onHand": 2,
-      "onOrder": 1,
+      "onHand": 2195404,
+      "onOrder": 1501600,
       "reserved": 0
     },
     "CON-DKI-JH": {
-      "onHand": 113,
-      "onOrder": 170,
+      "onHand": 113437,
+      "onOrder": 170000,
       "reserved": 0
     },
     "CON-DKI-LP": {
-      "onHand": 39,
+      "onHand": 39696,
       "onOrder": 0,
       "reserved": 0
     },
     "CON-DXP-JH": {
-      "onHand": 23,
+      "onHand": 23600,
       "onOrder": 0,
       "reserved": 0
     },
     "CON-DXP-LP": {
-      "onHand": 23,
-      "onOrder": 100,
+      "onHand": 23480,
+      "onOrder": 100000,
       "reserved": 0
     },
     "DBX-1GC-BG": {
-      "onHand": 2,
+      "onHand": 2862,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-1GC-GSC": {
-      "onHand": 2,
+      "onHand": 2476,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-1GC-NYSD": {
-      "onHand": 2,
+      "onHand": 2724,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-1GC-OD": {
-      "onHand": 2,
+      "onHand": 2778,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-1GC-PR": {
-      "onHand": 2,
+      "onHand": 2742,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-1GC-PS": {
-      "onHand": 2,
+      "onHand": 2653,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-1GC-RBK": {
-      "onHand": 2,
+      "onHand": 2743,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-1GC-TC": {
-      "onHand": 2,
+      "onHand": 2813,
       "onOrder": 0,
       "reserved": 0
     },
@@ -246,127 +246,127 @@
       "reserved": 0
     },
     "DBX-3.5-HYB": {
-      "onHand": 4,
+      "onHand": 4594,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-3.5-IND": {
       "onHand": 764,
-      "onOrder": 1,
+      "onOrder": 1400,
       "reserved": 0
     },
     "DBX-3.5-SAT": {
-      "onHand": 1,
+      "onHand": 1662,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-05CT-BD": {
-      "onHand": 1,
+      "onHand": 1464,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-05CT-KB": {
-      "onHand": 1,
+      "onHand": 1495,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-05CT-MB": {
-      "onHand": 1,
+      "onHand": 1392,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-05CT-MCR": {
-      "onHand": 1,
+      "onHand": 1562,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-05CT-PL": {
-      "onHand": 1,
+      "onHand": 1590,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-05CT-SS": {
-      "onHand": 1,
+      "onHand": 1544,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-BKC": {
-      "onHand": 7,
+      "onHand": 7235,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-BLOG": {
-      "onHand": 1,
-      "onOrder": 2,
+      "onHand": 1520,
+      "onOrder": 2400,
       "reserved": 0
     },
     "DBX-5PK-CC": {
-      "onHand": 2,
+      "onHand": 2297,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-GAG": {
-      "onHand": 1,
+      "onHand": 1762,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-GT": {
-      "onHand": 8,
+      "onHand": 8105,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-JFG": {
-      "onHand": 1,
+      "onHand": 1750,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-MMJ": {
-      "onHand": 3,
+      "onHand": 3252,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-PD": {
-      "onHand": 1,
-      "onOrder": 2,
+      "onHand": 1993,
+      "onOrder": 2100,
       "reserved": 0
     },
     "DBX-5PK-SBO": {
-      "onHand": 1,
+      "onHand": 1615,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-SC": {
-      "onHand": 4,
+      "onHand": 4056,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-SKP": {
-      "onHand": 2,
-      "onOrder": 2,
+      "onHand": 2069,
+      "onOrder": 2300,
       "reserved": 0
     },
     "DBX-5PK-TBP": {
-      "onHand": 2,
-      "onOrder": 1,
+      "onHand": 2348,
+      "onOrder": 1500,
       "reserved": 0
     },
     "DBX-5PK-TN": {
-      "onHand": 1,
-      "onOrder": 2,
+      "onHand": 1461,
+      "onOrder": 2000,
       "reserved": 0
     },
     "DBX-5PK-TP": {
-      "onHand": 3,
+      "onHand": 3203,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-5PK-TS": {
-      "onHand": 2,
-      "onOrder": 1,
+      "onHand": 2386,
+      "onOrder": 1400,
       "reserved": 0
     },
     "DBX-14-HYB": {
-      "onHand": 1,
+      "onHand": 1044,
       "onOrder": 0,
       "reserved": 0
     },
@@ -381,118 +381,118 @@
       "reserved": 0
     },
     "DBX-20CT-BD": {
-      "onHand": 3,
+      "onHand": 3915,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-20CT-KB": {
-      "onHand": 2,
+      "onHand": 2091,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-20CT-MB": {
-      "onHand": 3,
+      "onHand": 3660,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-20CT-MCR": {
-      "onHand": 1,
+      "onHand": 1365,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-20CT-PL": {
-      "onHand": 1,
+      "onHand": 1647,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-20CT-SS": {
-      "onHand": 4,
+      "onHand": 4507,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-510": {
-      "onHand": 2,
+      "onHand": 2100,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-BATT": {
-      "onHand": 10,
+      "onHand": 10535,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-CC-CB": {
-      "onHand": 2,
+      "onHand": 2348,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-CC-CF": {
-      "onHand": 2,
+      "onHand": 2509,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-CC-DR": {
-      "onHand": 2,
+      "onHand": 2403,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-DD-BLOG": {
       "onHand": 0,
-      "onOrder": 8,
+      "onOrder": 8000,
       "reserved": 0
     },
     "DBX-DD-BM": {
-      "onHand": 4,
+      "onHand": 4160,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-DD-CS": {
-      "onHand": 4,
+      "onHand": 4741,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-DD-GD": {
-      "onHand": 4,
+      "onHand": 4373,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-DD-LCG": {
-      "onHand": 4,
+      "onHand": 4294,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-DD-MMJ": {
       "onHand": 0,
-      "onOrder": 8,
+      "onOrder": 8000,
       "reserved": 0
     },
     "DBX-DD-PC": {
-      "onHand": 7,
+      "onHand": 7164,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-DD-PD": {
       "onHand": 0,
-      "onOrder": 8,
+      "onOrder": 8000,
       "reserved": 0
     },
     "DBX-DD-SJ": {
-      "onHand": 1,
+      "onHand": 1716,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-DD-SKP": {
       "onHand": 0,
-      "onOrder": 8,
+      "onOrder": 8000,
       "reserved": 0
     },
     "DBX-DD-TBP": {
       "onHand": 0,
-      "onOrder": 8,
+      "onOrder": 8000,
       "reserved": 0
     },
     "DBX-DD-TS": {
       "onHand": 0,
-      "onOrder": 8,
+      "onOrder": 8000,
       "reserved": 0
     },
     "DBX-FJ-AN": {
@@ -511,17 +511,17 @@
       "reserved": 0
     },
     "DBX-FM-05CT-BB": {
-      "onHand": 1,
+      "onHand": 1565,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-FM-05CT-MB": {
-      "onHand": 1,
+      "onHand": 1684,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-FM-05CT-SS": {
-      "onHand": 1,
+      "onHand": 1628,
       "onOrder": 0,
       "reserved": 0
     },
@@ -541,22 +541,22 @@
       "reserved": 0
     },
     "DBX-IL-AC": {
-      "onHand": 2,
+      "onHand": 2408,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-AF": {
-      "onHand": 2,
+      "onHand": 2307,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-BD": {
-      "onHand": 2,
+      "onHand": 2182,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-CM": {
-      "onHand": 1,
+      "onHand": 1315,
       "onOrder": 0,
       "reserved": 0
     },
@@ -566,17 +566,17 @@
       "reserved": 0
     },
     "DBX-IL-GMOC": {
-      "onHand": 1,
+      "onHand": 1217,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-LAKK": {
-      "onHand": 1,
+      "onHand": 1071,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-LCH": {
-      "onHand": 2,
+      "onHand": 2177,
       "onOrder": 0,
       "reserved": 0
     },
@@ -586,12 +586,12 @@
       "reserved": 0
     },
     "DBX-IL-OC": {
-      "onHand": 2,
+      "onHand": 2144,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-PBB": {
-      "onHand": 2,
+      "onHand": 2252,
       "onOrder": 0,
       "reserved": 0
     },
@@ -601,137 +601,137 @@
       "reserved": 0
     },
     "DBX-IL-SA": {
-      "onHand": 1,
+      "onHand": 1688,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-WFOG": {
-      "onHand": 1,
+      "onHand": 1265,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IL-YOG": {
       "onHand": 48,
-      "onOrder": 1,
+      "onOrder": 1000,
       "reserved": 0
     },
     "DBX-IT-AB": {
-      "onHand": 2,
+      "onHand": 2100,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IT-GB": {
-      "onHand": 2,
+      "onHand": 2100,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IT-LMC": {
-      "onHand": 2,
+      "onHand": 2100,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IT-SC": {
-      "onHand": 2,
+      "onHand": 2100,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IT-SP": {
-      "onHand": 2,
+      "onHand": 2100,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-IT-WBR": {
-      "onHand": 2,
+      "onHand": 2100,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-ABJ": {
-      "onHand": 1,
+      "onHand": 1989,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-BC": {
-      "onHand": 1,
+      "onHand": 1493,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-BLOG": {
-      "onHand": 1,
+      "onHand": 1657,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-FT": {
-      "onHand": 1,
+      "onHand": 1810,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-FW": {
-      "onHand": 1,
+      "onHand": 1508,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-GCC": {
-      "onHand": 2,
+      "onHand": 2067,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-MMJ": {
-      "onHand": 1,
+      "onHand": 1961,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-MT": {
-      "onHand": 1,
+      "onHand": 1500,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-PD": {
-      "onHand": 2,
+      "onHand": 2899,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-PP": {
-      "onHand": 1,
+      "onHand": 1522,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-RCP": {
-      "onHand": 1,
+      "onHand": 1745,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-SKP": {
-      "onHand": 2,
+      "onHand": 2765,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-SM": {
-      "onHand": 1,
+      "onHand": 1494,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-TBP": {
-      "onHand": 2,
+      "onHand": 2131,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-JH-TS": {
-      "onHand": 1,
+      "onHand": 1831,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-BD": {
-      "onHand": 1,
+      "onHand": 1878,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-BF": {
-      "onHand": 5,
+      "onHand": 5010,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-BLOG": {
-      "onHand": 2,
+      "onHand": 2496,
       "onOrder": 0,
       "reserved": 0
     },
@@ -741,12 +741,12 @@
       "reserved": 0
     },
     "DBX-LR-GJR": {
-      "onHand": 4,
+      "onHand": 4367,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-KL": {
-      "onHand": 4,
+      "onHand": 4360,
       "onOrder": 0,
       "reserved": 0
     },
@@ -756,48 +756,48 @@
       "reserved": 0
     },
     "DBX-LR-MG": {
-      "onHand": 5,
+      "onHand": 5652,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-MMJ": {
-      "onHand": 2,
+      "onHand": 2888,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-MW": {
-      "onHand": 1,
+      "onHand": 1943,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-PD": {
-      "onHand": 2,
+      "onHand": 2500,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-SC": {
-      "onHand": 1,
+      "onHand": 1973,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-SKP": {
-      "onHand": 2,
+      "onHand": 2494,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-SS": {
-      "onHand": 4,
+      "onHand": 4912,
       "onOrder": 0,
       "reserved": 0
     },
     "DBX-LR-TBP": {
-      "onHand": 1,
-      "onOrder": 1,
+      "onHand": 1308,
+      "onOrder": 1000,
       "reserved": 0
     },
     "DBX-LR-TS": {
       "onHand": 768,
-      "onOrder": 2,
+      "onOrder": 2000,
       "reserved": 0
     },
     "DBX-LR-WG": {
@@ -806,7 +806,7 @@
       "reserved": 0
     },
     "DBX-LR-WS": {
-      "onHand": 5,
+      "onHand": 5197,
       "onOrder": 0,
       "reserved": 0
     },
@@ -816,22 +816,22 @@
       "reserved": 0
     },
     "Direct Thermal 4x4, 1,500, 1 Box": {
-      "onHand": 12,
+      "onHand": 12904,
       "onOrder": 0,
       "reserved": 0
     },
     "Display Box - Blueberry Breeze - 5pk": {
-      "onHand": 1,
+      "onHand": 1077,
       "onOrder": 0,
       "reserved": 0
     },
     "Display Box - Mixed Berry - 5pk": {
-      "onHand": 1,
+      "onHand": 1163,
       "onOrder": 0,
       "reserved": 0
     },
     "Display Box - Strawberry Splash - 5pk": {
-      "onHand": 1,
+      "onHand": 1253,
       "onOrder": 0,
       "reserved": 0
     },
@@ -841,14 +841,14 @@
       "reserved": 1
     },
     "ECC-CB1-01": {
-      "onHand": 3,
+      "onHand": 3592,
       "onOrder": 0,
       "reserved": 0
     },
     "ECC-CB1-5PK": {
       "onHand": 27,
       "onOrder": 0,
-      "reserved": 0
+      "reserved": 1
     },
     "ECC-CF-01": {
       "onHand": 17,
@@ -856,14 +856,14 @@
       "reserved": 0
     },
     "ECC-CF1-01": {
-      "onHand": 3,
+      "onHand": 3293,
       "onOrder": 0,
       "reserved": 3
     },
     "ECC-CF1-5PK": {
       "onHand": 14,
       "onOrder": 0,
-      "reserved": 0
+      "reserved": 1
     },
     "ECC-DR-01": {
       "onHand": 11,
@@ -871,14 +871,14 @@
       "reserved": 0
     },
     "ECC-DR1-01": {
-      "onHand": 6,
+      "onHand": 6861,
       "onOrder": 0,
       "reserved": 0
     },
     "ECC-DR1-5PK": {
       "onHand": 14,
       "onOrder": 0,
-      "reserved": 0
+      "reserved": 1
     },
     "EGBB-05-01": {
       "onHand": 41,
@@ -891,7 +891,7 @@
       "reserved": 0
     },
     "EGBB-20-01": {
-      "onHand": 4,
+      "onHand": 4757,
       "onOrder": 0,
       "reserved": 0
     },
@@ -901,9 +901,9 @@
       "reserved": 0
     },
     "EGBD-100-01": {
-      "onHand": 370,
+      "onHand": 369,
       "onOrder": 6,
-      "reserved": 1
+      "reserved": 0
     },
     "EGBD-100-8PK": {
       "onHand": 222,
@@ -916,14 +916,14 @@
       "reserved": 4
     },
     "EGBD-400-5PK": {
-      "onHand": 1,
+      "onHand": 1036,
       "onOrder": 0,
-      "reserved": 4
+      "reserved": 5
     },
     "EGFJ-AN-01": {
-      "onHand": 286,
+      "onHand": 285,
       "onOrder": 0,
-      "reserved": 4
+      "reserved": 3
     },
     "EGFJ-AN-10PK": {
       "onHand": 19,
@@ -931,7 +931,7 @@
       "reserved": 0
     },
     "EGFJ-SD-01": {
-      "onHand": 145,
+      "onHand": 144,
       "onOrder": 12,
       "reserved": 15
     },
@@ -951,9 +951,9 @@
       "reserved": 7
     },
     "EGKB-100-01": {
-      "onHand": 75,
+      "onHand": 74,
       "onOrder": 10,
-      "reserved": 1
+      "reserved": 0
     },
     "EGKB-100-8PK": {
       "onHand": 291,
@@ -961,18 +961,18 @@
       "reserved": 1
     },
     "EGKB-400-01": {
-      "onHand": 4,
+      "onHand": 3474,
       "onOrder": 1,
       "reserved": 2
     },
     "EGKB-400-5PK": {
-      "onHand": 70,
+      "onHand": 331,
       "onOrder": 0,
       "reserved": 4
     },
     "EGMB-05-01": {
-      "onHand": 0,
-      "onOrder": 11,
+      "onHand": 1,
+      "onOrder": 486,
       "reserved": 24
     },
     "EGMB-05-8PK": {
@@ -981,7 +981,7 @@
       "reserved": 5
     },
     "EGMB-20-01": {
-      "onHand": 4,
+      "onHand": 4054,
       "onOrder": 1,
       "reserved": 3
     },
@@ -991,9 +991,9 @@
       "reserved": 0
     },
     "EGMB-125-01": {
-      "onHand": 469,
+      "onHand": 468,
       "onOrder": 3,
-      "reserved": 1
+      "reserved": 0
     },
     "EGMB-125-8PK": {
       "onHand": 134,
@@ -1001,19 +1001,19 @@
       "reserved": 1
     },
     "EGMB-500-01": {
-      "onHand": 239,
+      "onHand": 237,
       "onOrder": 4,
       "reserved": 7
     },
     "EGMB-500-5PK": {
       "onHand": 850,
       "onOrder": 0,
-      "reserved": 6
+      "reserved": 7
     },
     "EGMCR-150-01": {
-      "onHand": 382,
+      "onHand": 381,
       "onOrder": 9,
-      "reserved": 1
+      "reserved": 0
     },
     "EGMCR-150-8PK": {
       "onHand": 238,
@@ -1021,9 +1021,9 @@
       "reserved": 1
     },
     "EGMCR-600-01": {
-      "onHand": 2,
+      "onHand": 2770,
       "onOrder": 2,
-      "reserved": 7
+      "reserved": 5
     },
     "EGMCR-600-5PK": {
       "onHand": 292,
@@ -1031,9 +1031,9 @@
       "reserved": 4
     },
     "EGPL-100-01": {
-      "onHand": 334,
+      "onHand": 333,
       "onOrder": 4,
-      "reserved": 1
+      "reserved": 0
     },
     "EGPL-100-8PK": {
       "onHand": 243,
@@ -1041,14 +1041,14 @@
       "reserved": 0
     },
     "EGPL-400-01": {
-      "onHand": 2,
+      "onHand": 2606,
       "onOrder": 1,
       "reserved": 2
     },
     "EGPL-400-5PK": {
       "onHand": 213,
       "onOrder": 0,
-      "reserved": 4
+      "reserved": 5
     },
     "EGSS-05-01": {
       "onHand": 108,
@@ -1061,9 +1061,9 @@
       "reserved": 0
     },
     "EGSS-20-01": {
-      "onHand": 3,
-      "onOrder": 1,
-      "reserved": 1
+      "onHand": 3871,
+      "onOrder": 0,
+      "reserved": 0
     },
     "EGSS-20-5PK": {
       "onHand": 91,
@@ -1071,9 +1071,9 @@
       "reserved": 0
     },
     "EGSS-100-01": {
-      "onHand": 756,
+      "onHand": 755,
       "onOrder": 13,
-      "reserved": 1
+      "reserved": 0
     },
     "EGSS-100-8PK": {
       "onHand": 251,
@@ -1081,9 +1081,9 @@
       "reserved": 0
     },
     "EGSS-400-01": {
-      "onHand": 1,
+      "onHand": 1445,
       "onOrder": 1,
-      "reserved": 1
+      "reserved": 3
     },
     "EGSS-400-5PK": {
       "onHand": 981,
@@ -1096,7 +1096,7 @@
       "reserved": 1
     },
     "Filled - 5 Pack Doinks Preroll": {
-      "onHand": 58,
+      "onHand": 58932.23,
       "onOrder": 3,
       "reserved": 0
     },
@@ -1106,17 +1106,17 @@
       "reserved": 0
     },
     "Filled - Berry Larry OG": {
-      "onHand": 8,
+      "onHand": 8477,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Berry Larry OG - 5 Pack Doinks THCP Preroll": {
-      "onHand": 24,
+      "onHand": 24062.46,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Blueberry Crumble": {
-      "onHand": 1,
+      "onHand": 1031,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1131,7 +1131,7 @@
       "reserved": 0
     },
     "Filled - Double Doink Preroll": {
-      "onHand": 12,
+      "onHand": 12542,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1156,7 +1156,7 @@
       "reserved": 0
     },
     "Filled - Jelly Holes Preroll": {
-      "onHand": 2,
+      "onHand": 2741,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1166,27 +1166,27 @@
       "reserved": 0
     },
     "Filled - Loaded Preroll": {
-      "onHand": 7,
+      "onHand": 7066,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Magic Melon Juice": {
-      "onHand": 4,
+      "onHand": 5,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Magic Melon Juice - 5 Pack Doinks THCP Preroll": {
-      "onHand": 16,
+      "onHand": 16611,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Magic Melon Juice - THCP Jelly Hole Preroll": {
-      "onHand": 3,
+      "onHand": 3532,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Mango Tango": {
-      "onHand": 1,
+      "onHand": 1060,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1201,17 +1201,17 @@
       "reserved": 0
     },
     "Filled - Peachy Dream - 5 Pack Doinks THCP Preroll": {
-      "onHand": 19,
+      "onHand": 19050,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Peachy Dreams": {
-      "onHand": 3,
+      "onHand": 3309,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Peachy Dreams - THCP Jelly Hole Preroll": {
-      "onHand": 4,
+      "onHand": 4519.2,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1231,7 +1231,7 @@
       "reserved": 0
     },
     "Filled - Red Cherry Punch": {
-      "onHand": 2,
+      "onHand": 99,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1241,32 +1241,32 @@
       "reserved": 0
     },
     "Filled - Special Blend Blueberry Fuego": {
-      "onHand": 3,
+      "onHand": 3114,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Special Blend Grape Jelly Runtz": {
-      "onHand": 3,
+      "onHand": 3168,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Special Blend King Louie XIII": {
-      "onHand": 3,
+      "onHand": 3711,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Special Blend Mango Gelato": {
-      "onHand": 3,
+      "onHand": 3664,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Special Blend Strawberry Shortcake": {
-      "onHand": 3,
+      "onHand": 3106,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Special Blend Watermelon Slushy": {
-      "onHand": 3,
+      "onHand": 3497,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1276,7 +1276,7 @@
       "reserved": 0
     },
     "Filled - Strawberry Kush Pop - 5 Pack Doinks THCP Preroll": {
-      "onHand": 10,
+      "onHand": 10125.37,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1286,7 +1286,7 @@
       "reserved": 0
     },
     "Filled - Strawberry Milk": {
-      "onHand": 2,
+      "onHand": 2864,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1296,12 +1296,12 @@
       "reserved": 0
     },
     "Filled - Triple Berry Pie - 5 Pack Doinks THCP Preroll": {
-      "onHand": 15,
+      "onHand": 15218.76,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Triple Berry Pie - THCP Jelly Hole Preroll": {
-      "onHand": 5,
+      "onHand": 5299,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1311,12 +1311,12 @@
       "reserved": 0
     },
     "Filled - Tropical Splash": {
-      "onHand": 7,
+      "onHand": 7727,
       "onOrder": 0,
       "reserved": 0
     },
     "Filled - Tropical Splash - 5 Pack Doinks THCP Preroll": {
-      "onHand": 20,
+      "onHand": 20479,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1336,7 +1336,7 @@
       "reserved": 0
     },
     "Film - 4.75\" W x 8,000' L": {
-      "onHand": 319,
+      "onHand": 319252,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1397,8 +1397,8 @@
     },
     "FITCY-3.5-01": {
       "onHand": 1,
-      "onOrder": 1,
-      "reserved": 1
+      "onOrder": 0,
+      "reserved": 0
     },
     "FITDR-3.5-01": {
       "onHand": 8,
@@ -1412,8 +1412,8 @@
     },
     "FITG33-3.5-01": {
       "onHand": 34,
-      "onOrder": 1,
-      "reserved": 1
+      "onOrder": 0,
+      "reserved": 0
     },
     "FITG33-3.5-5PK": {
       "onHand": 26,
@@ -1476,12 +1476,12 @@
       "reserved": 0
     },
     "FITGUS-3.5-01": {
-      "onHand": 127,
+      "onHand": 2,
       "onOrder": 0,
       "reserved": 0
     },
     "FITGUS-3.5-5PK": {
-      "onHand": 0,
+      "onHand": 25,
       "onOrder": 0,
       "reserved": 20
     },
@@ -1612,8 +1612,8 @@
     },
     "FITSD-3.5-5PK": {
       "onHand": 25,
-      "onOrder": 25,
-      "reserved": 40
+      "onOrder": 0,
+      "reserved": 15
     },
     "FITSD-14-01": {
       "onHand": 4,
@@ -1681,37 +1681,37 @@
       "reserved": 0
     },
     "FLD-DD-BLOG": {
-      "onHand": 12,
+      "onHand": 12000,
       "onOrder": 0,
       "reserved": 0
     },
     "FLD-DD-MMJ": {
-      "onHand": 7,
+      "onHand": 7100,
       "onOrder": 0,
       "reserved": 0
     },
     "FLD-DD-PD": {
-      "onHand": 16,
+      "onHand": 16809,
       "onOrder": 0,
       "reserved": 0
     },
     "FLD-DD-SKP": {
-      "onHand": 7,
+      "onHand": 7200,
       "onOrder": 0,
       "reserved": 0
     },
     "FLD-DD-TBP": {
-      "onHand": 12,
+      "onHand": 12800,
       "onOrder": 0,
       "reserved": 0
     },
     "FLD-DD-TS": {
-      "onHand": 12,
+      "onHand": 12800,
       "onOrder": 0,
       "reserved": 0
     },
     "FLD-IL-AC": {
-      "onHand": 3,
+      "onHand": 3848,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1736,27 +1736,27 @@
       "reserved": 0
     },
     "FLD-IL-PBB": {
-      "onHand": 4,
+      "onHand": 4813,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - 24 Karat": {
       "onHand": 0,
-      "onOrder": 1,
+      "onOrder": 1260,
       "reserved": 0
     },
     "Flower - Acai Sorbet": {
       "onHand": 0,
-      "onOrder": 1,
+      "onOrder": 1260,
       "reserved": 0
     },
     "Flower - Blue Nerds": {
-      "onHand": 1,
+      "onHand": 1260,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Blue Nerd Smalls": {
-      "onHand": 4,
+      "onHand": 4200,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1766,14 +1766,14 @@
       "reserved": 0
     },
     "Flower - Candy Crush Smalls": {
-      "onHand": 3,
+      "onHand": 3780,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - CBD Flower": {
-      "onHand": 193,
-      "onOrder": 211,
-      "reserved": 29
+      "onHand": 193447.5,
+      "onOrder": 211564,
+      "reserved": 29964
     },
     "Flower - CBG Smalls - 1lb": {
       "onHand": 61,
@@ -1786,17 +1786,17 @@
       "reserved": 0
     },
     "Flower - Gelato 33": {
-      "onHand": 1,
+      "onHand": 1263.5,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Granddaddy Purple": {
       "onHand": 350,
-      "onOrder": 1,
+      "onOrder": 1260,
       "reserved": 0
     },
     "Flower - Greasy Runtz": {
-      "onHand": 1,
+      "onHand": 1260,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1807,7 +1807,7 @@
     },
     "Flower - Gush Mints": {
       "onHand": 0,
-      "onOrder": 1,
+      "onOrder": 1260,
       "reserved": 0
     },
     "Flower - Hemp - White CBG": {
@@ -1826,22 +1826,22 @@
       "reserved": 0
     },
     "Flower - Icy Pop": {
-      "onHand": 1,
+      "onHand": 1568,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Jelly Cake": {
-      "onHand": 1,
+      "onHand": 1148,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Kief": {
-      "onHand": 9,
+      "onHand": 9805.985322,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Lemon Cherry Gelato": {
-      "onHand": 1,
+      "onHand": 1260,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1851,32 +1851,32 @@
       "reserved": 0
     },
     "Flower - Pink Runtz": {
-      "onHand": 1,
+      "onHand": 1680,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Raw THCA Duff": {
-      "onHand": 1,
+      "onHand": 1040.47,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Raw THCA Smalls": {
-      "onHand": 62,
+      "onHand": 62657.11,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - SFV OG": {
-      "onHand": 1,
+      "onHand": 1190,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Sundae Driver": {
-      "onHand": 1,
+      "onHand": 1242.5,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - Trainwreck": {
-      "onHand": 1,
+      "onHand": 1154,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1886,73 +1886,73 @@
       "reserved": 0
     },
     "Flower - White Runtz": {
-      "onHand": 1,
+      "onHand": 1260,
       "onOrder": 0,
       "reserved": 0
     },
     "Flower - White Runtz Smalls": {
-      "onHand": 5,
+      "onHand": 5040,
       "onOrder": 0,
       "reserved": 0
     },
     "FMX-AC": {
-      "onHand": 2,
-      "onOrder": 5,
+      "onHand": 2804.00258,
+      "onOrder": 5000,
       "reserved": 0
     },
     "FMX-AF": {
-      "onHand": 8,
+      "onHand": 8725.101468,
       "onOrder": 0,
       "reserved": 0
     },
     "FMX-BD": {
-      "onHand": 5,
-      "onOrder": 5,
+      "onHand": 5811,
+      "onOrder": 5000,
       "reserved": 0
     },
     "FMX-BLOG": {
-      "onHand": 37,
-      "onOrder": 22,
+      "onHand": 37506.700838,
+      "onOrder": 22700,
       "reserved": 0
     },
     "FMX-LCH": {
-      "onHand": 4,
-      "onOrder": 14,
+      "onHand": 4460.00241,
+      "onOrder": 14000,
       "reserved": 0
     },
     "FMX-MMJ": {
-      "onHand": 48,
-      "onOrder": 22,
+      "onHand": 48749.405421,
+      "onOrder": 22700,
       "reserved": 0
     },
     "FMX-OC": {
-      "onHand": 4,
-      "onOrder": 14,
+      "onHand": 4831.3,
+      "onOrder": 14000,
       "reserved": 0
     },
     "FMX-PBB": {
       "onHand": 0,
-      "onOrder": 10,
+      "onOrder": 10000,
       "reserved": 0
     },
     "FMX-PD": {
-      "onHand": 49,
-      "onOrder": 25,
+      "onHand": 49677.72867,
+      "onOrder": 25000,
       "reserved": 0
     },
     "FMX-SKP": {
-      "onHand": 19,
-      "onOrder": 34,
+      "onHand": 19136.816,
+      "onOrder": 34350,
       "reserved": 0
     },
     "FMX-TBP": {
-      "onHand": 13,
-      "onOrder": 48,
+      "onHand": 13574.41214,
+      "onOrder": 48500,
       "reserved": 0
     },
     "FMX-TS": {
-      "onHand": 35,
-      "onOrder": 37,
+      "onHand": 35652.99165,
+      "onOrder": 37700,
       "reserved": 0
     },
     "FOIL BAG, 10\" X 14\"": {
@@ -1976,7 +1976,7 @@
       "reserved": 0
     },
     "Glue - Lemon Cherry": {
-      "onHand": 1,
+      "onHand": 1026.074903,
       "onOrder": 0,
       "reserved": 0
     },
@@ -1986,7 +1986,7 @@
       "reserved": 0
     },
     "Glue - Preroll": {
-      "onHand": 106,
+      "onHand": 106006.125,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2002,62 +2002,62 @@
     },
     "Gummy - Appleberry Nectar RAW": {
       "onHand": 0,
-      "onOrder": 18,
+      "onOrder": 18000,
       "reserved": 0
     },
     "Gummy - Blueberry Breeze - FMG - DOSED": {
-      "onHand": 10,
+      "onHand": 10630,
       "onOrder": 0,
       "reserved": 0
     },
     "Gummy - Blue Dream - 20mg - RAW": {
       "onHand": 0,
-      "onOrder": 84,
+      "onOrder": 84000,
       "reserved": 0
     },
     "Gummy - Kiwi Burst - 20mg - RAW": {
       "onHand": 0,
-      "onOrder": 84,
+      "onOrder": 84500,
       "reserved": 0
     },
     "Gummy - Mango Crush - 30mg - RAW": {
       "onHand": 0,
-      "onOrder": 61,
+      "onOrder": 61500,
       "reserved": 0
     },
     "Gummy - Midnight Berry - 25mg - RAW": {
       "onHand": 0,
-      "onOrder": 157,
+      "onOrder": 157500,
       "reserved": 0
     },
     "Gummy - Mixed Berry - FMG - DOSED": {
-      "onHand": 19,
+      "onHand": 16774,
       "onOrder": 0,
       "reserved": 0
     },
     "Gummy - Pink Lemonade - 20mg - RAW": {
       "onHand": 0,
-      "onOrder": 84,
+      "onOrder": 84000,
       "reserved": 0
     },
     "Gummy - Strawberry Dream RAW": {
       "onHand": 0,
-      "onOrder": 19,
+      "onOrder": 19500,
       "reserved": 0
     },
     "Gummy - Strawberry Shortcake - 20mg - RAW": {
       "onHand": 0,
-      "onOrder": 26,
+      "onOrder": 26000,
       "reserved": 0
     },
     "Gummy - Strawberry Splash - FMG - DOSED": {
-      "onHand": 6,
+      "onHand": 6286,
       "onOrder": 0,
       "reserved": 0
     },
     "Gummy - Tropical Passion RAW": {
       "onHand": 0,
-      "onOrder": 23,
+      "onOrder": 23000,
       "reserved": 0
     },
     "IM-CGC": {
@@ -2076,9 +2076,9 @@
       "reserved": 0
     },
     "IM-IS": {
-      "onHand": 5,
+      "onHand": 5400,
       "onOrder": 0,
-      "reserved": 15
+      "reserved": 0
     },
     "IM-IST": {
       "onHand": 0,
@@ -2091,7 +2091,7 @@
       "reserved": 0
     },
     "IM-ITYC": {
-      "onHand": 2,
+      "onHand": 2362,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2116,12 +2116,12 @@
       "reserved": 0
     },
     "IM-PSF811": {
-      "onHand": 1,
+      "onHand": 1577,
       "onOrder": 0,
       "reserved": 0
     },
     "IM-RP-01": {
-      "onHand": 4,
+      "onHand": 4045,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2146,7 +2146,7 @@
       "reserved": 0
     },
     "Infused - Peachy Dreams - THCP Jelly Hole Preroll": {
-      "onHand": 2,
+      "onHand": 2946,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2166,23 +2166,23 @@
       "reserved": 0
     },
     "INS-1GC": {
-      "onHand": 45,
+      "onHand": 45360,
       "onOrder": 0,
       "reserved": 0
     },
     "INS-DBX": {
-      "onHand": 24,
+      "onHand": 24019,
       "onOrder": 0,
       "reserved": 0
     },
     "INS-LR": {
-      "onHand": 129,
-      "onOrder": 200,
+      "onHand": 125643,
+      "onOrder": 200000,
       "reserved": 0
     },
     "ISO - CBD": {
-      "onHand": 1,
-      "onOrder": 1,
+      "onHand": 1000,
+      "onOrder": 1000,
       "reserved": 0
     },
     "ISO - CBG": {
@@ -2191,13 +2191,13 @@
       "reserved": 0
     },
     "ISO - CBN": {
-      "onHand": 1,
+      "onHand": 1171,
       "onOrder": 0,
       "reserved": 0
     },
     "ISO - THCA": {
-      "onHand": 35,
-      "onOrder": 30,
+      "onHand": 35553.285,
+      "onOrder": 30000,
       "reserved": 0
     },
     "LBL-3.5-OR": {
@@ -2231,12 +2231,12 @@
       "reserved": 0
     },
     "LBL-DBX-BN": {
-      "onHand": 1,
+      "onHand": 1065,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-DBX-CC": {
-      "onHand": 2,
+      "onHand": 2200,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2246,7 +2246,7 @@
       "reserved": 0
     },
     "LBL-DBX-CY": {
-      "onHand": 1,
+      "onHand": 1473,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2261,12 +2261,12 @@
       "reserved": 0
     },
     "LBL-DBX-GDP": {
-      "onHand": 1,
+      "onHand": 1294,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-DBX-GM": {
-      "onHand": 1,
+      "onHand": 1004,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2276,7 +2276,7 @@
       "reserved": 0
     },
     "LBL-DBX-GR": {
-      "onHand": 2,
+      "onHand": 2073,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2286,12 +2286,12 @@
       "reserved": 0
     },
     "LBL-DBX-GUS": {
-      "onHand": 809,
+      "onHand": 784,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-DBX-HZ": {
-      "onHand": 1,
+      "onHand": 1006,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2321,7 +2321,7 @@
       "reserved": 0
     },
     "LBL-DBX-PE": {
-      "onHand": 1,
+      "onHand": 1691,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2331,7 +2331,7 @@
       "reserved": 0
     },
     "LBL-DBX-PR": {
-      "onHand": 2,
+      "onHand": 2176,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2341,7 +2341,7 @@
       "reserved": 0
     },
     "LBL-DBX-SD": {
-      "onHand": 1,
+      "onHand": 1033,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2371,7 +2371,7 @@
       "reserved": 0
     },
     "LBL-DBX-WR": {
-      "onHand": 3,
+      "onHand": 3179,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2386,242 +2386,242 @@
       "reserved": 0
     },
     "LBL-DD-N&I": {
-      "onHand": 14,
+      "onHand": 14870,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IL-AC": {
-      "onHand": 3,
-      "onOrder": 10,
+      "onHand": 3283,
+      "onOrder": 10000,
       "reserved": 0
     },
     "LBL-IL-AF": {
-      "onHand": 2,
-      "onOrder": 7,
+      "onHand": 2685,
+      "onOrder": 7500,
       "reserved": 0
     },
     "LBL-IL-BD": {
-      "onHand": 3,
-      "onOrder": 10,
+      "onHand": 3400,
+      "onOrder": 10000,
       "reserved": 0
     },
     "LBL-IL-CM": {
-      "onHand": 8,
+      "onHand": 8346,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IL-GB": {
-      "onHand": 11,
+      "onHand": 11126,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IL-GMOC": {
-      "onHand": 2,
-      "onOrder": 6,
+      "onHand": 2576,
+      "onOrder": 6300,
       "reserved": 0
     },
     "LBL-IL-LAKK": {
-      "onHand": 8,
-      "onOrder": 2,
+      "onHand": 8109,
+      "onOrder": 2500,
       "reserved": 0
     },
     "LBL-IL-LCH": {
-      "onHand": 3,
-      "onOrder": 7,
+      "onHand": 3750,
+      "onOrder": 7500,
       "reserved": 0
     },
     "LBL-IL-NYCD": {
-      "onHand": 6,
-      "onOrder": 1,
+      "onHand": 6851,
+      "onOrder": 1800,
       "reserved": 0
     },
     "LBL-IL-OC": {
-      "onHand": 3,
-      "onOrder": 10,
+      "onHand": 3350,
+      "onOrder": 10000,
       "reserved": 0
     },
     "LBL-IL-PBB": {
       "onHand": 815,
-      "onOrder": 12,
+      "onOrder": 12000,
       "reserved": 0
     },
     "LBL-IL-PG": {
-      "onHand": 7,
+      "onHand": 7788,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IL-SA": {
-      "onHand": 10,
-      "onOrder": 2,
+      "onHand": 10034,
+      "onOrder": 2800,
       "reserved": 0
     },
     "LBL-IL-TE": {
-      "onHand": 146,
+      "onHand": 146974,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IL-WFOG": {
-      "onHand": 10,
+      "onHand": 10291,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IL-YOG": {
-      "onHand": 4,
-      "onOrder": 9,
+      "onHand": 4764,
+      "onOrder": 9000,
       "reserved": 0
     },
     "LBL-IT-FKS": {
-      "onHand": 9,
-      "onOrder": 10,
+      "onHand": 15257,
+      "onOrder": 4500,
       "reserved": 0
     },
     "LBL-IT-IND": {
-      "onHand": 21,
+      "onHand": 21763,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IT-SML": {
-      "onHand": 47,
+      "onHand": 47956,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-IT-ZAZ": {
-      "onHand": 21,
-      "onOrder": 15,
+      "onHand": 31823,
+      "onOrder": 5100,
       "reserved": 0
     },
     "LBL-JH-ABJ": {
-      "onHand": 1,
-      "onOrder": 12,
+      "onHand": 1937,
+      "onOrder": 12500,
       "reserved": 0
     },
     "LBL-JH-BC": {
-      "onHand": 7,
-      "onOrder": 2,
+      "onHand": 7895,
+      "onOrder": 2000,
       "reserved": 0
     },
     "LBL-JH-BLOG": {
-      "onHand": 7,
-      "onOrder": 16,
+      "onHand": 7671,
+      "onOrder": 16000,
       "reserved": 0
     },
     "LBL-JH-FT": {
-      "onHand": 8,
+      "onHand": 8072,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-JH-FW": {
-      "onHand": 8,
-      "onOrder": 2,
+      "onHand": 8284,
+      "onOrder": 2000,
       "reserved": 0
     },
     "LBL-JH-GCK": {
-      "onHand": 12,
+      "onHand": 12823,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-JH-MMJ": {
-      "onHand": 17,
-      "onOrder": 3,
+      "onHand": 17574,
+      "onOrder": 3800,
       "reserved": 0
     },
     "LBL-JH-MT": {
-      "onHand": 9,
+      "onHand": 9594,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-JH-PD": {
-      "onHand": 9,
-      "onOrder": 12,
+      "onHand": 9569,
+      "onOrder": 12000,
       "reserved": 0
     },
     "LBL-JH-PP": {
-      "onHand": 20,
+      "onHand": 20922,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-JH-RCP": {
-      "onHand": 5,
-      "onOrder": 4,
+      "onHand": 5100,
+      "onOrder": 4600,
       "reserved": 0
     },
     "LBL-JH-SKP": {
-      "onHand": 8,
-      "onOrder": 17,
+      "onHand": 8398,
+      "onOrder": 17000,
       "reserved": 0
     },
     "LBL-JH-SM": {
-      "onHand": 19,
+      "onHand": 19607,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-JH-TBP": {
-      "onHand": 9,
-      "onOrder": 19,
+      "onHand": 9330,
+      "onOrder": 19000,
       "reserved": 0
     },
     "LBL-JH-TS": {
-      "onHand": 15,
-      "onOrder": 8,
+      "onHand": 15663,
+      "onOrder": 8500,
       "reserved": 0
     },
     "LBL-UNI-24K": {
-      "onHand": 3,
+      "onHand": 3302,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-AS": {
-      "onHand": 2,
+      "onHand": 2174,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-BN": {
-      "onHand": 1,
+      "onHand": 1949,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-CC": {
-      "onHand": 3,
+      "onHand": 3148,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-CP": {
-      "onHand": 2,
+      "onHand": 2481,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-CY": {
-      "onHand": 5,
+      "onHand": 5200,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-DR": {
-      "onHand": 1,
+      "onHand": 1540,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-G33": {
-      "onHand": 1,
+      "onHand": 1466,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-GDP": {
-      "onHand": 3,
+      "onHand": 3336,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-GM": {
-      "onHand": 2,
+      "onHand": 2789,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-GO": {
-      "onHand": 1,
+      "onHand": 1040,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-GR": {
-      "onHand": 3,
+      "onHand": 3291,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2631,32 +2631,32 @@
       "reserved": 0
     },
     "LBL-UNI-GUS": {
-      "onHand": 1,
+      "onHand": 1900,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-HZ": {
-      "onHand": 1,
+      "onHand": 1380,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-ICC": {
-      "onHand": 1,
+      "onHand": 1907,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-IP": {
-      "onHand": 4,
+      "onHand": 4300,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-JC": {
-      "onHand": 1,
+      "onHand": 1126,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-LCG": {
-      "onHand": 2,
+      "onHand": 2266,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2666,72 +2666,72 @@
       "reserved": 0
     },
     "LBL-UNI-PE": {
-      "onHand": 1,
+      "onHand": 1547,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-PM": {
-      "onHand": 1,
+      "onHand": 1466,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-PR": {
-      "onHand": 2,
+      "onHand": 2837,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-PRM": {
-      "onHand": 1,
+      "onHand": 1405,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-SD": {
-      "onHand": 1,
+      "onHand": 1428,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-SFV": {
-      "onHand": 1,
+      "onHand": 1410,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-TP": {
-      "onHand": 1,
+      "onHand": 1549,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-TW": {
-      "onHand": 2,
+      "onHand": 2562,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-WC": {
-      "onHand": 2,
+      "onHand": 2206,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-WR": {
-      "onHand": 4,
+      "onHand": 4102,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-WZ": {
-      "onHand": 2,
+      "onHand": 2068,
       "onOrder": 0,
       "reserved": 0
     },
     "LBL-UNI-ZP": {
-      "onHand": 1,
+      "onHand": 1600,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-AC": {
-      "onHand": 2,
+      "onHand": 2706,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-AF": {
-      "onHand": 2,
+      "onHand": 2567,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2741,22 +2741,22 @@
       "reserved": 0
     },
     "LBT-IL-CM": {
-      "onHand": 3,
+      "onHand": 3370,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-GB": {
-      "onHand": 2,
+      "onHand": 2750,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-GMOC": {
-      "onHand": 3,
+      "onHand": 3477,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-LAKK": {
-      "onHand": 3,
+      "onHand": 3640,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2776,22 +2776,22 @@
       "reserved": 0
     },
     "LBT-IL-PBB": {
-      "onHand": 7,
+      "onHand": 7709,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-PG": {
-      "onHand": 3,
+      "onHand": 3538,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-SA": {
-      "onHand": 2,
+      "onHand": 2597,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-IL-WFOG": {
-      "onHand": 3,
+      "onHand": 3140,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2806,7 +2806,7 @@
       "reserved": 0
     },
     "LBT-JH-BC": {
-      "onHand": 2,
+      "onHand": 2557,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2821,27 +2821,27 @@
       "reserved": 0
     },
     "LBT-JH-FW": {
-      "onHand": 2,
+      "onHand": 2548,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-GCC": {
-      "onHand": 2,
+      "onHand": 2724,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-MMJ": {
-      "onHand": 2,
+      "onHand": 2679,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-MT": {
-      "onHand": 1,
+      "onHand": 1320,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-PD": {
-      "onHand": 4,
+      "onHand": 4477,
       "onOrder": 0,
       "reserved": 0
     },
@@ -2851,63 +2851,63 @@
       "reserved": 0
     },
     "LBT-JH-RCP": {
-      "onHand": 5,
+      "onHand": 2683,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-SKP": {
-      "onHand": 1,
+      "onHand": 1021,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-SM": {
-      "onHand": 2,
+      "onHand": 2833,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-TBP": {
-      "onHand": 2,
+      "onHand": 2956,
       "onOrder": 0,
       "reserved": 0
     },
     "LBT-JH-TS": {
-      "onHand": 1,
+      "onHand": 1157,
       "onOrder": 0,
       "reserved": 0
     },
     "LID-IL-BLK": {
-      "onHand": 186,
-      "onOrder": 120,
+      "onHand": 186555,
+      "onOrder": 120000,
       "reserved": 0
     },
     "LID-JH-BLU": {
-      "onHand": 46,
-      "onOrder": 10,
+      "onHand": 46446,
+      "onOrder": 10000,
       "reserved": 0
     },
     "LID-JH-GRN": {
-      "onHand": 31,
-      "onOrder": 10,
+      "onHand": 31396,
+      "onOrder": 10000,
       "reserved": 0
     },
     "LID-JH-PNK": {
-      "onHand": 47,
+      "onHand": 47696,
       "onOrder": 0,
       "reserved": 0
     },
     "LID-JH-PUR": {
-      "onHand": 40,
-      "onOrder": 19,
+      "onHand": 40678,
+      "onOrder": 19000,
       "reserved": 0
     },
     "LID-JH-RED": {
-      "onHand": 27,
-      "onOrder": 24,
+      "onHand": 25424,
+      "onOrder": 24000,
       "reserved": 0
     },
     "LID-JH-YOR": {
-      "onHand": 59,
-      "onOrder": 22,
+      "onHand": 59714,
+      "onOrder": 22000,
       "reserved": 0
     },
     "MICC-ASH-2X LARGE": {
@@ -3191,7 +3191,7 @@
       "reserved": 0
     },
     "Mixture - Flower Mixture": {
-      "onHand": 77,
+      "onHand": 77800.072502,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3211,12 +3211,12 @@
       "reserved": 0
     },
     "MM-CJTB-01": {
-      "onHand": 1,
+      "onHand": 1475,
       "onOrder": 0,
       "reserved": 1
     },
     "MM-CTF5585": {
-      "onHand": 2,
+      "onHand": 2000,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3231,9 +3231,9 @@
       "reserved": 0
     },
     "MM-FBCC811": {
-      "onHand": 786,
+      "onHand": 736,
       "onOrder": 0,
-      "reserved": 50
+      "reserved": 0
     },
     "MM-FEBMWC": {
       "onHand": 200,
@@ -3246,14 +3246,14 @@
       "reserved": 0
     },
     "MM-FMGTYC455": {
-      "onHand": 4,
+      "onHand": 4551,
       "onOrder": 0,
       "reserved": 1
     },
     "MM-JH5PF811": {
-      "onHand": 242,
+      "onHand": 222,
       "onOrder": 0,
-      "reserved": 20
+      "reserved": 0
     },
     "MM-JHF811": {
       "onHand": 959,
@@ -3266,29 +3266,29 @@
       "reserved": 20
     },
     "MM-MEB": {
-      "onHand": 2,
+      "onHand": 2905,
       "onOrder": 0,
       "reserved": 0
     },
     "MM-MED9F811": {
-      "onHand": 2,
+      "onHand": 2050,
       "onOrder": 0,
-      "reserved": 50
+      "reserved": 0
     },
     "MM-MHB": {
-      "onHand": 2,
+      "onHand": 2240,
       "onOrder": 0,
       "reserved": 0
     },
     "MM-MPB": {
-      "onHand": 313,
+      "onHand": 312,
       "onOrder": 835,
       "reserved": 0
     },
     "MM-MS": {
-      "onHand": 1,
+      "onHand": 1561,
       "onOrder": 0,
-      "reserved": 60
+      "reserved": 0
     },
     "MM-MSHLEDS": {
       "onHand": 500,
@@ -3296,9 +3296,9 @@
       "reserved": 0
     },
     "MM-MSHWC": {
-      "onHand": 123,
+      "onHand": 120,
       "onOrder": 200,
-      "reserved": 3
+      "reserved": 0
     },
     "MM-MTR": {
       "onHand": 4,
@@ -3306,22 +3306,22 @@
       "reserved": 0
     },
     "MM-RAFS": {
-      "onHand": 4,
-      "onOrder": 15,
-      "reserved": 61
+      "onHand": 4350,
+      "onOrder": 15000,
+      "reserved": 58
     },
     "MM-ST": {
-      "onHand": 198,
+      "onHand": 192,
       "onOrder": 0,
-      "reserved": 6
+      "reserved": 0
     },
     "MM-THCALRF811": {
-      "onHand": 803,
+      "onHand": 753,
       "onOrder": 0,
-      "reserved": 50
+      "reserved": 0
     },
     "MM-THCPSLF811": {
-      "onHand": 1,
+      "onHand": 1550,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3356,72 +3356,72 @@
       "reserved": 0
     },
     "MYL-3.5": {
-      "onHand": 40,
+      "onHand": 40420,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-05CT-BD": {
-      "onHand": 30,
+      "onHand": 30085,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-05CT-KB": {
-      "onHand": 16,
+      "onHand": 16161,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-05CT-MB": {
-      "onHand": 29,
-      "onOrder": 2,
+      "onHand": 29057,
+      "onOrder": 0,
       "reserved": 0
     },
     "MYL-05CT-MCR": {
-      "onHand": 37,
+      "onHand": 37107,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-05CT-PL": {
-      "onHand": 17,
+      "onHand": 17393,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-05CT-SS": {
-      "onHand": 16,
+      "onHand": 16010,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-14": {
-      "onHand": 9,
+      "onHand": 9841,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-20CT-BD": {
-      "onHand": 12,
+      "onHand": 12109,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-20CT-KB": {
-      "onHand": 14,
+      "onHand": 14690,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-20CT-MB": {
-      "onHand": 21,
+      "onHand": 21694,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-20CT-MCR": {
-      "onHand": 20,
+      "onHand": 20377,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-20CT-PL": {
-      "onHand": 20,
+      "onHand": 20519,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-20CT-SS": {
-      "onHand": 14,
+      "onHand": 14932,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3431,137 +3431,137 @@
       "reserved": 0
     },
     "MYL-CC-CB": {
-      "onHand": 9,
+      "onHand": 9841,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-CC-CF": {
-      "onHand": 9,
+      "onHand": 9423,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-CC-DR": {
-      "onHand": 9,
+      "onHand": 9931,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-D8-HB": {
-      "onHand": 5,
+      "onHand": 5711,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-D8-PR": {
-      "onHand": 5,
+      "onHand": 5517,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-D8-SW": {
-      "onHand": 5,
+      "onHand": 5845,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-DD-BLOG": {
       "onHand": 0,
-      "onOrder": 20,
+      "onOrder": 20000,
       "reserved": 0
     },
     "MYL-DD-BM": {
-      "onHand": 204,
+      "onHand": 204341,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-DD-CS": {
-      "onHand": 196,
+      "onHand": 196576,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-DD-GD": {
-      "onHand": 194,
+      "onHand": 194732,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-DD-LCG": {
-      "onHand": 182,
+      "onHand": 182936,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-DD-MMJ": {
       "onHand": 0,
-      "onOrder": 20,
+      "onOrder": 20000,
       "reserved": 0
     },
     "MYL-DD-PC": {
-      "onHand": 193,
+      "onHand": 193131,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-DD-PD": {
       "onHand": 0,
-      "onOrder": 20,
+      "onOrder": 20000,
       "reserved": 0
     },
     "MYL-DD-SJ": {
-      "onHand": 173,
+      "onHand": 173243,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-DD-SKP": {
       "onHand": 0,
-      "onOrder": 20,
+      "onOrder": 20000,
       "reserved": 0
     },
     "MYL-DD-TBP": {
       "onHand": 0,
-      "onOrder": 20,
+      "onOrder": 20000,
       "reserved": 0
     },
     "MYL-DD-TS": {
       "onHand": 0,
-      "onOrder": 20,
+      "onOrder": 20000,
       "reserved": 0
     },
     "MYL-FM-BB": {
-      "onHand": 15,
+      "onHand": 15106,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-FM-MB": {
-      "onHand": 15,
+      "onHand": 15065,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-FM-SS": {
-      "onHand": 14,
+      "onHand": 14545,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-IT-AB": {
-      "onHand": 19,
+      "onHand": 19998,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-IT-GB": {
-      "onHand": 19,
+      "onHand": 19998,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-IT-LMC": {
-      "onHand": 19,
+      "onHand": 19998,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-IT-SC": {
-      "onHand": 19,
+      "onHand": 19998,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-IT-SP": {
-      "onHand": 19,
+      "onHand": 19998,
       "onOrder": 0,
       "reserved": 0
     },
     "MYL-IT-WBR": {
-      "onHand": 19,
+      "onHand": 19998,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3576,32 +3576,32 @@
       "reserved": 0
     },
     "OIL-CBD-BRD": {
-      "onHand": 1,
+      "onHand": 1000,
       "onOrder": 0,
       "reserved": 0
     },
     "OIL-CBD-FSP": {
-      "onHand": 1,
+      "onHand": 1000,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil - D9": {
-      "onHand": 1,
+      "onHand": 1000,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil - D9THCP": {
-      "onHand": 6,
+      "onHand": 6019.292,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil - HHC": {
-      "onHand": 94,
+      "onHand": 94081.862,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil - KCA D8": {
-      "onHand": 2,
+      "onHand": 2848.143,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3641,7 +3641,7 @@
       "reserved": 0
     },
     "Oil Mixture - Girl Scout Cookies": {
-      "onHand": 1,
+      "onHand": 1000,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3651,12 +3651,12 @@
       "reserved": 0
     },
     "Oil Mixture - Mango Tango": {
-      "onHand": 1,
+      "onHand": 1188.663563,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil Mixture - New York Sour Diesel": {
-      "onHand": 1,
+      "onHand": 1266,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3671,7 +3671,7 @@
       "reserved": 0
     },
     "Oil Mixture - Pinkberry Sherbert": {
-      "onHand": 1,
+      "onHand": 1266,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3716,7 +3716,7 @@
       "reserved": 0
     },
     "Oil Mixture - Strawberry Kush Pop": {
-      "onHand": 6,
+      "onHand": 6250.0025,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3726,22 +3726,22 @@
       "reserved": 0
     },
     "Oil Mixture - THCP Oil Jiko Infused": {
-      "onHand": 1,
+      "onHand": 1200.52758,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil Mixture - Triple Berry Pie": {
-      "onHand": 6,
+      "onHand": 6250,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil Mixture - Tropical Splash": {
-      "onHand": 1,
+      "onHand": 1250.046874,
       "onOrder": 0,
       "reserved": 0
     },
     "Oil Mixture - Tropicanna Cookies": {
-      "onHand": 1,
+      "onHand": 1266,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3751,14 +3751,14 @@
       "reserved": 0
     },
     "P5D-BKC-01": {
-      "onHand": 20,
-      "onOrder": 5,
-      "reserved": 1
+      "onHand": 19,
+      "onOrder": 5159,
+      "reserved": 0
     },
     "P5D-BKC-10PK": {
       "onHand": 4,
       "onOrder": 2,
-      "reserved": 83
+      "reserved": 85
     },
     "P5D-BLOG-01": {
       "onHand": 36,
@@ -3771,39 +3771,39 @@
       "reserved": 27
     },
     "P5D-CC-01": {
-      "onHand": 156,
-      "onOrder": 5,
-      "reserved": 2
+      "onHand": 45,
+      "onOrder": 5002,
+      "reserved": 1
     },
     "P5D-CC-10PK": {
-      "onHand": 139,
+      "onHand": 58,
       "onOrder": 2,
-      "reserved": 122
+      "reserved": 32
     },
     "P5D-GAG-01": {
-      "onHand": 25,
+      "onHand": 24,
+      "onOrder": 0,
+      "reserved": 1
+    },
+    "P5D-GAG-10PK": {
+      "onHand": 37,
       "onOrder": 0,
       "reserved": 2
     },
-    "P5D-GAG-10PK": {
-      "onHand": 40,
-      "onOrder": 0,
-      "reserved": 3
-    },
     "P5D-GT-01": {
-      "onHand": 55,
+      "onHand": 54,
       "onOrder": 1,
-      "reserved": 1
+      "reserved": 0
     },
     "P5D-GT-10PK": {
-      "onHand": 289,
+      "onHand": 286,
       "onOrder": 0,
-      "reserved": 15
+      "reserved": 14
     },
     "P5D-JFG-01": {
-      "onHand": 17,
+      "onHand": 16,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "P5D-JFG-03P": {
       "onHand": 1,
@@ -3811,9 +3811,9 @@
       "reserved": 0
     },
     "P5D-JFG-10PK": {
-      "onHand": 41,
+      "onHand": 38,
       "onOrder": 0,
-      "reserved": 18
+      "reserved": 17
     },
     "P5D-MMJ-01": {
       "onHand": 72,
@@ -3836,34 +3836,34 @@
       "reserved": 34
     },
     "P5D-SBO-01": {
-      "onHand": 23,
+      "onHand": 22,
       "onOrder": 0,
-      "reserved": 1
-    },
-    "P5D-SBO-10PK": {
-      "onHand": 186,
-      "onOrder": 0,
-      "reserved": 33
-    },
-    "P5D-SC-01": {
-      "onHand": 67,
-      "onOrder": 2,
-      "reserved": 3
-    },
-    "P5D-SC-10PK": {
-      "onHand": 191,
-      "onOrder": 0,
-      "reserved": 28
-    },
-    "P5D-SKP-01": {
-      "onHand": 70,
-      "onOrder": 4,
       "reserved": 0
     },
+    "P5D-SBO-10PK": {
+      "onHand": 183,
+      "onOrder": 0,
+      "reserved": 32
+    },
+    "P5D-SC-01": {
+      "onHand": 66,
+      "onOrder": 2,
+      "reserved": 2
+    },
+    "P5D-SC-10PK": {
+      "onHand": 190,
+      "onOrder": 0,
+      "reserved": 29
+    },
+    "P5D-SKP-01": {
+      "onHand": 98,
+      "onOrder": 17,
+      "reserved": 15
+    },
     "P5D-SKP-10PK": {
-      "onHand": 5,
-      "onOrder": 42,
-      "reserved": 64
+      "onHand": 433,
+      "onOrder": 470,
+      "reserved": 492
     },
     "P5D-TBP-01": {
       "onHand": 68,
@@ -3876,24 +3876,24 @@
       "reserved": 19
     },
     "P5D-TN-01": {
-      "onHand": 42,
+      "onHand": 41,
       "onOrder": 2,
-      "reserved": 1
+      "reserved": 0
     },
     "P5D-TN-10PK": {
-      "onHand": 360,
+      "onHand": 297,
       "onOrder": 0,
-      "reserved": 73
+      "reserved": 12
     },
     "P5D-TP-01": {
-      "onHand": 29,
+      "onHand": 28,
       "onOrder": 1,
-      "reserved": 2
+      "reserved": 1
     },
     "P5D-TP-10PK": {
-      "onHand": 379,
+      "onHand": 332,
       "onOrder": 0,
-      "reserved": 55
+      "reserved": 10
     },
     "P5D-TS-01": {
       "onHand": 45,
@@ -3906,7 +3906,7 @@
       "reserved": 52
     },
     "Pack - Boveda 1G": {
-      "onHand": 6,
+      "onHand": 6480,
       "onOrder": 0,
       "reserved": 0
     },
@@ -3982,23 +3982,23 @@
     },
     "PIL-AC-01": {
       "onHand": 25,
-      "onOrder": 3,
-      "reserved": 1
+      "onOrder": 2,
+      "reserved": 0
     },
     "PIL-AC-10PK": {
-      "onHand": 39,
+      "onHand": 38,
       "onOrder": 37,
-      "reserved": 78
+      "reserved": 77
     },
     "PIL-AF-01": {
       "onHand": 14,
-      "onOrder": 7,
-      "reserved": 1
+      "onOrder": 6,
+      "reserved": 0
     },
     "PIL-AF-10PK": {
-      "onHand": 61,
+      "onHand": 60,
       "onOrder": 27,
-      "reserved": 38
+      "reserved": 37
     },
     "PIL-BD-01": {
       "onHand": 17,
@@ -4006,49 +4006,49 @@
       "reserved": 0
     },
     "PIL-BD-10PK": {
-      "onHand": 233,
+      "onHand": 232,
       "onOrder": 0,
-      "reserved": 21
+      "reserved": 20
     },
     "PIL-CM-01": {
-      "onHand": 27,
+      "onHand": 25,
       "onOrder": 0,
-      "reserved": 3
+      "reserved": 1
     },
     "PIL-CM-10PK": {
-      "onHand": 116,
+      "onHand": 115,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "PIL-GB-01": {
-      "onHand": 73,
+      "onHand": 71,
       "onOrder": 1,
-      "reserved": 3
+      "reserved": 1
     },
     "PIL-GB-10PK": {
-      "onHand": 88,
+      "onHand": 87,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "PIL-GMOC-01": {
-      "onHand": 34,
+      "onHand": 32,
       "onOrder": 5,
-      "reserved": 3
+      "reserved": 1
     },
     "PIL-GMOC-10PK": {
-      "onHand": 62,
+      "onHand": 61,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "PIL-LAKK-01": {
-      "onHand": 6,
-      "onOrder": 0,
-      "reserved": 3
-    },
-    "PIL-LAKK-10PK": {
-      "onHand": 131,
+      "onHand": 4,
       "onOrder": 0,
       "reserved": 1
+    },
+    "PIL-LAKK-10PK": {
+      "onHand": 130,
+      "onOrder": 0,
+      "reserved": 0
     },
     "PIL-LCH-01": {
       "onHand": 11,
@@ -4056,19 +4056,19 @@
       "reserved": 0
     },
     "PIL-LCH-10PK": {
-      "onHand": 166,
+      "onHand": 165,
       "onOrder": 19,
-      "reserved": 30
+      "reserved": 29
     },
     "PIL-NYCD-01": {
-      "onHand": 47,
+      "onHand": 45,
       "onOrder": 2,
-      "reserved": 4
+      "reserved": 2
     },
     "PIL-NYCD-10PK": {
-      "onHand": 208,
+      "onHand": 197,
       "onOrder": 0,
-      "reserved": 11
+      "reserved": 0
     },
     "PIL-OC-01": {
       "onHand": 4,
@@ -4076,9 +4076,9 @@
       "reserved": 0
     },
     "PIL-OC-10PK": {
-      "onHand": 232,
+      "onHand": 231,
       "onOrder": 38,
-      "reserved": 49
+      "reserved": 48
     },
     "PIL-PBB-01": {
       "onHand": 34,
@@ -4086,49 +4086,49 @@
       "reserved": 0
     },
     "PIL-PBB-10PK": {
-      "onHand": 149,
+      "onHand": 148,
       "onOrder": 41,
-      "reserved": 52
+      "reserved": 51
     },
     "PIL-PG-01": {
-      "onHand": 26,
+      "onHand": 24,
       "onOrder": 10,
-      "reserved": 3
+      "reserved": 1
     },
     "PIL-PG-10PK": {
-      "onHand": 98,
+      "onHand": 97,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "PIL-SA-01": {
-      "onHand": 33,
+      "onHand": 31,
       "onOrder": 10,
-      "reserved": 3
+      "reserved": 1
     },
     "PIL-SA-10PK": {
-      "onHand": 11,
+      "onHand": 10,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "PIL-WFOG-01": {
-      "onHand": 62,
+      "onHand": 60,
       "onOrder": 0,
-      "reserved": 2
+      "reserved": 0
     },
     "PIL-WFOG-10PK": {
-      "onHand": 150,
+      "onHand": 149,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "PIL-YOG-01": {
-      "onHand": 15,
+      "onHand": 13,
       "onOrder": 10,
-      "reserved": 3
+      "reserved": 1
     },
     "PIL-YOG-10PK": {
-      "onHand": 207,
+      "onHand": 206,
       "onOrder": 0,
-      "reserved": 1
+      "reserved": 0
     },
     "PJH-ABJ-01": {
       "onHand": 73,
@@ -4142,8 +4142,8 @@
     },
     "PJH-BC-01": {
       "onHand": 78,
-      "onOrder": 2,
-      "reserved": 1
+      "onOrder": 1,
+      "reserved": 0
     },
     "PJH-BC-10PK": {
       "onHand": 62,
@@ -4156,9 +4156,9 @@
       "reserved": 9
     },
     "PJH-BLOG-10PK": {
-      "onHand": 492,
+      "onHand": 477,
       "onOrder": 30,
-      "reserved": 21
+      "reserved": 6
     },
     "PJH-FT-01": {
       "onHand": 41,
@@ -4166,9 +4166,9 @@
       "reserved": 3
     },
     "PJH-FT-10PK": {
-      "onHand": 225,
+      "onHand": 195,
       "onOrder": 1,
-      "reserved": 31
+      "reserved": 1
     },
     "PJH-FW-01": {
       "onHand": 34,
@@ -4201,7 +4201,7 @@
       "reserved": 0
     },
     "PJH-MT-01": {
-      "onHand": 20,
+      "onHand": 19,
       "onOrder": 2,
       "reserved": 1
     },
@@ -4222,17 +4222,17 @@
     },
     "PJH-PP-01": {
       "onHand": 123,
-      "onOrder": 2,
-      "reserved": 1
+      "onOrder": 1,
+      "reserved": 0
     },
     "PJH-PP-10PK": {
-      "onHand": 232,
+      "onHand": 222,
       "onOrder": 0,
-      "reserved": 20
+      "reserved": 10
     },
     "PJH-RCP-01": {
       "onHand": 38,
-      "onOrder": 0,
+      "onOrder": 2471,
       "reserved": 1
     },
     "PJH-RCP-10PK": {
@@ -4246,9 +4246,9 @@
       "reserved": 0
     },
     "PJH-SKP-10PK": {
-      "onHand": 320,
+      "onHand": 305,
       "onOrder": 36,
-      "reserved": 25
+      "reserved": 10
     },
     "PJH-SM-01": {
       "onHand": 25,
@@ -4256,9 +4256,9 @@
       "reserved": 1
     },
     "PJH-SM-10PK": {
-      "onHand": 88,
+      "onHand": 78,
       "onOrder": 2,
-      "reserved": 22
+      "reserved": 12
     },
     "PJH-TBP-01": {
       "onHand": 54,
@@ -4281,12 +4281,12 @@
       "reserved": 7
     },
     "Rigid Box - 3.5g 6 Pack": {
-      "onHand": 5,
+      "onHand": 5152,
       "onOrder": 0,
       "reserved": 0
     },
     "Rigid Box - Preroll 6 Pack": {
-      "onHand": 5,
+      "onHand": 5225,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4306,222 +4306,222 @@
       "reserved": 0
     },
     "SLV-1GC-BG": {
-      "onHand": 6,
+      "onHand": 6861,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-GSC": {
-      "onHand": 3,
+      "onHand": 3953,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-LPC": {
-      "onHand": 1,
+      "onHand": 1815,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-NYSD": {
-      "onHand": 5,
+      "onHand": 5238,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-OD": {
-      "onHand": 6,
+      "onHand": 6180,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-PR": {
-      "onHand": 5,
+      "onHand": 5947,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-PS": {
-      "onHand": 5,
+      "onHand": 5357,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-RBK": {
-      "onHand": 5,
+      "onHand": 5663,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GC-TC": {
-      "onHand": 5,
+      "onHand": 5542,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-AB": {
-      "onHand": 7,
+      "onHand": 7394,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-BG": {
-      "onHand": 5,
+      "onHand": 5632,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-GB": {
-      "onHand": 8,
+      "onHand": 8016,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-GC": {
-      "onHand": 4,
+      "onHand": 4616,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-ICC": {
-      "onHand": 7,
+      "onHand": 7026,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-LCG": {
-      "onHand": 7,
+      "onHand": 7157,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-M1": {
-      "onHand": 7,
+      "onHand": 7301,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-SC": {
-      "onHand": 7,
+      "onHand": 7096,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-SPC": {
-      "onHand": 4,
+      "onHand": 4717,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-TP": {
-      "onHand": 5,
+      "onHand": 5224,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-WBR": {
-      "onHand": 4,
+      "onHand": 4684,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-1GP-WS": {
-      "onHand": 4,
+      "onHand": 4787,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-BKC": {
-      "onHand": 32,
+      "onHand": 32678,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-BLOG": {
-      "onHand": 18,
-      "onOrder": 16,
+      "onHand": 18185,
+      "onOrder": 16000,
       "reserved": 0
     },
     "SLV-5PK-CC": {
-      "onHand": 27,
+      "onHand": 27704,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-GAG": {
-      "onHand": 17,
+      "onHand": 17509,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-GT": {
-      "onHand": 43,
+      "onHand": 43754,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-JFG": {
-      "onHand": 17,
+      "onHand": 17448,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-MMJ": {
-      "onHand": 18,
-      "onOrder": 15,
+      "onHand": 18118,
+      "onOrder": 15000,
       "reserved": 0
     },
     "SLV-5PK-PD": {
-      "onHand": 16,
-      "onOrder": 17,
+      "onHand": 16497,
+      "onOrder": 17000,
       "reserved": 0
     },
     "SLV-5PK-SBO": {
-      "onHand": 15,
+      "onHand": 15533,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-SC": {
-      "onHand": 35,
+      "onHand": 35320,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-SKP": {
-      "onHand": 12,
-      "onOrder": 17,
+      "onHand": 12218,
+      "onOrder": 17000,
       "reserved": 0
     },
     "SLV-5PK-TBP": {
-      "onHand": 17,
-      "onOrder": 16,
+      "onHand": 17107,
+      "onOrder": 16000,
       "reserved": 0
     },
     "SLV-5PK-TN": {
-      "onHand": 26,
+      "onHand": 26211,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-TP": {
-      "onHand": 35,
+      "onHand": 35392,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-5PK-TS": {
-      "onHand": 23,
+      "onHand": 23314,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-510": {
-      "onHand": 16,
+      "onHand": 16800,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-BATT-INNER": {
-      "onHand": 45,
+      "onHand": 45606,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-BATT-OUTER": {
-      "onHand": 47,
+      "onHand": 47850,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-FJ-AN": {
-      "onHand": 3,
-      "onOrder": 2,
+      "onHand": 3459,
+      "onOrder": 2000,
       "reserved": 0
     },
     "SLV-FJ-SD": {
-      "onHand": 2,
-      "onOrder": 4,
+      "onHand": 2017,
+      "onOrder": 4000,
       "reserved": 0
     },
     "SLV-FJ-TP": {
-      "onHand": 3,
-      "onOrder": 3,
+      "onHand": 3626,
+      "onOrder": 3000,
       "reserved": 0
     },
     "SLV-IB-HSC": {
-      "onHand": 3,
+      "onHand": 3780,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-IB-HSH": {
-      "onHand": 1,
+      "onHand": 1500,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4531,97 +4531,97 @@
       "reserved": 0
     },
     "SLV-IB-TPK": {
-      "onHand": 3,
+      "onHand": 3694,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-BD": {
-      "onHand": 6,
+      "onHand": 6658,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-BF": {
-      "onHand": 20,
+      "onHand": 20238,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-BLOG": {
-      "onHand": 16,
+      "onHand": 16262,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-CL": {
-      "onHand": 13,
+      "onHand": 13500,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-GJR": {
-      "onHand": 13,
-      "onOrder": 13,
+      "onHand": 13368,
+      "onOrder": 13000,
       "reserved": 0
     },
     "SLV-LR-KL": {
-      "onHand": 20,
+      "onHand": 20701,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-LAC": {
-      "onHand": 5,
+      "onHand": 5659,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-MG": {
-      "onHand": 16,
-      "onOrder": 13,
+      "onHand": 16774,
+      "onOrder": 13000,
       "reserved": 0
     },
     "SLV-LR-MMJ": {
-      "onHand": 16,
+      "onHand": 12679,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-MW": {
-      "onHand": 2,
+      "onHand": 2880,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-PD": {
-      "onHand": 16,
+      "onHand": 16563,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-SC": {
-      "onHand": 17,
+      "onHand": 17652,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-SKP": {
-      "onHand": 18,
+      "onHand": 18060,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-SS": {
-      "onHand": 21,
+      "onHand": 21133,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-TBP": {
-      "onHand": 14,
+      "onHand": 14340,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-TS": {
-      "onHand": 15,
-      "onOrder": 10,
+      "onHand": 15684,
+      "onOrder": 10000,
       "reserved": 0
     },
     "SLV-LR-WG": {
-      "onHand": 2,
+      "onHand": 2081,
       "onOrder": 0,
       "reserved": 0
     },
     "SLV-LR-WS": {
-      "onHand": 26,
+      "onHand": 26802,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4656,8 +4656,8 @@
       "reserved": 0
     },
     "TRP-BKN": {
-      "onHand": 1,
-      "onOrder": 1,
+      "onHand": 1667.5,
+      "onOrder": 1000,
       "reserved": 0
     },
     "TRP-BLC": {
@@ -4671,7 +4671,7 @@
       "reserved": 0
     },
     "TRP-BRRC": {
-      "onHand": 2,
+      "onHand": 2039.36,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4721,7 +4721,7 @@
       "reserved": 0
     },
     "TRP-GRP": {
-      "onHand": 1,
+      "onHand": 1750.485,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4731,7 +4731,7 @@
       "reserved": 0
     },
     "TRP-IRC": {
-      "onHand": 1,
+      "onHand": 1217.16,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4741,7 +4741,7 @@
       "reserved": 0
     },
     "TRP-KLXIII": {
-      "onHand": 1,
+      "onHand": 1093.34,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4766,12 +4766,12 @@
       "reserved": 0
     },
     "TRP-MBC": {
-      "onHand": 1,
+      "onHand": 1865.5,
       "onOrder": 0,
       "reserved": 0
     },
     "TRP-MSC": {
-      "onHand": 1,
+      "onHand": 1351.24,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4781,12 +4781,12 @@
       "reserved": 0
     },
     "TRP-NBG": {
-      "onHand": 1,
+      "onHand": 1279,
       "onOrder": 0,
       "reserved": 0
     },
     "TRP-NFF": {
-      "onHand": 1,
+      "onHand": 1001,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4821,12 +4821,12 @@
       "reserved": 0
     },
     "TRP-PCR": {
-      "onHand": 1,
+      "onHand": 1847.68,
       "onOrder": 0,
       "reserved": 0
     },
     "TRP-PEG": {
-      "onHand": 29,
+      "onHand": 29807.518,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4841,7 +4841,7 @@
       "reserved": 0
     },
     "TRP-SBK": {
-      "onHand": 1,
+      "onHand": 1541.75,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4852,7 +4852,7 @@
     },
     "TRP-SJC": {
       "onHand": 736.66,
-      "onOrder": 1,
+      "onOrder": 1000,
       "reserved": 0
     },
     "TRP-SSC": {
@@ -4861,12 +4861,12 @@
       "reserved": 0
     },
     "TRP-TPI": {
-      "onHand": 1,
+      "onHand": 1255.84,
       "onOrder": 0,
       "reserved": 0
     },
     "TRP-TPS": {
-      "onHand": 2,
+      "onHand": 2179.97,
       "onOrder": 0,
       "reserved": 0
     },
@@ -4877,92 +4877,92 @@
     },
     "TRP-WSC": {
       "onHand": 489,
-      "onOrder": 1,
+      "onOrder": 1000,
       "reserved": 0
     },
     "TRY-1GC": {
-      "onHand": 5,
+      "onHand": 5000,
       "onOrder": 0,
       "reserved": 0
     },
     "TRY-1GP": {
-      "onHand": 65,
+      "onHand": 65896,
       "onOrder": 0,
       "reserved": 0
     },
     "TRY-FJ-BTM": {
-      "onHand": 9,
-      "onOrder": 10,
+      "onHand": 9657,
+      "onOrder": 10000,
       "reserved": 0
     },
     "TRY-FJ-TOP": {
-      "onHand": 8,
-      "onOrder": 10,
+      "onHand": 8827,
+      "onOrder": 10000,
       "reserved": 0
     },
     "TRY-KDL": {
-      "onHand": 342,
-      "onOrder": 600,
+      "onHand": 338597,
+      "onOrder": 600000,
       "reserved": 0
     },
     "TUB-DD-CLR": {
-      "onHand": 497,
+      "onHand": 497017,
       "onOrder": 0,
       "reserved": 0
     },
     "TUB-IL-BLK": {
-      "onHand": 148,
-      "onOrder": 100,
+      "onHand": 148894,
+      "onOrder": 100000,
       "reserved": 0
     },
     "TUB-JH-CLR": {
-      "onHand": 168,
-      "onOrder": 100,
+      "onHand": 168088,
+      "onOrder": 100000,
       "reserved": 0
     },
     "VHW-1GP": {
-      "onHand": 25,
+      "onHand": 25012,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-510": {
-      "onHand": 10,
+      "onHand": 10000,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-ALD-1GC": {
-      "onHand": 4,
+      "onHand": 4973,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-BATT": {
-      "onHand": 14,
+      "onHand": 14100,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-IKR-1GC": {
-      "onHand": 19,
+      "onHand": 19617,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-LR": {
-      "onHand": 246,
+      "onHand": 246599,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-LR-HWD": {
-      "onHand": 1,
+      "onHand": 1536,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-LR-MPC": {
-      "onHand": 2,
+      "onHand": 2850,
       "onOrder": 0,
       "reserved": 0
     },
     "VHW-TRN": {
       "onHand": 0,
-      "onOrder": 60,
+      "onOrder": 60000,
       "reserved": 0
     },
     "VIC-BG-01": {
@@ -5191,9 +5191,9 @@
       "reserved": 0
     },
     "VLR-BLOG-01": {
-      "onHand": 64,
+      "onHand": 62,
       "onOrder": 11,
-      "reserved": 4
+      "reserved": 2
     },
     "VLR-BLOG-10PK": {
       "onHand": 139,
@@ -5202,8 +5202,8 @@
     },
     "VLR-CL-01": {
       "onHand": 143,
-      "onOrder": 1,
-      "reserved": 1
+      "onOrder": 0,
+      "reserved": 0
     },
     "VLR-CL-10PK": {
       "onHand": 41,
@@ -5218,12 +5218,12 @@
     "VLR-LAC-10PK": {
       "onHand": 20,
       "onOrder": 0,
-      "reserved": 0
+      "reserved": 1
     },
     "VLR-MMJ-01": {
-      "onHand": 120,
-      "onOrder": 10,
-      "reserved": 18
+      "onHand": 18,
+      "onOrder": 4130,
+      "reserved": 17
     },
     "VLR-MMJ-10PK": {
       "onHand": 4,
@@ -5241,9 +5241,9 @@
       "reserved": 0
     },
     "VLR-PD-01": {
-      "onHand": 27,
-      "onOrder": 11,
-      "reserved": 6
+      "onHand": 26,
+      "onOrder": 10,
+      "reserved": 4
     },
     "VLR-PD-10PK": {
       "onHand": 404,
@@ -5261,9 +5261,9 @@
       "reserved": 0
     },
     "VLR-SKP-01": {
-      "onHand": 245,
+      "onHand": 240,
       "onOrder": 14,
-      "reserved": 22
+      "reserved": 21
     },
     "VLR-SKP-10PK": {
       "onHand": 198,
@@ -5276,19 +5276,19 @@
       "reserved": 0
     },
     "VLR-TBP-01": {
-      "onHand": 5,
+      "onHand": -2,
       "onOrder": 10,
-      "reserved": 31
+      "reserved": 23
     },
     "VLR-TBP-10PK": {
-      "onHand": 0,
+      "onHand": 506,
       "onOrder": 0,
       "reserved": 34
     },
     "VLR-TS-01": {
-      "onHand": 73,
+      "onHand": 69,
       "onOrder": 11,
-      "reserved": 16
+      "reserved": 13
     },
     "VLR-TS-10PK": {
       "onHand": 140,
@@ -5306,89 +5306,89 @@
       "reserved": 0
     },
     "VLRSB-BF-01": {
-      "onHand": 77,
-      "onOrder": 14,
-      "reserved": 9
+      "onHand": 76,
+      "onOrder": 13,
+      "reserved": 8
     },
     "VLRSB-BF-10PK": {
       "onHand": 385,
       "onOrder": 0,
-      "reserved": 21
+      "reserved": 33
     },
     "VLRSB-GJR-01": {
-      "onHand": 150,
+      "onHand": 148,
       "onOrder": 10,
-      "reserved": 12
+      "reserved": 10
     },
     "VLRSB-GJR-10PK": {
       "onHand": 214,
       "onOrder": 0,
-      "reserved": 25
+      "reserved": 39
     },
     "VLRSB-KL-01": {
-      "onHand": 93,
+      "onHand": 91,
       "onOrder": 38,
-      "reserved": 2
+      "reserved": 0
     },
     "VLRSB-KL-10PK": {
       "onHand": 359,
       "onOrder": 0,
-      "reserved": 7
+      "reserved": 19
     },
     "VLRSB-MG-01": {
-      "onHand": 110,
+      "onHand": 107,
       "onOrder": 34,
-      "reserved": 6
+      "reserved": 3
     },
     "VLRSB-MG-10PK": {
       "onHand": 37,
       "onOrder": 0,
-      "reserved": 21
+      "reserved": 31
     },
     "VLRSB-SS-01": {
-      "onHand": 89,
+      "onHand": 88,
       "onOrder": 23,
-      "reserved": 6
+      "reserved": 5
     },
     "VLRSB-SS-10PK": {
       "onHand": 149,
       "onOrder": 14,
-      "reserved": 22
+      "reserved": 35
     },
     "VLRSB-WS-01": {
       "onHand": 2,
-      "onOrder": 2,
+      "onOrder": 2600,
       "reserved": 7
     },
     "VLRSB-WS-10PK": {
       "onHand": 1,
       "onOrder": 14,
-      "reserved": 64
+      "reserved": 74
     }
   },
   "onOrder": {
     "BUN-FMG-05": 2,
-    "CON-DKI-D": 1,
-    "CON-DKI-JH": 170,
-    "CON-DXP-LP": 100,
-    "DBX-3.5-IND": 1,
-    "DBX-5PK-BLOG": 2,
-    "DBX-5PK-PD": 2,
-    "DBX-5PK-SKP": 2,
-    "DBX-5PK-TBP": 1,
-    "DBX-5PK-TN": 2,
-    "DBX-5PK-TS": 1,
-    "DBX-DD-BLOG": 8,
-    "DBX-DD-MMJ": 8,
-    "DBX-DD-PD": 8,
-    "DBX-DD-SKP": 8,
-    "DBX-DD-TBP": 8,
-    "DBX-DD-TS": 8,
+    "CON-DKI-D": 1501600,
+    "CON-DKI-JH": 170000,
+    "CON-DXP-LP": 100000,
+    "DBX-3.5-IND": 1400,
+    "DBX-5PK-BLOG": 2400,
+    "DBX-5PK-PD": 2100,
+    "DBX-5PK-SKP": 2300,
+    "DBX-5PK-TBP": 1500,
+    "DBX-5PK-TN": 2000,
+    "DBX-5PK-TS": 1400,
+    "DBX-DD-BLOG": 8000,
+    "DBX-DD-MMJ": 8000,
+    "DBX-DD-PD": 8000,
+    "DBX-DD-SKP": 8000,
+    "DBX-DD-TBP": 8000,
+    "DBX-DD-TS": 8000,
     "DBX-FM-20CT-SS": 400,
-    "DBX-IL-YOG": 1,
+    "DBX-IL-YOG": 1000,
     "DBX-LR-LAC": 200,
-    "DBX-LR-TBP": 1,
-    "DBX-LR-TS": 2,
+    "DBX-LR-TBP": 1000,
+    "DBX-LR-TS": 2000,
     "ECC-CB-01": 1,
     "EGBB-05-01": 22,
     "EGBD-100-01": 6,
@@ -5399,7 +5399,7 @@
     "EGKB-100-01": 10,
     "EGKB-100-8PK": 1,
     "EGKB-400-01": 1,
-    "EGMB-05-01": 11,
+    "EGMB-05-01": 486,
     "EGMB-20-01": 1,
     "EGMB-125-01": 3,
     "EGMB-125-8PK": 1,
@@ -5410,87 +5410,82 @@
     "EGPL-100-01": 4,
     "EGPL-400-01": 1,
     "EGSS-05-01": 13,
-    "EGSS-20-01": 1,
     "EGSS-100-01": 13,
     "EGSS-400-01": 1,
     "Filled - 5 Pack Doinks Preroll": 3,
-    "FITCY-3.5-01": 1,
-    "FITG33-3.5-01": 1,
-    "FITSD-3.5-5PK": 25,
-    "Flower - 24 Karat": 1,
-    "Flower - Acai Sorbet": 1,
-    "Flower - CBD Flower": 211,
-    "Flower - Granddaddy Purple": 1,
-    "Flower - Gush Mints": 1,
-    "FMX-AC": 5,
-    "FMX-BD": 5,
-    "FMX-BLOG": 22,
-    "FMX-LCH": 14,
-    "FMX-MMJ": 22,
-    "FMX-OC": 14,
-    "FMX-PBB": 10,
-    "FMX-PD": 25,
-    "FMX-SKP": 34,
-    "FMX-TBP": 48,
-    "FMX-TS": 37,
-    "Gummy - Appleberry Nectar RAW": 18,
-    "Gummy - Blue Dream - 20mg - RAW": 84,
-    "Gummy - Kiwi Burst - 20mg - RAW": 84,
-    "Gummy - Mango Crush - 30mg - RAW": 61,
-    "Gummy - Midnight Berry - 25mg - RAW": 157,
-    "Gummy - Pink Lemonade - 20mg - RAW": 84,
-    "Gummy - Strawberry Dream RAW": 19,
-    "Gummy - Strawberry Shortcake - 20mg - RAW": 26,
-    "Gummy - Tropical Passion RAW": 23,
+    "Flower - 24 Karat": 1260,
+    "Flower - Acai Sorbet": 1260,
+    "Flower - CBD Flower": 211564,
+    "Flower - Granddaddy Purple": 1260,
+    "Flower - Gush Mints": 1260,
+    "FMX-AC": 5000,
+    "FMX-BD": 5000,
+    "FMX-BLOG": 22700,
+    "FMX-LCH": 14000,
+    "FMX-MMJ": 22700,
+    "FMX-OC": 14000,
+    "FMX-PBB": 10000,
+    "FMX-PD": 25000,
+    "FMX-SKP": 34350,
+    "FMX-TBP": 48500,
+    "FMX-TS": 37700,
+    "Gummy - Appleberry Nectar RAW": 18000,
+    "Gummy - Blue Dream - 20mg - RAW": 84000,
+    "Gummy - Kiwi Burst - 20mg - RAW": 84500,
+    "Gummy - Mango Crush - 30mg - RAW": 61500,
+    "Gummy - Midnight Berry - 25mg - RAW": 157500,
+    "Gummy - Pink Lemonade - 20mg - RAW": 84000,
+    "Gummy - Strawberry Dream RAW": 19500,
+    "Gummy - Strawberry Shortcake - 20mg - RAW": 26000,
+    "Gummy - Tropical Passion RAW": 23000,
     "IM-IST": 100,
-    "INS-LR": 200,
-    "ISO - CBD": 1,
+    "INS-LR": 200000,
+    "ISO - CBD": 1000,
     "ISO - CBG": 500,
-    "ISO - THCA": 30,
-    "LBL-IL-AC": 10,
-    "LBL-IL-AF": 7,
-    "LBL-IL-BD": 10,
-    "LBL-IL-GMOC": 6,
-    "LBL-IL-LAKK": 2,
-    "LBL-IL-LCH": 7,
-    "LBL-IL-NYCD": 1,
-    "LBL-IL-OC": 10,
-    "LBL-IL-PBB": 12,
-    "LBL-IL-SA": 2,
-    "LBL-IL-YOG": 9,
-    "LBL-IT-FKS": 10,
-    "LBL-IT-ZAZ": 15,
-    "LBL-JH-ABJ": 12,
-    "LBL-JH-BC": 2,
-    "LBL-JH-BLOG": 16,
-    "LBL-JH-FW": 2,
-    "LBL-JH-MMJ": 3,
-    "LBL-JH-PD": 12,
-    "LBL-JH-RCP": 4,
-    "LBL-JH-SKP": 17,
-    "LBL-JH-TBP": 19,
-    "LBL-JH-TS": 8,
-    "LID-IL-BLK": 120,
-    "LID-JH-BLU": 10,
-    "LID-JH-GRN": 10,
-    "LID-JH-PUR": 19,
-    "LID-JH-RED": 24,
-    "LID-JH-YOR": 22,
+    "ISO - THCA": 30000,
+    "LBL-IL-AC": 10000,
+    "LBL-IL-AF": 7500,
+    "LBL-IL-BD": 10000,
+    "LBL-IL-GMOC": 6300,
+    "LBL-IL-LAKK": 2500,
+    "LBL-IL-LCH": 7500,
+    "LBL-IL-NYCD": 1800,
+    "LBL-IL-OC": 10000,
+    "LBL-IL-PBB": 12000,
+    "LBL-IL-SA": 2800,
+    "LBL-IL-YOG": 9000,
+    "LBL-IT-FKS": 4500,
+    "LBL-IT-ZAZ": 5100,
+    "LBL-JH-ABJ": 12500,
+    "LBL-JH-BC": 2000,
+    "LBL-JH-BLOG": 16000,
+    "LBL-JH-FW": 2000,
+    "LBL-JH-MMJ": 3800,
+    "LBL-JH-PD": 12000,
+    "LBL-JH-RCP": 4600,
+    "LBL-JH-SKP": 17000,
+    "LBL-JH-TBP": 19000,
+    "LBL-JH-TS": 8500,
+    "LID-IL-BLK": 120000,
+    "LID-JH-BLU": 10000,
+    "LID-JH-GRN": 10000,
+    "LID-JH-PUR": 19000,
+    "LID-JH-RED": 24000,
+    "LID-JH-YOR": 22000,
     "MM-MPB": 835,
     "MM-MSHWC": 200,
-    "MM-RAFS": 15,
-    "MYL-05CT-MB": 2,
-    "MYL-DD-BLOG": 20,
-    "MYL-DD-MMJ": 20,
-    "MYL-DD-PD": 20,
-    "MYL-DD-SKP": 20,
-    "MYL-DD-TBP": 20,
-    "MYL-DD-TS": 20,
-    "P5D-BKC-01": 5,
+    "MM-RAFS": 15000,
+    "MYL-DD-BLOG": 20000,
+    "MYL-DD-MMJ": 20000,
+    "MYL-DD-PD": 20000,
+    "MYL-DD-SKP": 20000,
+    "MYL-DD-TBP": 20000,
+    "MYL-DD-TS": 20000,
+    "P5D-BKC-01": 5159,
     "P5D-BKC-10PK": 2,
     "P5D-BLOG-01": 5,
     "P5D-BLOG-10PK": 48,
-    "P5D-CC-01": 5,
+    "P5D-CC-01": 5002,
     "P5D-CC-10PK": 2,
     "P5D-GT-01": 1,
     "P5D-MMJ-01": 22,
@@ -5498,17 +5493,17 @@
     "P5D-PD-01": 5,
     "P5D-PD-10PK": 58,
     "P5D-SC-01": 2,
-    "P5D-SKP-01": 4,
-    "P5D-SKP-10PK": 42,
+    "P5D-SKP-01": 17,
+    "P5D-SKP-10PK": 470,
     "P5D-TBP-01": 11,
     "P5D-TBP-10PK": 38,
     "P5D-TN-01": 2,
     "P5D-TP-01": 1,
     "P5D-TS-01": 14,
     "P5D-TS-10PK": 56,
-    "PIL-AC-01": 3,
+    "PIL-AC-01": 2,
     "PIL-AC-10PK": 37,
-    "PIL-AF-01": 7,
+    "PIL-AF-01": 6,
     "PIL-AF-10PK": 27,
     "PIL-BD-01": 1,
     "PIL-GB-01": 1,
@@ -5523,7 +5518,7 @@
     "PIL-PG-01": 10,
     "PIL-SA-01": 10,
     "PIL-YOG-01": 10,
-    "PJH-BC-01": 2,
+    "PJH-BC-01": 1,
     "PJH-BC-10PK": 1,
     "PJH-BLOG-01": 13,
     "PJH-BLOG-10PK": 30,
@@ -5535,7 +5530,8 @@
     "PJH-MT-01": 2,
     "PJH-PD-01": 6,
     "PJH-PD-10PK": 26,
-    "PJH-PP-01": 2,
+    "PJH-PP-01": 1,
+    "PJH-RCP-01": 2471,
     "PJH-SKP-01": 4,
     "PJH-SKP-10PK": 36,
     "PJH-SM-01": 2,
@@ -5544,46 +5540,45 @@
     "PJH-TBP-10PK": 28,
     "PJH-TS-01": 21,
     "PJH-TS-10PK": 32,
-    "SLV-5PK-BLOG": 16,
-    "SLV-5PK-MMJ": 15,
-    "SLV-5PK-PD": 17,
-    "SLV-5PK-SKP": 17,
-    "SLV-5PK-TBP": 16,
-    "SLV-FJ-AN": 2,
-    "SLV-FJ-SD": 4,
-    "SLV-FJ-TP": 3,
-    "SLV-LR-GJR": 13,
-    "SLV-LR-MG": 13,
-    "SLV-LR-TS": 10,
-    "TRP-BKN": 1,
-    "TRP-SJC": 1,
-    "TRP-WSC": 1,
-    "TRY-FJ-BTM": 10,
-    "TRY-FJ-TOP": 10,
-    "TRY-KDL": 600,
-    "TUB-IL-BLK": 100,
-    "TUB-JH-CLR": 100,
-    "VHW-TRN": 60,
+    "SLV-5PK-BLOG": 16000,
+    "SLV-5PK-MMJ": 15000,
+    "SLV-5PK-PD": 17000,
+    "SLV-5PK-SKP": 17000,
+    "SLV-5PK-TBP": 16000,
+    "SLV-FJ-AN": 2000,
+    "SLV-FJ-SD": 4000,
+    "SLV-FJ-TP": 3000,
+    "SLV-LR-GJR": 13000,
+    "SLV-LR-MG": 13000,
+    "SLV-LR-TS": 10000,
+    "TRP-BKN": 1000,
+    "TRP-SJC": 1000,
+    "TRP-WSC": 1000,
+    "TRY-FJ-BTM": 10000,
+    "TRY-FJ-TOP": 10000,
+    "TRY-KDL": 600000,
+    "TUB-IL-BLK": 100000,
+    "TUB-JH-CLR": 100000,
+    "VHW-TRN": 60000,
     "VIC-GSC-01": 1,
     "VIC-NYSD-01": 2,
     "VIC-PR-01": 48,
     "VIC-PS-01": 3,
     "VIC-RBK-01": 5,
     "VLR-BLOG-01": 11,
-    "VLR-CL-01": 1,
-    "VLR-MMJ-01": 10,
+    "VLR-MMJ-01": 4130,
     "VLR-MW-01": 2,
-    "VLR-PD-01": 11,
+    "VLR-PD-01": 10,
     "VLR-SKP-01": 14,
     "VLR-TBP-01": 10,
     "VLR-TS-01": 11,
-    "VLRSB-BF-01": 14,
+    "VLRSB-BF-01": 13,
     "VLRSB-GJR-01": 10,
     "VLRSB-KL-01": 38,
     "VLRSB-MG-01": 34,
     "VLRSB-SS-01": 23,
     "VLRSB-SS-10PK": 14,
-    "VLRSB-WS-01": 2,
+    "VLRSB-WS-01": 2600,
     "VLRSB-WS-10PK": 14
   }
 }
