@@ -67,7 +67,10 @@
       "Bash(timeout 5 bash -c 'sleep 3 && cat \"C:\\\\Users\\\\DANIEL~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Daniel-Kim-OneDrive-Desktop-thetruth\\\\3f9877a0-a3fd-4ba6-8e24-896f9c2f1777\\\\tasks\\\\bq4sz5wwm.output\"')",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\" -Recurse -Filter \"*.js\" -File)",
       "Bash(Select-Object -First 20)",
-      "Bash(Format-Table FullName)"
+      "Bash(Format-Table FullName)",
+      "Bash(git pull *)",
+      "Bash(python3 -c ' *)",
+      "Bash(npm list *)"
     ]
   }
 }

@@ -35,9 +35,11 @@ function showView(view) {
   const isInv    = view === 'inventory';
   const isSales  = view === 'sales';
   const isAlerts = view === 'alerts';
+  const isCalc   = view === 'calculator';
 
   document.getElementById('sales-view').style.display  = isSales   ? 'block' : 'none';
   document.getElementById('alerts-view').style.display = isAlerts  ? 'block' : 'none';
+  document.getElementById('calculator-view').style.display = isCalc ? 'block' : 'none';
   document.getElementById('items-list').style.display  = isInv     ? '' : 'none';
   document.getElementById('empty-state').style.display = 'none';
 
@@ -58,13 +60,14 @@ function showView(view) {
   const fbar = document.querySelector('.filter-bar');
   if (fbar) fbar.style.display = isInv ? '' : 'none';
 
-  ['inventory','sales','alerts'].forEach(v => {
+  ['inventory','sales','alerts','calculator'].forEach(v => {
     const el = document.getElementById('nav-' + v);
     if (el) el.style.color = v === view ? 'var(--accent)' : '';
   });
 
   if (isInv)    render();
   if (isAlerts) { renderAlertSubcatChips(); renderAlerts(); }
+  if (isCalc)   { import('./views/calculator.js').then(m => m.renderCalculatorView()); }
 }
 
 // ── Keyboard shortcut: Escape closes modal ──

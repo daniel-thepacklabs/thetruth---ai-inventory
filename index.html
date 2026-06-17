@@ -31,6 +31,9 @@
     <div class="nav-item" onclick="showView('alerts')" id="nav-alerts">
       <span class="dot" style="background:var(--red)"></span> Consumption Alerts
     </div>
+    <div class="nav-item" onclick="showView('calculator')" id="nav-calculator">
+      <span class="dot" style="background:var(--purple)"></span> Material Calculator
+    </div>
 
     <div class="nav-label">Status</div>
     <div class="nav-item active" data-filter="all" onclick="setFilter('all',this)">
@@ -301,6 +304,27 @@
         </div>
 
       </div><!-- end sales-view -->
+
+      <!-- Material Calculator view -->
+      <div id="calculator-view" style="display:none;padding:1rem">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:.5rem">
+              <span style="font-size:14px;font-weight:600;color:var(--text)">Material Calculator</span>
+              <span style="font-size:10px;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:3px">Enter quantities to calculate ingredients</span>
+            </div>
+            <div style="display:flex;gap:.5rem">
+              <button onclick="window.__calcResetAll && window.__calcResetAll()" style="padding:4px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:11px;cursor:pointer">Reset All</button>
+            </div>
+          </div>
+          <div id="calc-body" style="padding:1rem">
+            <div id="calc-product-inputs" style="display:grid;gap:1.25rem"></div>
+            <div id="calc-flower-totals" style="margin-top:1.25rem"></div>
+            <div id="calc-results" style="margin-top:1.25rem"></div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- end content -->
   </div><!-- end main -->
 </div><!-- end shell -->
@@ -441,6 +465,7 @@
     </div>
   </div>
 </div>
+
 
 <script type="module" src="/src/main.js"></script>
 </body>
