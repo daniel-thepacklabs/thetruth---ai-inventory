@@ -9,16 +9,36 @@ const SECRET = import.meta.env.VITE_FINALE_API_SECRET;
 const AUTH = KEY && SECRET ? 'Basic ' + btoa(`${KEY}:${SECRET}`) : null;
 const num = v => parseFloat(String(v || '0').replace(/,/g, '')) || 0;
 
-async function gql(query) {
-  const r = await fetch('/finale-api/graphql', {
-    method: 'POST',
-    headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query }),
-  });
-  if (!r.ok) throw new Error(`GraphQL ${r.status}: ${await r.text()}`);
-  const d = await r.json();
-  if (d.errors) throw new Error('GraphQL errors: ' + JSON.stringify(d.errors));
-  return d.data;
+async function gql(query, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const r = await fetch('/finale-api/graphql', {
+        method: 'POST',
+        headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+      if (r.status === 429 || r.status >= 500) {
+        if (attempt < retries) {
+          const wait = attempt * 2000;
+          console.warn(`GraphQL ${r.status}, retrying in ${wait}ms (attempt ${attempt}/${retries})...`);
+          await new Promise(resolve => setTimeout(resolve, wait));
+          continue;
+        }
+      }
+      if (!r.ok) throw new Error(`GraphQL ${r.status}: ${await r.text()}`);
+      const d = await r.json();
+      if (d.errors) throw new Error('GraphQL errors: ' + JSON.stringify(d.errors));
+      return d.data;
+    } catch (err) {
+      if (attempt < retries && (err.name === 'TypeError' || err.message.includes('Failed to fetch'))) {
+        const wait = attempt * 2000;
+        console.warn(`Fetch error: ${err.message}, retrying in ${wait}ms (attempt ${attempt}/${retries})...`);
+        await new Promise(resolve => setTimeout(resolve, wait));
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 async function fetchLiveProducts() {

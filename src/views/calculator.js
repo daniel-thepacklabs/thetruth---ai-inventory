@@ -199,6 +199,105 @@ const FORMULATIONS = {
   },
 };
 
+const GUMMY_FLAVORS = [
+  {
+    flavor: 'Blue Dream',
+    rawSku: 'Gummy - Blue Dream - 20mg - RAW',
+    color: '#5BA3E0',
+    skus: [
+      { label: '5ct Single', code: 'EGBD-100-01', pcs: 5 },
+      { label: '5ct 8PK Display', code: 'EGBD-100-8PK', pcs: 40 },
+      { label: '20ct Single', code: 'EGBD-400-01', pcs: 20 },
+      { label: '20ct 5PK Display', code: 'EGBD-400-5PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Kiwi Burst',
+    rawSku: 'Gummy - Kiwi Burst - 20mg - RAW',
+    color: '#7BC67E',
+    skus: [
+      { label: '5ct Single', code: 'EGKB-100-01', pcs: 5 },
+      { label: '5ct 8PK Display', code: 'EGKB-100-8PK', pcs: 40 },
+      { label: '20ct Single', code: 'EGKB-400-01', pcs: 20 },
+      { label: '20ct 5PK Display', code: 'EGKB-400-5PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Mango Crush',
+    rawSku: 'Gummy - Mango Crush - 30mg - RAW',
+    color: '#F0A050',
+    skus: [
+      { label: '5ct Single', code: 'EGMCR-150-01', pcs: 5 },
+      { label: '5ct 8PK Display', code: 'EGMCR-150-8PK', pcs: 40 },
+      { label: '20ct Single', code: 'EGMCR-600-01', pcs: 20 },
+      { label: '20ct 5PK Display', code: 'EGMCR-600-5PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Midnight Berry',
+    rawSku: 'Gummy - Midnight Berry - 25mg - RAW',
+    color: '#8B6BB5',
+    skus: [
+      { label: '5ct Single', code: 'EGMB-125-01', pcs: 5 },
+      { label: '5ct 8PK Display', code: 'EGMB-125-8PK', pcs: 40 },
+      { label: '20ct Single', code: 'EGMB-500-01', pcs: 20 },
+      { label: '20ct 5PK Display', code: 'EGMB-500-5PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Pink Lemonade',
+    rawSku: 'Gummy - Pink Lemonade - 20mg - RAW',
+    color: '#E88BC3',
+    skus: [
+      { label: '5ct Single', code: 'EGPL-100-01', pcs: 5 },
+      { label: '5ct 8PK Display', code: 'EGPL-100-8PK', pcs: 40 },
+      { label: '20ct Single', code: 'EGPL-400-01', pcs: 20 },
+      { label: '20ct 5PK Display', code: 'EGPL-400-5PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Strawberry Shortcake',
+    rawSku: 'Gummy - Strawberry Shortcake - 20mg - RAW',
+    color: '#E06B6B',
+    skus: [
+      { label: '5ct Single', code: 'EGSS-100-01', pcs: 5 },
+      { label: '5ct 8PK Display', code: 'EGSS-100-8PK', pcs: 40 },
+      { label: '20ct Single', code: 'EGSS-400-01', pcs: 20 },
+      { label: '20ct 5PK Display', code: 'EGSS-400-5PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Appleberry Nectar',
+    rawSku: 'Gummy - Appleberry Nectar RAW',
+    color: '#C4E05B',
+    line: 'Froot Jam',
+    skus: [
+      { label: 'Single (10pc)', code: 'EGFJ-AN-01', pcs: 10 },
+      { label: '10PK Display', code: 'EGFJ-AN-10PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Strawberry Dream',
+    rawSku: 'Gummy - Strawberry Dream RAW',
+    color: '#E08B8B',
+    line: 'Froot Jam',
+    skus: [
+      { label: 'Single (10pc)', code: 'EGFJ-SD-01', pcs: 10 },
+      { label: '10PK Display', code: 'EGFJ-SD-10PK', pcs: 100 },
+    ],
+  },
+  {
+    flavor: 'Tropical Passion',
+    rawSku: 'Gummy - Tropical Passion RAW',
+    color: '#E0C45B',
+    line: 'Froot Jam',
+    skus: [
+      { label: 'Single (10pc)', code: 'EGFJ-TP-01', pcs: 10 },
+      { label: '10PK Display', code: 'EGFJ-TP-10PK', pcs: 100 },
+    ],
+  },
+];
+
 let editingFormulation = null;
 
 const LIQUID_INGREDIENTS = {
@@ -293,8 +392,74 @@ function recalculate() {
     });
   }
 
+  const gummyPieces = recalcGummies();
+
   renderFlowerTotals(flowerMix);
+  renderGummyTotals(gummyPieces);
   renderResults(totals);
+}
+
+function recalcGummies() {
+  const results = [];
+  for (const gf of GUMMY_FLAVORS) {
+    let totalPieces = 0;
+    const breakdown = [];
+    for (const sku of gf.skus) {
+      const el = document.getElementById('gummy-' + sku.code);
+      const qty = parseInt(el?.value) || 0;
+      if (qty > 0) {
+        const pcs = qty * sku.pcs;
+        totalPieces += pcs;
+        breakdown.push({ label: sku.label, qty, pcs });
+      }
+    }
+    if (totalPieces > 0) {
+      results.push({ ...gf, totalPieces, breakdown });
+    }
+  }
+  return results;
+}
+
+function renderGummyTotals(results) {
+  const el = document.getElementById('calc-gummy-totals');
+  if (!el) return;
+  if (!results.length) {
+    el.innerHTML = '';
+    return;
+  }
+
+  const grand = results.reduce((s, r) => s + r.totalPieces, 0);
+  let html = `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+    <div style="padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <span style="font-size:13px;font-weight:600;color:var(--orange)">RAW Gummy Pieces Needed</span>
+        <span style="font-size:10px;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:3px">${results.length} flavors</span>
+      </div>
+      <span style="font-size:12px;font-weight:600;font-family:var(--font-mono);color:var(--orange)">${grand.toLocaleString()} total pieces</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:var(--bg4)">
+        <th style="padding:.5rem 1rem;text-align:left;color:var(--text3);font-weight:500">Flavor</th>
+        <th style="padding:.5rem .75rem;text-align:left;color:var(--text3);font-weight:500">RAW SKU</th>
+        <th style="padding:.5rem .75rem;text-align:right;color:var(--text3);font-weight:500">Total Pieces</th>
+        <th style="padding:.5rem 1rem;text-align:left;color:var(--text3);font-weight:500">Breakdown</th>
+      </tr></thead><tbody>`;
+
+  for (const r of results) {
+    const tags = r.breakdown.map(b =>
+      `<span style="display:inline-block;padding:1px 5px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin:1px;font-size:10px;white-space:nowrap">${b.label}: ${b.qty} × ${b.pcs / b.qty}pcs = ${b.pcs.toLocaleString()}</span>`
+    ).join(' ');
+    const line = r.line ? `<span style="font-size:9px;color:var(--text3);background:var(--bg2);padding:0 4px;border-radius:2px;margin-left:4px">${r.line}</span>` : '';
+    html += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:.5rem 1rem;font-weight:500"><span style="color:${r.color}">${r.flavor}</span>${line}</td>
+      <td style="padding:.5rem .75rem;font-size:10px;color:var(--text3);font-family:var(--font-mono)">${r.rawSku}</td>
+      <td style="padding:.5rem .75rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--orange)">${r.totalPieces.toLocaleString()}</td>
+      <td style="padding:.5rem 1rem">${tags}</td>
+    </tr>`;
+  }
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
 }
 
 function renderFlowerTotals(flowerMix) {
@@ -507,6 +672,33 @@ function renderProductInputs() {
     html += '</div></div>';
   }
 
+  // Gummy Pieces section
+  html += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+    <div style="padding:.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--orange)"></span>
+      <span style="font-size:12px;font-weight:600;color:var(--orange)">Gummy Pieces Calculator</span>
+      <span style="font-size:10px;color:var(--text3)">Packaged → RAW pieces</span>
+    </div>
+    <div style="display:grid;gap:0">`;
+
+  for (const gf of GUMMY_FLAVORS) {
+    const line = gf.line ? ` <span style="font-size:9px;color:var(--text3);background:var(--bg2);padding:0 4px;border-radius:2px">${gf.line}</span>` : '';
+    html += `<div style="padding:.6rem 1rem;border-bottom:0.5px solid var(--border)">
+      <div style="font-size:12px;font-weight:500;color:${gf.color};margin-bottom:.4rem">${gf.flavor}${line}</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">`;
+    for (const sku of gf.skus) {
+      html += `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:9px;color:var(--text3);text-transform:uppercase;white-space:nowrap">${sku.label} <span style="color:var(--text4)">(${sku.pcs}pcs)</span></span>
+        <input type="number" id="gummy-${sku.code}" value="0" min="0" step="1"
+          oninput="window.__calcRecalc()"
+          style="width:70px;padding:4px 6px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:12px;font-family:var(--font-mono);text-align:center" />
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+
+  html += '</div></div>';
+
   container.innerHTML = html;
 }
 
@@ -517,6 +709,7 @@ export function renderCalculatorView() {
   window.__calcRecalc = recalculate;
   window.__calcResetAll = () => {
     document.querySelectorAll('#calc-product-inputs input[type="number"]').forEach(el => { el.value = '0'; });
+    document.getElementById('calc-gummy-totals').innerHTML = '';
     recalculate();
   };
   window.__calcEditFormula = renderFormulationEditor;

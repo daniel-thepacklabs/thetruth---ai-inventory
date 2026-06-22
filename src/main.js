@@ -1,7 +1,7 @@
 import { processData, processSalesReport, buildSubcatIndex } from './data/parsers.js';
 import { state } from './data/state.js';
 import { fetchAll } from './data/finaleApi.js';
-import { updateRangeLabel, renderSubcatChips, setRenderFn as setFilterRender, toggleChip, togglePill, resetFilters, selectAllChips, clearAllChips, toggleSubcat, selectAllSubcats, clearAllSubcats, quickFilter, quickStatusFilter, setFilter, activateReorderOnly } from './ui/filters.js';
+import { updateRangeLabel, renderSubcatChips, renderEdibleFilters, initEdibleFilterGlobals, setRenderFn as setFilterRender, toggleChip, togglePill, resetFilters, selectAllChips, clearAllChips, toggleSubcat, selectAllSubcats, clearAllSubcats, quickFilter, quickStatusFilter, setFilter, activateReorderOnly } from './ui/filters.js';
 import { openModal, closeModal, saveModal, resetOverride, updateModalPreview, setRenderFn as setModalRender } from './ui/modal.js';
 import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView } from './views/inventory.js';
 import { renderSalesView } from './views/sales.js';
@@ -36,10 +36,12 @@ function showView(view) {
   const isSales  = view === 'sales';
   const isAlerts = view === 'alerts';
   const isCalc   = view === 'calculator';
+  const isEdibles = view === 'edibles';
 
   document.getElementById('sales-view').style.display  = isSales   ? 'block' : 'none';
   document.getElementById('alerts-view').style.display = isAlerts  ? 'block' : 'none';
   document.getElementById('calculator-view').style.display = isCalc ? 'block' : 'none';
+  document.getElementById('edibles-view').style.display = isEdibles ? 'block' : 'none';
   document.getElementById('items-list').style.display  = isInv     ? '' : 'none';
   document.getElementById('empty-state').style.display = 'none';
 
@@ -58,16 +60,17 @@ function showView(view) {
   const sortSel = document.getElementById('sortSel');
   if (sortSel) sortSel.style.display = isInv ? '' : 'none';
   const fbar = document.querySelector('.filter-bar');
-  if (fbar) fbar.style.display = isInv ? '' : 'none';
+  if (fbar) fbar.style.display = (isInv || isEdibles) ? '' : 'none';
 
-  ['inventory','sales','alerts','calculator'].forEach(v => {
+  ['inventory','sales','alerts','calculator','edibles'].forEach(v => {
     const el = document.getElementById('nav-' + v);
     if (el) el.style.color = v === view ? 'var(--accent)' : '';
   });
 
-  if (isInv)    render();
-  if (isAlerts) { renderAlertSubcatChips(); renderAlerts(); }
-  if (isCalc)   { import('./views/calculator.js').then(m => m.renderCalculatorView()); }
+  if (isInv)     render();
+  if (isEdibles) { import('./views/edibles.js').then(m => m.renderEdiblesView()); }
+  if (isAlerts)  { renderAlertSubcatChips(); renderAlerts(); }
+  if (isCalc)    { import('./views/calculator.js').then(m => m.renderCalculatorView()); }
 }
 
 // ── Keyboard shortcut: Escape closes modal ──
@@ -95,6 +98,7 @@ async function syncFromFinale() {
     buildSubcatIndex();
     updateRangeLabel();
     renderSubcatChips();
+    renderEdibleFilters();
     render();
     if (salesOrder || monthlyTotals || productSalesData) renderSalesView();
 
@@ -116,3 +120,4 @@ syncFromFinale();
 
 // expose for the sync button
 window.syncFromFinale = syncFromFinale;
+initEdibleFilterGlobals();

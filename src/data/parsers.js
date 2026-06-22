@@ -93,27 +93,45 @@ export function catSubcat(pid) {
 }
 
 // ── Edible helpers ──
+export function getEdiblePackType(pid) {
+  const p = (pid || '').toUpperCase();
+  if (p.includes('-8PK')) return '8PK Display';
+  if (p.includes('-5PK')) return '5PK Display';
+  if (p.includes('-10PK')) return '10PK Display';
+  if (p.includes('-03P')) return '3-Pack';
+  if (p.includes('-02P')) return '2-Pack';
+  if (p.includes('-01')) return 'Single';
+  if (p.startsWith('GUMMY ')) return 'RAW';
+  return null;
+}
+
 export function getPiecesPerUnit(pid, desc) {
   const p = (pid || '').toUpperCase();
   const d = (desc || '');
   let piecesPerBag = 1;
-  const ctMatch = d.match(/(\d+)(?:ct|CT|pc)\b/);
-  if (ctMatch) {
-    piecesPerBag = parseInt(ctMatch[1]);
-  } else if (p.includes('-05-') || /-05$/.test(p)) {
-    piecesPerBag = 5;
-  } else if (p.includes('-20-') || /-20$/.test(p)) {
-    piecesPerBag = 20;
-  } else if (p.includes('-100-') || p.includes('-125-') || p.includes('-150-')) {
-    piecesPerBag = 5;
-  } else if (p.includes('-400-') || p.includes('-500-') || p.includes('-600-')) {
-    piecesPerBag = 20;
+  if (p.startsWith('EGFJ-')) {
+    piecesPerBag = 10;
+  } else {
+    const ctMatch = d.match(/(\d+)(?:ct|CT|pc)\b/);
+    if (ctMatch) {
+      piecesPerBag = parseInt(ctMatch[1]);
+    } else if (p.includes('-05-') || /-05$/.test(p)) {
+      piecesPerBag = 5;
+    } else if (p.includes('-20-') || /-20$/.test(p)) {
+      piecesPerBag = 20;
+    } else if (p.includes('-100-') || p.includes('-125-') || p.includes('-150-')) {
+      piecesPerBag = 5;
+    } else if (p.includes('-400-') || p.includes('-500-') || p.includes('-600-')) {
+      piecesPerBag = 20;
+    }
   }
-  let bagsPerUnit = 1;
-  if (p.includes('-8PK'))       bagsPerUnit = 8;
-  else if (p.includes('-5PK'))  bagsPerUnit = 5;
-  else if (p.includes('-10PK')) bagsPerUnit = 10;
-  return piecesPerBag * bagsPerUnit;
+  let packMultiplier = 1;
+  if (p.includes('-02P'))       packMultiplier = 2;
+  else if (p.includes('-03P'))  packMultiplier = 3;
+  else if (p.includes('-5PK'))  packMultiplier = 5;
+  else if (p.includes('-8PK'))  packMultiplier = 8;
+  else if (p.includes('-10PK')) packMultiplier = 10;
+  return piecesPerBag * packMultiplier;
 }
 
 export function getEdibleFlavor(pid, desc) {
@@ -254,9 +272,7 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
     });
   }
 
-  // Non-edible rows
   const nonEdibleRows = Object.entries(stockMap)
-    .filter(([pid]) => !/^(EG|ECC)/i.test(pid))
     .map(([pid, st]) => {
       const [cat, subcat] = catSubcat(pid); if (!cat) return null;
       const sl = salesMap[pid] || { s90:0, s30:0, slm:0 };
@@ -266,6 +282,9 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const remaining = st.onHand - st.reserved;
       if (consumed90 === 0) return null;
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
+      const isEdible = cat === 'Edibles' && /^(EG|ECC)/i.test(pid);
+      const flavor = isEdible ? getEdibleFlavor(pid, st.desc) : null;
+      const packType = isEdible ? getEdiblePackType(pid) : null;
       return {
         id: pid, desc: st.desc, cat, subcat,
         consumed90, runRate30, actual30, dem: runRate30,
@@ -275,46 +294,65 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
         hasConsumption: consumeMap[pid] != null,
         has30Consumption: consume30Map[pid] != null,
         isEdibleFlavor: false,
+        flavor, packType,
       };
     }).filter(Boolean);
 
-  // Edible rows — consolidate by flavor into individual pieces
-  state.EDIBLE_ONHAND = {};
-  Object.entries(stockMap).forEach(([pid, st]) => {
-    if (!/^(EG|ECC)/i.test(pid)) return;
-    const flavor = getEdibleFlavor(pid, st.desc);
-    const ppu    = getPiecesPerUnit(pid, st.desc);
-    if (!state.EDIBLE_ONHAND[flavor]) state.EDIBLE_ONHAND[flavor] = { onHand:0, onOrder:0, reserved:0, desc:'' };
-    state.EDIBLE_ONHAND[flavor].onHand   += Math.max(0, st.onHand) * ppu;
-    state.EDIBLE_ONHAND[flavor].onOrder  += st.onOrder * ppu;
-    state.EDIBLE_ONHAND[flavor].reserved += st.reserved * ppu;
-    if (!state.EDIBLE_ONHAND[flavor].desc) state.EDIBLE_ONHAND[flavor].desc = st.desc;
-  });
-
-  const edibleRows = Object.entries(state.EDIBLE_ONHAND).map(([flavor, oh]) => {
-    let avgMoPieces = 0;
-    if (state.SALES_DATA.length) {
-      const flavorSales = state.SALES_DATA.filter(r => /^(EG|ECC)/i.test(r.pid) && getEdibleFlavor(r.pid, r.desc) === flavor);
-      const totalPieces = flavorSales.reduce((s, r) => s + r.qty * getPiecesPerUnit(r.pid, r.desc), 0);
-      const months = [...new Set(flavorSales.map(r => r.month))];
-      avgMoPieces = months.length > 0 ? totalPieces / months.length : 0;
+  // Map packaged edible SKUs → RAW SKU, aggregate sales as piece demand
+  const PACKAGED_TO_RAW = {
+    'EGBD':    'Gummy - Blue Dream - 20mg - RAW',
+    'EGKB':    'Gummy - Kiwi Burst - 20mg - RAW',
+    'EGMCR':   'Gummy - Mango Crush - 30mg - RAW',
+    'EGPL':    'Gummy - Pink Lemonade - 20mg - RAW',
+    'EGFJ-AN': 'Gummy - Appleberry Nectar RAW',
+    'EGFJ-SD': 'Gummy - Strawberry Dream RAW',
+    'EGFJ-TP': 'Gummy - Tropical Passion RAW',
+  };
+  // EGMB and EGSS are shared codes — distinguish by mg number
+  function resolveRawSku(pid) {
+    const p = pid.toUpperCase();
+    if (p.startsWith('EGSS-100-') || p.startsWith('EGSS-400-')) return 'Gummy - Strawberry Shortcake - 20mg - RAW';
+    if (p.startsWith('EGMB-125-') || p.startsWith('EGMB-500-')) return 'Gummy - Midnight Berry - 25mg - RAW';
+    for (const [prefix, raw] of Object.entries(PACKAGED_TO_RAW)) {
+      if (p.startsWith(prefix + '-')) return raw;
     }
-    const dem = parseFloat(avgMoPieces.toFixed(2));
-    const totalSupply = oh.onHand + oh.onOrder;
-    const months = dem > 0 ? parseFloat((totalSupply / dem).toFixed(4)) : 0;
-    return {
-      id: 'EDIBLE-' + flavor.replace(/\s+/g, '-').toUpperCase(),
-      desc: flavor, cat: 'Edibles', subcat: 'Gummy',
-      consumed90: dem * 3, runRate30: dem, actual30: 0,
-      dem, s30: 0, slm: 0,
-      onHand: oh.onHand, onOrder: oh.onOrder, reserved: oh.reserved,
-      remaining: totalSupply, totalInv: totalSupply, months, ss: 1.75,
-      hasConsumption: false, has30Consumption: false,
-      isEdibleFlavor: true, flavorName: flavor,
-    };
-  }).filter(r => r.dem > 0 || r.onHand > 0);
+    return null;
+  }
 
-  state.RAW_DATA = [...nonEdibleRows, ...edibleRows];
+  const rawDemand = {};
+  for (const [pid, sl] of Object.entries(salesMap)) {
+    const rawSku = resolveRawSku(pid);
+    if (!rawSku) continue;
+    const ppu = getPiecesPerUnit(pid, stockMap[pid]?.desc || '');
+    if (!rawDemand[rawSku]) rawDemand[rawSku] = { s90: 0, s30: 0, slm: 0 };
+    rawDemand[rawSku].s90 += sl.s90 * ppu;
+    rawDemand[rawSku].s30 += sl.s30 * ppu;
+    rawDemand[rawSku].slm += sl.slm * ppu;
+  }
+
+  const rawRows = Object.entries(rawDemand).map(([rawSku, dem]) => {
+    const st = stockMap[rawSku] || { onHand: 0, onOrder: 0, reserved: 0, desc: '' };
+    const consumed90 = dem.s90;
+    const runRate30 = parseFloat((consumed90 / 3).toFixed(2));
+    const actual30 = dem.s30;
+    const remaining = st.onHand - st.reserved;
+    const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
+    if (consumed90 === 0 && st.onHand === 0) return null;
+    const flavorMatch = rawSku.match(/^Gummy - (.+?)(?:\s*-\s*\d+mg\s*)?-?\s*RAW$/);
+    const rawFlavor = flavorMatch ? flavorMatch[1].trim() : rawSku;
+    return {
+      id: rawSku, desc: st.desc || rawSku, cat: 'Edibles', subcat: 'Gummy RAW',
+      consumed90, runRate30, actual30, dem: runRate30,
+      s30: dem.s30, slm: dem.slm,
+      onHand: st.onHand, onOrder: st.onOrder, reserved: st.reserved,
+      remaining, totalInv: st.onHand + st.onOrder, months, ss: 1.75,
+      hasConsumption: false, has30Consumption: false,
+      isEdibleFlavor: false,
+      flavor: rawFlavor, packType: 'RAW',
+    };
+  }).filter(Boolean);
+
+  state.RAW_DATA = [...nonEdibleRows, ...rawRows];
 }
 
 export function processSalesReport(csv) {
@@ -346,4 +384,13 @@ export function buildSubcatIndex() {
     state.ALL_SUBCAT_LIST.add(item.subcat);
   });
   state.activeSubcats = new Set(state.ALL_SUBCAT_LIST);
+
+  state.ALL_EDIBLE_FLAVORS.clear();
+  state.ALL_EDIBLE_PACKS.clear();
+  state.RAW_DATA.forEach(item => {
+    if (item.flavor) state.ALL_EDIBLE_FLAVORS.add(item.flavor);
+    if (item.packType) state.ALL_EDIBLE_PACKS.add(item.packType);
+  });
+  state.activeEdibleFlavors = new Set(state.ALL_EDIBLE_FLAVORS);
+  state.activeEdiblePacks = new Set(state.ALL_EDIBLE_PACKS);
 }

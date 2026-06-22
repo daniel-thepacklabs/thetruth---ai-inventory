@@ -36,6 +36,53 @@ export function toggleSubcat(el, val) {
 export function selectAllSubcats() { state.ALL_SUBCAT_LIST.forEach(s => state.activeSubcats.add(s)); document.querySelectorAll('[data-subcat]').forEach(c => c.classList.add('active')); _render(); }
 export function clearAllSubcats()  { state.activeSubcats.clear(); document.querySelectorAll('[data-subcat]').forEach(c => c.classList.remove('active')); _render(); }
 
+// ── Edible flavor / pack filters ──
+export function renderEdibleFilters() {
+  const container = document.getElementById('edible-filters'); if (!container) return;
+  const showEdibles = state.activeCats.has('Edibles');
+  if (!showEdibles || !state.ALL_EDIBLE_FLAVORS.size) { container.style.display = 'none'; return; }
+  container.style.display = '';
+
+  const flavors = [...state.ALL_EDIBLE_FLAVORS].sort();
+  const packs = ['Single', '2-Pack', '3-Pack', '5PK Display', '8PK Display', '10PK Display', 'RAW'].filter(p => state.ALL_EDIBLE_PACKS.has(p));
+
+  let html = '<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:6px">';
+  html += '<span style="font-size:10px;color:var(--text3);font-weight:600;margin-right:4px">FLAVOR</span>';
+  html += `<span class="chip badge-gray" style="font-size:9px;padding:1px 6px;cursor:pointer" onclick="window.__edibleFlavorAll()">All</span>`;
+  html += `<span class="chip badge-gray" style="font-size:9px;padding:1px 6px;cursor:pointer" onclick="window.__edibleFlavorNone()">None</span>`;
+  for (const f of flavors) {
+    const active = state.activeEdibleFlavors.has(f);
+    html += `<span class="chip badge-orange ${active ? 'active' : ''}" data-eflavor="${f}" onclick="window.__toggleEdibleFlavor(this,'${f.replace(/'/g, "\\'")}')" style="font-size:10px;padding:2px 8px;cursor:pointer">${f}</span>`;
+  }
+  html += '</div><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">';
+  html += '<span style="font-size:10px;color:var(--text3);font-weight:600;margin-right:4px">PACK</span>';
+  html += `<span class="chip badge-gray" style="font-size:9px;padding:1px 6px;cursor:pointer" onclick="window.__ediblePackAll()">All</span>`;
+  html += `<span class="chip badge-gray" style="font-size:9px;padding:1px 6px;cursor:pointer" onclick="window.__ediblePackNone()">None</span>`;
+  for (const p of packs) {
+    const active = state.activeEdiblePacks.has(p);
+    html += `<span class="chip badge-blue ${active ? 'active' : ''}" data-epack="${p}" onclick="window.__toggleEdiblePack(this,'${p.replace(/'/g, "\\'")}')" style="font-size:10px;padding:2px 8px;cursor:pointer">${p}</span>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+export function initEdibleFilterGlobals() {
+  window.__toggleEdibleFlavor = (el, val) => {
+    if (state.activeEdibleFlavors.has(val)) state.activeEdibleFlavors.delete(val); else state.activeEdibleFlavors.add(val);
+    el.classList.toggle('active', state.activeEdibleFlavors.has(val));
+    _render();
+  };
+  window.__toggleEdiblePack = (el, val) => {
+    if (state.activeEdiblePacks.has(val)) state.activeEdiblePacks.delete(val); else state.activeEdiblePacks.add(val);
+    el.classList.toggle('active', state.activeEdiblePacks.has(val));
+    _render();
+  };
+  window.__edibleFlavorAll = () => { state.ALL_EDIBLE_FLAVORS.forEach(f => state.activeEdibleFlavors.add(f)); renderEdibleFilters(); _render(); };
+  window.__edibleFlavorNone = () => { state.activeEdibleFlavors.clear(); renderEdibleFilters(); _render(); };
+  window.__ediblePackAll = () => { state.ALL_EDIBLE_PACKS.forEach(p => state.activeEdiblePacks.add(p)); renderEdibleFilters(); _render(); };
+  window.__ediblePackNone = () => { state.activeEdiblePacks.clear(); renderEdibleFilters(); _render(); };
+}
+
 // ── Status / category chips ──
 export function toggleChip(el, group) {
   const val = el.dataset.status || el.dataset.cat;
@@ -66,16 +113,6 @@ export function togglePill(key) {
   state.toggles[key] = !state.toggles[key];
   const el = document.getElementById('tog-' + key); if (!el) return;
   el.classList.toggle('active', state.toggles[key]);
-  if (key === 'combined') {
-    el.style.background  = state.toggles[key] ? 'rgba(232,197,71,0.1)' : '';
-    el.style.borderColor = state.toggles[key] ? 'rgba(232,197,71,0.3)' : '';
-    el.style.color       = state.toggles[key] ? 'var(--accent)' : '';
-  }
-  if (key === 'individual') {
-    el.style.background  = state.toggles[key] ? 'rgba(91,163,224,0.1)' : '';
-    el.style.borderColor = state.toggles[key] ? 'rgba(91,163,224,0.3)' : '';
-    el.style.color       = state.toggles[key] ? 'var(--blue)' : '';
-  }
   _render();
 }
 
@@ -111,15 +148,13 @@ export function resetFilters() {
   state.activeStatuses = new Set(['critical','alert','warning','ok']);
   state.activeCats     = new Set(ALL_CATEGORIES);
   state.activeSubcats  = new Set(state.ALL_SUBCAT_LIST);
-  state.toggles = { reorder:false, nodem:false, adjusted:false, onorder:false, combined:true, individual:true };
+  state.activeEdibleFlavors = new Set(state.ALL_EDIBLE_FLAVORS);
+  state.activeEdiblePacks = new Set(state.ALL_EDIBLE_PACKS);
+  state.toggles = { reorder:false, nodem:false, adjusted:false, onorder:false };
 
   document.querySelectorAll('.chip[data-status],.chip[data-cat]').forEach(c => c.classList.add('active'));
   ['reorder','nodem','adjusted','onorder'].forEach(k => { const el = document.getElementById('tog-' + k); if (el) el.classList.remove('active'); });
 
-  const togCombined = document.getElementById('tog-combined');
-  if (togCombined) { togCombined.classList.add('active'); togCombined.style.background='rgba(232,197,71,0.1)'; togCombined.style.borderColor='rgba(232,197,71,0.3)'; togCombined.style.color='var(--accent)'; }
-  const togIndividual = document.getElementById('tog-individual');
-  if (togIndividual) { togIndividual.classList.add('active'); togIndividual.style.background='rgba(91,163,224,0.1)'; togIndividual.style.borderColor='rgba(91,163,224,0.3)'; togIndividual.style.color='var(--blue)'; }
 
   document.getElementById('maxMonths').value = 12;
   document.getElementById('minDemand').value = 0;

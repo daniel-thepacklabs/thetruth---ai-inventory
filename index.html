@@ -25,6 +25,9 @@
     <div class="nav-item" onclick="showView('inventory')" id="nav-inventory" style="font-weight:500;color:var(--accent)">
       <span class="dot" style="background:var(--accent)"></span> Inventory
     </div>
+    <div class="nav-item" onclick="showView('edibles')" id="nav-edibles" style="padding-left:28px;font-size:12px">
+      <span class="dot" style="background:var(--orange)"></span> Edibles Dashboard
+    </div>
     <div class="nav-item" onclick="showView('sales')" id="nav-sales">
       <span class="dot" style="background:var(--blue)"></span> Monthly Sales
     </div>
@@ -109,9 +112,6 @@
         <span class="toggle-pill" id="tog-nodem"      onclick="togglePill('nodem')"><span class="toggle-dot"></span>Hide zero demand</span>
         <span class="toggle-pill" id="tog-adjusted"   onclick="togglePill('adjusted')"><span class="toggle-dot"></span>Adjusted only</span>
         <span class="toggle-pill" id="tog-onorder"    onclick="togglePill('onorder')"><span class="toggle-dot"></span>Has open PO</span>
-        <div class="filter-divider"></div>
-        <span class="toggle-pill active" id="tog-combined"   onclick="togglePill('combined')"   style="background:rgba(232,197,71,0.1);border-color:rgba(232,197,71,0.3);color:var(--accent)"><span class="toggle-dot"></span>Combined SKUs</span>
-        <span class="toggle-pill active" id="tog-individual" onclick="togglePill('individual')" style="background:rgba(91,163,224,0.1);border-color:rgba(91,163,224,0.3);color:var(--blue)"><span class="toggle-dot"></span>Individual SKUs</span>
       </div>
 
       <div class="filter-row">
@@ -134,6 +134,8 @@
         <span class="chip" id="subcat-all"  onclick="selectAllSubcats()" style="font-size:10px;padding:2px 8px;">All</span>
         <span class="chip" id="subcat-none" onclick="clearAllSubcats()"  style="font-size:10px;padding:2px 8px;">None</span>
       </div>
+
+      <div id="edible-filters" style="display:none;padding:6px 72px 6px 72px;border-top:1px solid var(--border)"></div>
 
       <div class="filter-row">
         <span class="filter-label">Max months</span>
@@ -209,6 +211,15 @@
         </svg>
         <div style="margin-bottom:.5rem">No data loaded</div>
         <div style="font-size:12px;opacity:.6">Connect the Finale API in <code>src/data/finaleApi.js</code> to load inventory</div>
+      </div>
+
+      <!-- Edibles dashboard -->
+      <div id="edibles-view" style="display:none;padding:1rem">
+        <div style="margin-bottom:12px">
+          <div style="font-size:15px;font-weight:500;color:var(--text)">Edibles Dashboard</div>
+          <div style="font-size:12px;color:var(--text3)">All quantities in single-unit equivalents (5PK = 5, 8PK = 8, 10PK = 10)</div>
+        </div>
+        <div id="edibles-table"></div>
       </div>
 
       <!-- Sales view -->
@@ -320,6 +331,7 @@
           <div id="calc-body" style="padding:1rem">
             <div id="calc-product-inputs" style="display:grid;gap:1.25rem"></div>
             <div id="calc-flower-totals" style="margin-top:1.25rem"></div>
+            <div id="calc-gummy-totals" style="margin-top:1.25rem"></div>
             <div id="calc-results" style="margin-top:1.25rem"></div>
           </div>
         </div>

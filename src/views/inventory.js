@@ -1,6 +1,7 @@
 import { state } from '../data/state.js';
 import { CATEGORY_THRESHOLDS, SUBCAT_SAFETY_STOCK, CAT_BADGE, SUBCAT_COLORS } from '../data/constants.js';
 import { fmt, fmtDec } from '../data/parsers.js';
+import { renderEdibleFilters } from '../ui/filters.js';
 
 // ── Business logic ──
 export function getSafetyStock(item) {
@@ -116,6 +117,7 @@ export function toggleRow(id) {
 
 // ── Main render ──
 export function render() {
+  renderEdibleFilters();
   if (!state.RAW_DATA.length) return;
 
   const search  = document.getElementById('search').value.toLowerCase();
@@ -148,8 +150,8 @@ export function render() {
   if (state.toggles.nodem)     rows = rows.filter(r => r.eff_dem > 0);
   if (state.toggles.adjusted)  rows = rows.filter(r => !!state.overrides[r.id]);
   if (state.toggles.onorder)   rows = rows.filter(r => r.onOrder > 0);
-  if (!state.toggles.combined)   rows = rows.filter(r => !r.isEdibleFlavor);
-  if (!state.toggles.individual) rows = rows.filter(r => r.isEdibleFlavor || r.cat !== 'Edibles');
+  if (state.activeEdibleFlavors.size < state.ALL_EDIBLE_FLAVORS.size) rows = rows.filter(r => r.cat !== 'Edibles' || (r.flavor && state.activeEdibleFlavors.has(r.flavor)));
+  if (state.activeEdiblePacks.size < state.ALL_EDIBLE_PACKS.size) rows = rows.filter(r => r.cat !== 'Edibles' || (r.packType && state.activeEdiblePacks.has(r.packType)));
 
   if (sort === 'urgency')      rows.sort((a, b) => a.months - b.months);
   else if (sort === 'demand')  rows.sort((a, b) => b.eff_dem - a.eff_dem);
@@ -189,7 +191,7 @@ export function render() {
     const vcTot = moTotal  < ss ? 'color:var(--red)' : moTotal  < rp ? 'color:var(--orange)' : 'color:var(--green)';
 
     const displayId   = item.isEdibleFlavor ? '🍬 ' + item.flavorName : item.id;
-    const displayDesc = item.isEdibleFlavor ? 'All SKUs combined · individual pieces · demand from sales data' : (item.desc || '—');
+    const displayDesc = item.desc || '—';
 
     return `<div class="item-row" id="row-${CSS.escape(item.id)}" style="${isSel ? 'outline:1.5px solid rgba(232,197,71,0.5)' : ''}">
       <div class="item-header">
