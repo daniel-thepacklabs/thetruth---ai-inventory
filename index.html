@@ -37,6 +37,9 @@
     <div class="nav-item" onclick="showView('calculator')" id="nav-calculator">
       <span class="dot" style="background:var(--purple)"></span> Material Calculator
     </div>
+    <div class="nav-item" onclick="showView('cogs')" id="nav-cogs">
+      <span class="dot" style="background:var(--yellow)"></span> COGS
+    </div>
 
     <div class="nav-label">Status</div>
     <div class="nav-item active" data-filter="all" onclick="setFilter('all',this)">
@@ -229,6 +232,7 @@
             <div style="font-size:15px;font-weight:500;color:var(--text)">Monthly Sales</div>
             <div style="font-size:12px;color:var(--text3)" id="sales-date-range">Connect Finale API to view sales data</div>
           </div>
+          <button onclick="exportAllCSV()" style="padding:4px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:11px;cursor:pointer;white-space:nowrap" title="Export all sections as CSV">⬇ Export All CSV</button>
         </div>
 
         <!-- KPI cards -->
@@ -244,6 +248,9 @@
           <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
             <span style="font-size:12px;font-weight:500;color:var(--text)">Forecast</span>
             <span style="font-size:10px;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:3px" id="forecast-basis">—</span>
+            <span style="flex:1"></span>
+            <button onclick="exportForecastCSV()" class="export-btn" title="Export to CSV">⬇ CSV</button>
+            <button onclick="exportForecastPDF()" class="export-btn" title="Export to PDF">⬇ PDF</button>
           </div>
           <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:.75rem 1rem" id="forecast-kpis">
             <div class="stat-card" style="border-left:3px solid var(--blue)"><div class="stat-label">Projected Revenue</div><div class="stat-val c-blue" id="fc-rev">—</div></div>
@@ -268,6 +275,8 @@
           <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem">
             <span style="font-size:12px;font-weight:500;color:var(--text)">Monthly Breakdown</span>
             <div style="display:flex;gap:.5rem;align-items:center" id="monthly-filters">
+              <button onclick="exportMonthlyCSV()" class="export-btn" title="Export to CSV">⬇ CSV</button>
+              <button onclick="exportMonthlyPDF()" class="export-btn" title="Export to PDF">⬇ PDF</button>
               <select id="filter-monthly-year" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer"></select>
               <select id="filter-monthly-month" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer">
                 <option value="">All Months</option>
@@ -283,11 +292,13 @@
                   <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Units Sold</th>
                   <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Orders</th>
                   <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Avg Order Value</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--orange);font-weight:500;white-space:nowrap">COGS</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Margin %</th>
                   <th style="padding:.6rem 1rem;text-align:left;color:var(--text3);font-weight:500">vs Prior Month</th>
                 </tr>
               </thead>
               <tbody id="sales-monthly-body">
-                <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text3)">No data — connect Finale API</td></tr>
+                <tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--text3)">No data — connect Finale API</td></tr>
               </tbody>
             </table>
           </div>
@@ -298,6 +309,8 @@
           <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem">
             <span style="font-size:12px;font-weight:500;color:var(--text)">Monthly Revenue by Product Type &amp; Subcategory</span>
             <div style="display:flex;gap:.5rem;align-items:center" id="bytype-filters">
+              <button onclick="exportByTypeCSV()" class="export-btn" title="Export to CSV">⬇ CSV</button>
+              <button onclick="exportByTypePDF()" class="export-btn" title="Export to PDF">⬇ PDF</button>
               <select id="filter-bytype-year" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer"></select>
               <select id="filter-bytype-month" style="padding:.25rem .5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;cursor:pointer">
                 <option value="">All Months</option>
@@ -317,6 +330,8 @@
       </div><!-- end sales-view -->
 
       <!-- Material Calculator view -->
+      <div id="cogs-view" style="display:none;padding:1rem"></div>
+
       <div id="calculator-view" style="display:none;padding:1rem">
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
           <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">

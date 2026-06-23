@@ -1,10 +1,21 @@
 import { state } from '../data/state.js';
 import { fmt, getSalesProductType, getPackSize } from '../data/parsers.js';
 import { computeForecast, computeForecastByType } from '../forecast/engine.js';
+import { buildCogsLookup } from './cogs.js';
 
 const MONTH_NAMES = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const $f = v => '$' + (v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const $u = v => v > 0 ? v.toLocaleString() : '-';
+const marginColor = pct => pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : pct >= 30 ? 'var(--orange)' : 'var(--red)';
+
+function getItemCogs(cogsLookup, pid, desc, qty) {
+  const [, subtype] = getSalesProductType(pid, desc);
+  const entry = cogsLookup[subtype];
+  if (!entry) return 0;
+  const packSize = getPackSize(pid);
+  const unitCost = packSize > 1 ? entry.packCost : entry.singleCost;
+  return unitCost * qty;
+}
 
 function getCurrentMonthInfo() {
   const now = new Date();
@@ -70,10 +81,19 @@ function renderMonthlyTable(allMonths, byMonth) {
   const monthEl = document.getElementById('filter-monthly-month');
   const months = filterMonths(allMonths, yearEl, monthEl);
 
-  const filteredData = months.map(m => ({ period: m, ...byMonth[m] }));
+  const cogsLookup = buildCogsLookup();
+  const cogsByMonth = {};
+  state.SALES_DATA.forEach(r => {
+    if (!months.includes(r.month)) return;
+    if (!cogsByMonth[r.month]) cogsByMonth[r.month] = 0;
+    cogsByMonth[r.month] += getItemCogs(cogsLookup, r.pid, r.desc, r.qty);
+  });
+
+  const filteredData = months.map(m => ({ period: m, ...byMonth[m], cogs: cogsByMonth[m] || 0 }));
   const totalRev = filteredData.reduce((s, m) => s + m.rev, 0);
   const totalUnits = filteredData.reduce((s, m) => s + m.units, 0);
   const totalOrders = filteredData.reduce((s, m) => s + m.orders, 0);
+  const totalCogs = filteredData.reduce((s, m) => s + m.cogs, 0);
   const cm = getCurrentMonthInfo();
   const fullMonths = filteredData.filter(m => m.period !== cm.period);
   const avgRev = fullMonths.length ? fullMonths.reduce((s, m) => s + m.rev, 0) / fullMonths.length : 0;
@@ -85,9 +105,11 @@ function renderMonthlyTable(allMonths, byMonth) {
   document.getElementById('kpi-avg-units').textContent = Math.round(avgUnits).toLocaleString();
 
   const tbody = document.getElementById('sales-monthly-body');
-  const monthList = months.map((m, i) => ({ m, ...byMonth[m], prev: i > 0 ? byMonth[months[i - 1]] : null }));
-  tbody.innerHTML = monthList.map(({ m, rev, units, orders, prev }) => {
+  const monthList = months.map((m, i) => ({ m, ...byMonth[m], cogs: cogsByMonth[m] || 0, prev: i > 0 ? byMonth[months[i - 1]] : null }));
+  tbody.innerHTML = monthList.map(({ m, rev, units, orders, cogs, prev }) => {
     const aov = units > 0 ? rev / units : 0;
+    const margin = rev > 0 ? ((rev - cogs) / rev) * 100 : 0;
+    const mCol = cogs > 0 ? marginColor(margin) : 'var(--text3)';
     const isPartial = m === cm.period;
     const projected = isPartial && cm.pctElapsed > 0 ? rev / cm.pctElapsed : null;
     const vsLabel = !prev ? '—' : (() => {
@@ -105,6 +127,8 @@ function renderMonthlyTable(allMonths, byMonth) {
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${units.toLocaleString()}${isPartial && projected ? `<br><span style="font-size:10px;color:var(--blue)">proj: ${Math.round(units / cm.pctElapsed).toLocaleString()}</span>` : ''}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${orders.toLocaleString()}${isPartial && projected ? `<br><span style="font-size:10px;color:var(--blue)">proj: ${Math.round(orders / cm.pctElapsed).toLocaleString()}</span>` : ''}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${$f(aov)}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--orange)">${cogs > 0 ? $f(cogs) : '—'}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${mCol}">${cogs > 0 ? margin.toFixed(1) + '%' : '—'}</td>
       <td style="padding:.6rem 1rem">
         <div style="display:flex;align-items:center;gap:8px">
           ${vsLabel}
@@ -119,12 +143,16 @@ function renderMonthlyTable(allMonths, byMonth) {
 
   const label = months.length === 1 ? months[0] : `TOTAL (${months.length} mo)`;
   const avgAov = totalUnits > 0 ? totalRev / totalUnits : 0;
+  const totalMargin = totalRev > 0 ? ((totalRev - totalCogs) / totalRev) * 100 : 0;
+  const tmCol = totalCogs > 0 ? marginColor(totalMargin) : 'var(--text3)';
   tbody.innerHTML += `<tr style="background:var(--bg3);border-top:2px solid var(--border2)">
     <td style="padding:.6rem 1rem;font-weight:700;color:var(--accent)">${label}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--green)">${$f(totalRev)}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${totalUnits.toLocaleString()}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${totalOrders.toLocaleString()}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${$f(avgAov)}</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--orange)">${totalCogs > 0 ? $f(totalCogs) : '—'}</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:${tmCol}">${totalCogs > 0 ? totalMargin.toFixed(1) + '%' : '—'}</td>
     <td></td>
   </tr>`;
 }
@@ -186,7 +214,7 @@ function renderForecastByType(cm, lastMoPeriod, allMonths) {
 
   const rows = computeForecastByType(state.SALES_DATA, allSalesMonths, cm.period, cm.dayOfMonth, cm.daysInMonth, lastMoPeriod);
 
-  const typeOrder = ['Prerolls', 'Vapes', 'Edibles', 'Flower'];
+  const typeOrder = ['Prerolls', 'Vapes', 'Edibles', 'Flower', 'Other'];
   const typeColors = { Prerolls: 'var(--green)', Vapes: 'var(--blue)', Edibles: 'var(--orange)', Flower: '#52c97a', Other: 'var(--text3)' };
   const lastMoLabel = lastMoPeriod || 'Last Mo';
   const grouped = {};
@@ -269,101 +297,142 @@ function renderByProductType() {
   const months = filterMonths(allSalesMonths, yearEl, monthEl);
 
   const filtered = state.SALES_DATA.filter(r => months.includes(r.month));
+  const cogsLookup = buildCogsLookup();
   const tree = {}, typeTotals = {};
 
   filtered.forEach(r => {
     const [type, subtype] = getSalesProductType(r.pid, r.desc);
     const isPack = getPackSize(r.pid) > 1;
+    const itemCogs = getItemCogs(cogsLookup, r.pid, r.desc, r.qty);
     if (!tree[type]) tree[type] = {};
     if (!tree[type][subtype]) tree[type][subtype] = {};
-    if (!tree[type][subtype][r.month]) tree[type][subtype][r.month] = { rev: 0, packs: 0, singles: 0 };
+    if (!tree[type][subtype][r.month]) tree[type][subtype][r.month] = { rev: 0, packs: 0, singles: 0, cogs: 0 };
     tree[type][subtype][r.month].rev += r.subtotal;
+    tree[type][subtype][r.month].cogs += itemCogs;
     if (isPack) tree[type][subtype][r.month].packs += r.qty;
     else tree[type][subtype][r.month].singles += r.qty;
-    if (!typeTotals[type]) typeTotals[type] = { rev: 0, packs: 0, singles: 0 };
+    if (!typeTotals[type]) typeTotals[type] = { rev: 0, packs: 0, singles: 0, cogs: 0 };
     typeTotals[type].rev += r.subtotal;
+    typeTotals[type].cogs += itemCogs;
     if (isPack) typeTotals[type].packs += r.qty;
     else typeTotals[type].singles += r.qty;
   });
 
   const $r = $f;
-  const typeOrder = ['Prerolls', 'Vapes', 'Edibles', 'Flower'];
+  const typeOrder = ['Prerolls', 'Vapes', 'Edibles', 'Flower', 'Other'];
   const typeColors = { Prerolls: 'var(--green)', Vapes: 'var(--blue)', Edibles: 'var(--orange)', Flower: '#52c97a', Other: 'var(--text3)' };
 
   const thead = document.getElementById('by-type-head');
   thead.innerHTML = `<tr style="background:var(--bg3)">
     <th rowspan="2" style="padding:.5rem 1rem;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap;position:sticky;left:0;background:var(--bg3);z-index:3;vertical-align:bottom;min-width:220px">Product Type / Sub</th>
-    ${months.map(m => `<th colspan="3" style="padding:.4rem .65rem;text-align:center;color:var(--text3);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">${m}</th>`).join('')}
-    <th colspan="3" style="padding:.4rem .65rem;text-align:center;color:var(--text3);font-weight:600;border-left:2px solid var(--border2)">Total</th>
+    ${months.map(m => `<th colspan="5" style="padding:.4rem .65rem;text-align:center;color:var(--text3);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">${m}</th>`).join('')}
+    <th colspan="5" style="padding:.4rem .65rem;text-align:center;color:var(--text3);font-weight:600;border-left:2px solid var(--border2)">Total</th>
   </tr>
   <tr style="background:var(--bg3)">
     ${months.map(() => `
       <th style="padding:.3rem .5rem;text-align:right;color:var(--green);font-weight:400;font-size:10px;border-left:1px solid var(--border2);white-space:nowrap">Revenue</th>
       <th style="padding:.3rem .5rem;text-align:right;color:var(--blue);font-weight:400;font-size:10px;white-space:nowrap">Packs</th>
       <th style="padding:.3rem .5rem;text-align:right;color:var(--text3);font-weight:400;font-size:10px;white-space:nowrap">Singles</th>
+      <th style="padding:.3rem .5rem;text-align:right;color:var(--orange);font-weight:400;font-size:10px;white-space:nowrap">COGS</th>
+      <th style="padding:.3rem .5rem;text-align:right;color:var(--text3);font-weight:400;font-size:10px;white-space:nowrap">Margin</th>
     `).join('')}
     <th style="padding:.3rem .5rem;text-align:right;color:var(--green);font-weight:600;font-size:10px;border-left:2px solid var(--border2);white-space:nowrap">Revenue</th>
     <th style="padding:.3rem .5rem;text-align:right;color:var(--blue);font-weight:600;font-size:10px;white-space:nowrap">Packs</th>
     <th style="padding:.3rem .5rem;text-align:right;color:var(--text3);font-weight:600;font-size:10px;white-space:nowrap">Singles</th>
+    <th style="padding:.3rem .5rem;text-align:right;color:var(--orange);font-weight:600;font-size:10px;white-space:nowrap">COGS</th>
+    <th style="padding:.3rem .5rem;text-align:right;color:var(--text3);font-weight:600;font-size:10px;white-space:nowrap">Margin</th>
   </tr>`;
 
   const tbody = document.getElementById('by-type-body');
-  let html = '', grandRev = 0, grandPacks = 0, grandSingles = 0;
+  let html = '', grandRev = 0, grandPacks = 0, grandSingles = 0, grandCogs = 0;
   const grandByMonth = {};
 
   typeOrder.filter(t => tree[t]).forEach(type => {
     const col = typeColors[type];
-    const { rev: typeRev, packs: typePacks, singles: typeSingles } = typeTotals[type] || { rev: 0, packs: 0, singles: 0 };
-    grandRev += typeRev; grandPacks += typePacks; grandSingles += typeSingles;
+    const { rev: typeRev, packs: typePacks, singles: typeSingles, cogs: typeCogs } = typeTotals[type] || { rev: 0, packs: 0, singles: 0, cogs: 0 };
+    grandRev += typeRev; grandPacks += typePacks; grandSingles += typeSingles; grandCogs += typeCogs;
     const typeByMonth = {};
     months.forEach(m => {
       const rev = Object.values(tree[type]).reduce((s, sub) => s + ((sub[m] || {}).rev || 0), 0);
       const packs = Object.values(tree[type]).reduce((s, sub) => s + ((sub[m] || {}).packs || 0), 0);
       const singles = Object.values(tree[type]).reduce((s, sub) => s + ((sub[m] || {}).singles || 0), 0);
-      typeByMonth[m] = { rev, packs, singles };
-      if (!grandByMonth[m]) grandByMonth[m] = { rev: 0, packs: 0, singles: 0 };
-      grandByMonth[m].rev += rev; grandByMonth[m].packs += packs; grandByMonth[m].singles += singles;
+      const cogs = Object.values(tree[type]).reduce((s, sub) => s + ((sub[m] || {}).cogs || 0), 0);
+      typeByMonth[m] = { rev, packs, singles, cogs };
+      if (!grandByMonth[m]) grandByMonth[m] = { rev: 0, packs: 0, singles: 0, cogs: 0 };
+      grandByMonth[m].rev += rev; grandByMonth[m].packs += packs; grandByMonth[m].singles += singles; grandByMonth[m].cogs += cogs;
     });
+    const typeMargin = typeRev > 0 ? ((typeRev - typeCogs) / typeRev) * 100 : 0;
+    const tmCol = typeCogs > 0 ? marginColor(typeMargin) : 'var(--text3)';
     html += `<tr style="background:var(--bg3);border-top:1px solid var(--border2)">
       <td style="padding:.55rem 1rem;font-weight:600;color:${col};position:sticky;left:0;background:var(--bg3);z-index:2">${type}</td>
-      ${months.map(m => `
+      ${months.map(m => {
+        const mm = typeByMonth[m].rev > 0 ? ((typeByMonth[m].rev - typeByMonth[m].cogs) / typeByMonth[m].rev * 100) : 0;
+        const mc = typeByMonth[m].cogs > 0 ? marginColor(mm) : 'var(--text3)';
+        return `
         <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${col};border-left:1px solid var(--border2)">${$r(typeByMonth[m].rev)}</td>
         <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--blue)">${$u(typeByMonth[m].packs)}</td>
         <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--text2)">${$u(typeByMonth[m].singles)}</td>
-      `).join('')}
+        <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:500;color:var(--orange)">${typeByMonth[m].cogs > 0 ? $r(typeByMonth[m].cogs) : '—'}</td>
+        <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${mc}">${typeByMonth[m].cogs > 0 ? mm.toFixed(1) + '%' : '—'}</td>`;
+      }).join('')}
       <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${col};border-left:2px solid var(--border2)">${$r(typeRev)}</td>
       <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--blue)">${$u(typePacks)}</td>
       <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--text2)">${$u(typeSingles)}</td>
+      <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--orange)">${typeCogs > 0 ? $r(typeCogs) : '—'}</td>
+      <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${tmCol}">${typeCogs > 0 ? typeMargin.toFixed(1) + '%' : '—'}</td>
     </tr>`;
     Object.keys(tree[type]).sort().forEach(sub => {
       const sm = tree[type][sub];
       const sRev = Object.values(sm).reduce((s, v) => s + v.rev, 0);
       const sPacks = Object.values(sm).reduce((s, v) => s + v.packs, 0);
       const sSingles = Object.values(sm).reduce((s, v) => s + v.singles, 0);
+      const sCogs = Object.values(sm).reduce((s, v) => s + (v.cogs || 0), 0);
+      const sMargin = sRev > 0 ? ((sRev - sCogs) / sRev) * 100 : 0;
+      const smCol = sCogs > 0 ? marginColor(sMargin) : 'var(--text3)';
       html += `<tr style="border-bottom:0.5px solid var(--border)">
         <td style="padding:.4rem 1rem .4rem 1.75rem;color:var(--text2);font-size:11px;position:sticky;left:0;background:var(--bg2);z-index:2">&lfloor; ${sub}</td>
-        ${months.map(m => `
+        ${months.map(m => {
+          const mr = sm[m]?.rev || 0;
+          const mc = sm[m]?.cogs || 0;
+          const mm = mr > 0 ? ((mr - mc) / mr * 100) : 0;
+          const mmc = mc > 0 ? marginColor(mm) : 'var(--text3)';
+          return `
           <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text2);border-left:1px solid var(--border)">${sm[m] && sm[m].rev > 0 ? $r(sm[m].rev) : '-'}</td>
           <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--blue)">${sm[m] ? $u(sm[m].packs) : '-'}</td>
           <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text3)">${sm[m] ? $u(sm[m].singles) : '-'}</td>
-        `).join('')}
+          <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--orange)">${mc > 0 ? $r(mc) : '-'}</td>
+          <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;font-weight:500;color:${mmc}">${mc > 0 ? mm.toFixed(1) + '%' : '-'}</td>`;
+        }).join('')}
         <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text2);border-left:2px solid var(--border)">${$r(sRev)}</td>
         <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--blue)">${$u(sPacks)}</td>
         <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text3)">${$u(sSingles)}</td>
+        <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--orange)">${sCogs > 0 ? $r(sCogs) : '-'}</td>
+        <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;font-weight:500;color:${smCol}">${sCogs > 0 ? sMargin.toFixed(1) + '%' : '-'}</td>
       </tr>`;
     });
   });
 
+  const grandMargin = grandRev > 0 ? ((grandRev - grandCogs) / grandRev * 100) : 0;
+  const gmCol = grandCogs > 0 ? marginColor(grandMargin) : 'var(--text3)';
   html += `<tr style="background:var(--bg3);border-top:2px solid var(--border2)">
     <td style="padding:.6rem 1rem;font-weight:700;color:var(--accent);position:sticky;left:0;background:var(--bg3);z-index:2">Grand Total</td>
-    ${months.map(m => `
-      <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent);border-left:1px solid var(--border2)">${$r(grandByMonth[m]?.rev || 0)}</td>
+    ${months.map(m => {
+      const gr = grandByMonth[m]?.rev || 0;
+      const gc = grandByMonth[m]?.cogs || 0;
+      const gm = gr > 0 ? ((gr - gc) / gr * 100) : 0;
+      const gmc = gc > 0 ? marginColor(gm) : 'var(--text3)';
+      return `
+      <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent);border-left:1px solid var(--border2)">${$r(gr)}</td>
       <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue)">${$u(grandByMonth[m]?.packs || 0)}</td>
       <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--text2)">${$u(grandByMonth[m]?.singles || 0)}</td>
-    `).join('')}
+      <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--orange)">${gc > 0 ? $r(gc) : '—'}</td>
+      <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:${gmc}">${gc > 0 ? gm.toFixed(1) + '%' : '—'}</td>`;
+    }).join('')}
     <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent);border-left:2px solid var(--border2)">${$r(grandRev)}</td>
     <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue)">${$u(grandPacks)}</td>
     <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--text2)">${$u(grandSingles)}</td>
+    <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--orange)">${grandCogs > 0 ? $r(grandCogs) : '—'}</td>
+    <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:${gmCol}">${grandCogs > 0 ? grandMargin.toFixed(1) + '%' : '—'}</td>
   </tr>`;
 
   tbody.innerHTML = html;

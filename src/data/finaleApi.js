@@ -2,6 +2,7 @@ import salesData from './finale-sales.json';
 import consumptionData from './finale-consumption.json';
 import monthlyData from './finale-monthly.json';
 import orderItemData from './finale-order-items.json';
+import priceMapsData from './price-maps.json';
 
 const ACCOUNT = import.meta.env.VITE_FINALE_ACCOUNT || 'deltamunchies';
 const KEY = import.meta.env.VITE_FINALE_API_KEY;
@@ -184,6 +185,114 @@ function buildSalesOrderCSV(products) {
   return toCSV(rows);
 }
 
+async function fetchMonthRevenue(year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const begin = `${month}/1/${year}`;
+  const end = `${month}/${daysInMonth}/${year}`;
+  let cursor = null, revenue = 0, units = 0, orders = 0;
+  while (true) {
+    const afterClause = cursor ? `, after: "${cursor}"` : '';
+    const q = `{ orderViewConnection(first: 1000${afterClause}, orderDate: { begin: "${begin}", end: "${end}" }) { pageInfo { hasNextPage endCursor } edges { node { status subtotal totalUnits type } } } }`;
+    const data = await gql(q);
+    const conn = data.orderViewConnection;
+    conn.edges.forEach(e => {
+      const n = e.node;
+      if (n.type !== 'Sale' || (n.status !== 'Completed' && n.status !== 'Committed')) return;
+      revenue += parseFloat((n.subtotal || '0').replace(/,/g, ''));
+      units += parseInt(n.totalUnits || 0);
+      orders++;
+    });
+    if (!conn.pageInfo.hasNextPage) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return { revenue: Math.round(revenue * 100) / 100, units, orders };
+}
+
+function buildAvgPriceMap() {
+  const byPid = {};
+  (orderItemData.data || []).forEach(r => {
+    if (r.subtotal > 0 && r.qty > 0) {
+      if (!byPid[r.pid]) byPid[r.pid] = { totalSub: 0, totalQty: 0 };
+      byPid[r.pid].totalSub += r.subtotal;
+      byPid[r.pid].totalQty += r.qty;
+    }
+  });
+  const priceMap = {};
+  for (const [pid, d] of Object.entries(byPid)) {
+    priceMap[pid] = Math.round((d.totalSub / d.totalQty) * 100) / 100;
+  }
+  return priceMap;
+}
+
+function buildLiveSalesItems(products, period, priceMap) {
+  const items = [];
+  const field = period === getCurrentPeriod() ? 'salesThisMonth' : 'salesLastMonth';
+  for (const p of products) {
+    if (p.status !== 'Active') continue;
+    const qty = num(p[field]);
+    if (qty <= 0) continue;
+    const price = priceMap[p.productId] || 0;
+    items.push({
+      month: period,
+      date: period + '-15',
+      pid: p.productId,
+      desc: p.description || '',
+      qty,
+      price,
+      subtotal: Math.round(qty * price * 100) / 100,
+    });
+  }
+  return items;
+}
+
+function getCurrentPeriod() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getPrevPeriod() {
+  const now = new Date();
+  return now.getMonth() === 0
+    ? `${now.getFullYear() - 1}-12`
+    : `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
+}
+
+async function fetchLiveMonthlyData(products) {
+  const staticMonths = monthlyData.months || [];
+  const staticItems = orderItemData.data || [];
+  const curPeriod = getCurrentPeriod();
+  const prevPeriod = getPrevPeriod();
+  const livePeriods = [prevPeriod, curPeriod];
+
+  const months = staticMonths.filter(m => !livePeriods.includes(m.period));
+  const salesItems = staticItems.filter(r => !livePeriods.includes(r.month));
+
+  const priceMap = buildAvgPriceMap();
+
+  for (const period of livePeriods) {
+    const [y, m] = period.split('-').map(Number);
+    console.log(`  Fetching live revenue for ${period}...`);
+    const rev = await fetchMonthRevenue(y, m);
+    months.push({ period, revenue: rev.revenue, units: rev.units, orders: rev.orders });
+
+    const liveItems = buildLiveSalesItems(products, period, priceMap);
+    // Scale per-product estimated revenue to match actual order totals
+    const estimatedTotal = liveItems.reduce((s, it) => s + it.subtotal, 0);
+    if (estimatedTotal > 0 && rev.revenue > 0) {
+      const scale = rev.revenue / estimatedTotal;
+      liveItems.forEach(it => {
+        it.subtotal = Math.round(it.subtotal * scale * 100) / 100;
+        it.price = Math.round(it.price * scale * 100) / 100;
+      });
+    }
+    salesItems.push(...liveItems);
+    console.log(`  ${period}: $${rev.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} revenue, ${liveItems.length} products (scale: ${estimatedTotal > 0 ? (rev.revenue / estimatedTotal).toFixed(3) : 'n/a'})`);
+  }
+
+  months.sort((a, b) => a.period.localeCompare(b.period));
+  return { months, salesItems };
+}
+
 export async function fetchAll() {
   if (!AUTH) {
     console.warn('No Finale API credentials — using static data');
@@ -212,14 +321,39 @@ export async function fetchAll() {
   const withSales = active.filter(p => num(p.salesLast30Days) > 0 || num(p.salesLastMonth) > 0).length;
   console.log(`Live: ${active.length} active products, ${withStock} with stock, ${withSales} with sales`);
 
-  const productSalesData = (orderItemData.data || []).map(r => ({
-    ...r,
-    date: r.date || (r.month + '-01'),
-    status: 'Completed',
-    category: '',
-  }));
+  console.log('Fetching live monthly order data...');
+  let monthlyTotals, productSalesData;
+  try {
+    const liveData = await fetchLiveMonthlyData(products);
+    monthlyTotals = liveData.months;
+    productSalesData = liveData.salesItems.map(r => ({
+      ...r,
+      date: r.date || (r.month + '-01'),
+      status: 'Completed',
+      category: '',
+    }));
+  } catch (err) {
+    console.warn('Live monthly data failed, using static:', err.message);
+    monthlyTotals = monthlyData.months || [];
+    productSalesData = (orderItemData.data || []).map(r => ({
+      ...r,
+      date: r.date || (r.month + '-01'),
+      status: 'Completed',
+      category: '',
+    }));
+  }
 
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData };
+  const costMap = {};
+  products.forEach(p => {
+    const cost = num(p.lastPurchaseLandedCostPerUnit);
+    if (cost > 0) costMap[p.productId] = cost;
+  });
+
+  const priceMap = buildAvgPriceMap();
+  const shopifyPriceMap = priceMapsData.shopify || {};
+  const wholesalePriceMap = priceMapsData.wholesale || {};
+
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap };
 }
 
 async function fetchAllStatic() {

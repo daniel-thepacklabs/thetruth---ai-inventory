@@ -5,6 +5,8 @@ import { updateRangeLabel, renderSubcatChips, renderEdibleFilters, initEdibleFil
 import { openModal, closeModal, saveModal, resetOverride, updateModalPreview, setRenderFn as setModalRender } from './ui/modal.js';
 import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView } from './views/inventory.js';
 import { renderSalesView } from './views/sales.js';
+import { exportForecastCSV, exportForecastPDF, exportMonthlyCSV, exportMonthlyPDF, exportByTypeCSV, exportByTypePDF, exportAllCSV } from './export.js';
+import { renderCogsView, exportCogsIngCSV, exportCogsIngPDF, exportCogsProductCSV, exportCogsProductPDF } from './views/cogs.js';
 import { renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds } from './views/alerts.js';
 
 // ── Inject render() into modules that need it ──
@@ -24,6 +26,11 @@ Object.assign(window, {
   quickStatusFilter, setFilter, activateReorderOnly, updateRangeLabel,
   // Sales
   renderSalesView,
+  // Exports
+  exportForecastCSV, exportForecastPDF, exportMonthlyCSV, exportMonthlyPDF,
+  exportByTypeCSV, exportByTypePDF, exportAllCSV,
+  // COGS
+  renderCogsView, exportCogsIngCSV, exportCogsIngPDF, exportCogsProductCSV, exportCogsProductPDF,
   // Alerts
   renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds,
   // View switching
@@ -37,11 +44,13 @@ function showView(view) {
   const isAlerts = view === 'alerts';
   const isCalc   = view === 'calculator';
   const isEdibles = view === 'edibles';
+  const isCogs = view === 'cogs';
 
   document.getElementById('sales-view').style.display  = isSales   ? 'block' : 'none';
   document.getElementById('alerts-view').style.display = isAlerts  ? 'block' : 'none';
   document.getElementById('calculator-view').style.display = isCalc ? 'block' : 'none';
   document.getElementById('edibles-view').style.display = isEdibles ? 'block' : 'none';
+  document.getElementById('cogs-view').style.display = isCogs ? 'block' : 'none';
   document.getElementById('items-list').style.display  = isInv     ? '' : 'none';
   document.getElementById('empty-state').style.display = 'none';
 
@@ -62,7 +71,7 @@ function showView(view) {
   const fbar = document.querySelector('.filter-bar');
   if (fbar) fbar.style.display = (isInv || isEdibles) ? '' : 'none';
 
-  ['inventory','sales','alerts','calculator','edibles'].forEach(v => {
+  ['inventory','sales','alerts','calculator','edibles','cogs'].forEach(v => {
     const el = document.getElementById('nav-' + v);
     if (el) el.style.color = v === view ? 'var(--accent)' : '';
   });
@@ -71,6 +80,7 @@ function showView(view) {
   if (isEdibles) { import('./views/edibles.js').then(m => m.renderEdiblesView()); }
   if (isAlerts)  { renderAlertSubcatChips(); renderAlerts(); }
   if (isCalc)    { import('./views/calculator.js').then(m => m.renderCalculatorView()); }
+  if (isCogs)    renderCogsView();
 }
 
 // ── Keyboard shortcut: Escape closes modal ──
@@ -83,7 +93,7 @@ async function syncFromFinale() {
   if (btn) { btn.textContent = '⟳ Syncing…'; btn.disabled = true; }
 
   try {
-    const { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData } = await fetchAll();
+    const { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap } = await fetchAll();
 
     if (!stock || !salesHistory) {
       if (ts) { ts.textContent = 'Finale API not connected'; ts.style.color = 'var(--text3)'; }
@@ -94,6 +104,10 @@ async function syncFromFinale() {
     if (salesOrder) processSalesReport(salesOrder);
     if (monthlyTotals) state.MONTHLY_TOTALS = monthlyTotals;
     if (productSalesData && productSalesData.length) state.SALES_DATA = productSalesData;
+    if (costMap) state.COST_MAP = costMap;
+    if (priceMap) state.PRICE_MAP = priceMap;
+    if (shopifyPriceMap) state.SHOPIFY_PRICE_MAP = shopifyPriceMap;
+    if (wholesalePriceMap) state.WHOLESALE_PRICE_MAP = wholesalePriceMap;
 
     buildSubcatIndex();
     updateRangeLabel();
@@ -116,7 +130,10 @@ async function syncFromFinale() {
 
 // ── Init ──
 updateRangeLabel();
-syncFromFinale();
+if (!window.__finaleSyncStarted) {
+  window.__finaleSyncStarted = true;
+  syncFromFinale();
+}
 
 // expose for the sync button
 window.syncFromFinale = syncFromFinale;
