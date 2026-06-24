@@ -457,11 +457,14 @@ export function buildCogsLookup() {
   const costMap = state.COST_MAP || {};
   if (!Object.keys(costMap).length) return {};
   const lookup = {};
+  const skuMap = {};
   Object.entries(FORMULATIONS).forEach(([, cat]) => {
     cat.products.forEach(prod => {
       prod.variants.forEach(v => {
         const cogs = computeProductCOGS(v, costMap);
         lookup[`${prod.name}|${v.variant}`] = { singleCost: cogs.singleCost, packCost: cogs.packCost };
+        if (v.skuSingle) skuMap[v.skuSingle] = { singleCost: cogs.singleCost, packCost: cogs.packCost };
+        if (v.skuPack) skuMap[v.skuPack] = { singleCost: cogs.singleCost, packCost: cogs.packCost };
       });
     });
   });
@@ -470,6 +473,14 @@ export function buildCogsLookup() {
     const key = `${prodName}|${variant}`;
     if (lookup[key]) result[subtype] = lookup[key];
   });
+  Object.entries(lookup).forEach(([key, costs]) => {
+    const [, variant] = key.split('|');
+    if (variant && variant.includes('20ct')) {
+      const subtype = Object.entries(SUBTYPE_TO_VARIANT).find(([, [pn]]) => key.startsWith(pn + '|'));
+      if (subtype) result[subtype[0] + '|20ct'] = costs;
+    }
+  });
+  result._skuMap = skuMap;
   return result;
 }
 

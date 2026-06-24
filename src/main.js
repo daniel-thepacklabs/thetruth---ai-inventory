@@ -7,6 +7,7 @@ import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, upda
 import { renderSalesView } from './views/sales.js';
 import { exportForecastCSV, exportForecastPDF, exportMonthlyCSV, exportMonthlyPDF, exportByTypeCSV, exportByTypePDF, exportAllCSV } from './export.js';
 import { renderCogsView, exportCogsIngCSV, exportCogsIngPDF, exportCogsProductCSV, exportCogsProductPDF } from './views/cogs.js';
+import { renderZeroPriceView } from './views/zeroPriceItems.js';
 import { renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds } from './views/alerts.js';
 
 // ── Inject render() into modules that need it ──
@@ -31,6 +32,8 @@ Object.assign(window, {
   exportByTypeCSV, exportByTypePDF, exportAllCSV,
   // COGS
   renderCogsView, exportCogsIngCSV, exportCogsIngPDF, exportCogsProductCSV, exportCogsProductPDF,
+  // Zero Price
+  renderZeroPriceView,
   // Alerts
   renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds,
   // View switching
@@ -45,12 +48,14 @@ function showView(view) {
   const isCalc   = view === 'calculator';
   const isEdibles = view === 'edibles';
   const isCogs = view === 'cogs';
+  const isZeroPrice = view === 'zeroprice';
 
   document.getElementById('sales-view').style.display  = isSales   ? 'block' : 'none';
   document.getElementById('alerts-view').style.display = isAlerts  ? 'block' : 'none';
   document.getElementById('calculator-view').style.display = isCalc ? 'block' : 'none';
   document.getElementById('edibles-view').style.display = isEdibles ? 'block' : 'none';
   document.getElementById('cogs-view').style.display = isCogs ? 'block' : 'none';
+  document.getElementById('zeroprice-view').style.display = isZeroPrice ? 'block' : 'none';
   document.getElementById('items-list').style.display  = isInv     ? '' : 'none';
   document.getElementById('empty-state').style.display = 'none';
 
@@ -71,7 +76,7 @@ function showView(view) {
   const fbar = document.querySelector('.filter-bar');
   if (fbar) fbar.style.display = (isInv || isEdibles) ? '' : 'none';
 
-  ['inventory','sales','alerts','calculator','edibles','cogs'].forEach(v => {
+  ['inventory','sales','alerts','calculator','edibles','cogs','zeroprice'].forEach(v => {
     const el = document.getElementById('nav-' + v);
     if (el) el.style.color = v === view ? 'var(--accent)' : '';
   });
@@ -81,6 +86,7 @@ function showView(view) {
   if (isAlerts)  { renderAlertSubcatChips(); renderAlerts(); }
   if (isCalc)    { import('./views/calculator.js').then(m => m.renderCalculatorView()); }
   if (isCogs)    renderCogsView();
+  if (isZeroPrice) renderZeroPriceView();
 }
 
 // ── Keyboard shortcut: Escape closes modal ──
@@ -115,6 +121,7 @@ async function syncFromFinale() {
     renderEdibleFilters();
     render();
     if (salesOrder || monthlyTotals || productSalesData) renderSalesView();
+    if (document.getElementById('zeroprice-view')?.style.display !== 'none') renderZeroPriceView();
 
     if (ts) {
       ts.textContent = 'Synced ' + new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
