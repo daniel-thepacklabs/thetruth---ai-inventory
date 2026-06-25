@@ -381,5 +381,12 @@ async function fetchAllStatic() {
     status: 'Completed',
     category: '',
   }));
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData };
+
+  const costMap = {};
+  stockData.forEach(p => { if (p.cost > 0) costMap[p.sku] = p.cost; });
+  const priceMap = buildAvgPriceMap();
+  const shopifyPriceMap = priceMapsData.shopify || {};
+  const wholesalePriceMap = priceMapsData.wholesale || {};
+
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap };
 }
