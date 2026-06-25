@@ -47,6 +47,62 @@ function filterMonths(months, yearEl, monthEl) {
   });
 }
 
+function renderCurrentMonthSummary(byMonth) {
+  const cm = getCurrentMonthInfo();
+  const cur = byMonth[cm.period];
+  const prevMonths = Object.keys(byMonth).filter(m => m < cm.period).sort();
+  const lastMoPeriod = prevMonths.length ? prevMonths[prevMonths.length - 1] : null;
+  const lastMo = lastMoPeriod ? byMonth[lastMoPeriod] : null;
+
+  let container = document.getElementById('current-month-summary');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'current-month-summary';
+    const salesView = document.getElementById('sales-view');
+    const kpis = document.getElementById('sales-kpis');
+    salesView.insertBefore(container, kpis);
+  }
+
+  if (!cur) { container.innerHTML = ''; return; }
+
+  const projRev = cm.pctElapsed > 0 ? cur.rev / cm.pctElapsed : 0;
+  const projUnits = cm.pctElapsed > 0 ? cur.units / cm.pctElapsed : 0;
+  const vsRev = lastMo && lastMo.rev > 0 ? ((projRev - lastMo.rev) / lastMo.rev * 100) : 0;
+  const vsCol = vsRev >= 0 ? 'var(--green)' : 'var(--red)';
+  const monthName = MONTH_NAMES[parseInt(cm.period.slice(5))];
+
+  container.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:.75rem 1rem;margin-bottom:1rem">
+      <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:.5rem">
+        ${monthName} ${cm.period.slice(0,4)} — Current Month
+        <span style="font-size:10px;color:var(--text3);margin-left:6px">${cm.dayOfMonth}/${cm.daysInMonth} days (${(cm.pctElapsed*100).toFixed(0)}%)</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+        <div class="stat-card" style="border-left:3px solid var(--green)">
+          <div class="stat-label">MTD Revenue</div>
+          <div class="stat-val c-green">${$f(cur.rev)}</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid var(--blue)">
+          <div class="stat-label">MTD Units</div>
+          <div class="stat-val c-blue">${cur.units.toLocaleString()}</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid var(--blue)">
+          <div class="stat-label">Projected Revenue</div>
+          <div class="stat-val c-blue">${$f(projRev)}</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid var(--blue)">
+          <div class="stat-label">Projected Units</div>
+          <div class="stat-val c-blue">${Math.round(projUnits).toLocaleString()}</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid ${vsCol}">
+          <div class="stat-label">vs ${lastMoPeriod || 'Last Mo'}</div>
+          <div class="stat-val" style="color:${vsCol}">${lastMo ? `${vsRev >= 0 ? '+' : ''}${vsRev.toFixed(1)}%` : '—'}</div>
+          ${lastMo ? `<div style="font-size:10px;color:var(--text3)">${$f(lastMo.rev)}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
 export function renderSalesView() {
   const hasMonthly = state.MONTHLY_TOTALS && state.MONTHLY_TOTALS.length > 0;
   if (!hasMonthly && !state.SALES_DATA.length) return;
@@ -62,9 +118,12 @@ export function renderSalesView() {
     byMonth[m.period] = { rev: m.revenue, units: m.units, orders: m.orders };
   });
 
+  renderCurrentMonthSummary(byMonth);
+
   const yearEl = document.getElementById('filter-monthly-year');
   const monthEl = document.getElementById('filter-monthly-month');
   populateFilterDropdowns(allMonths, yearEl, monthEl, () => renderMonthlyTable(allMonths, byMonth));
+  yearEl.value = String(new Date().getFullYear());
   renderMonthlyTable(allMonths, byMonth);
 
   const yearEl2 = document.getElementById('filter-bytype-year');

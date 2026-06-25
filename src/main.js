@@ -41,6 +41,7 @@ Object.assign(window, {
 });
 
 // ── View switcher ──
+const _viewRendered = {};
 function showView(view) {
   const isInv    = view === 'inventory';
   const isSales  = view === 'sales';
@@ -84,9 +85,9 @@ function showView(view) {
   if (isInv)     render();
   if (isEdibles) { import('./views/edibles.js').then(m => m.renderEdiblesView()); }
   if (isAlerts)  { renderAlertSubcatChips(); renderAlerts(); }
-  if (isCalc)    { import('./views/calculator.js').then(m => m.renderCalculatorView()); }
+  if (isCalc && !_viewRendered.calculator) { _viewRendered.calculator = true; import('./views/calculator.js').then(m => m.renderCalculatorView()); }
   if (isCogs)    renderCogsView();
-  if (isZeroPrice) renderZeroPriceView();
+  if (isZeroPrice && !_viewRendered.zeroprice) { _viewRendered.zeroprice = true; renderZeroPriceView(); }
 }
 
 // ── Keyboard shortcut: Escape closes modal ──
@@ -121,7 +122,10 @@ async function syncFromFinale() {
     renderEdibleFilters();
     render();
     if (salesOrder || monthlyTotals || productSalesData) renderSalesView();
-    if (document.getElementById('zeroprice-view')?.style.display !== 'none') renderZeroPriceView();
+    _viewRendered.zeroprice = false;
+    if (document.getElementById('zeroprice-view')?.style.display !== 'none') { _viewRendered.zeroprice = true; renderZeroPriceView(); }
+    if (document.getElementById('cogs-view')?.style.display !== 'none') renderCogsView();
+    if (document.getElementById('edibles-view')?.style.display !== 'none') import('./views/edibles.js').then(m => m.renderEdiblesView());
 
     if (ts) {
       ts.textContent = 'Synced ' + new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });

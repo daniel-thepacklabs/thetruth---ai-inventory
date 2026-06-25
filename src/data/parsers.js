@@ -84,7 +84,7 @@ export function catSubcat(pid) {
   if (p.startsWith('OIL-')) return ['Raw Material','Oil'];
   if (p.startsWith('BUN-')) return ['WIP','BUN'];
   if (p.startsWith('FIB-')) return ['WIP','FIB'];
-  if (p.startsWith('TPLM-')) return ['Components','TPLM'];
+  if (p.startsWith('TPLM-')) return ['Marketing','TPLM'];
   if (/^BOXES?\s/i.test(p) || p.includes('Bubble') || p.includes('Shipping Supplies') || p.includes('Direct Thermal') || p.includes('FOIL BAG') || p.includes('Pallet') || p.includes('Supplies -') || p.includes('SILVER LINING')) return ['Misc','Shipping'];
   if (p.startsWith('Mylar - ')) return ['Packaging','MYL'];
   if (p.startsWith('Filled ')) return ['WIP','Filled'];
