@@ -110,8 +110,13 @@ export function renderSalesView() {
   const allMonthlyData = hasMonthly ? state.MONTHLY_TOTALS : [];
   const allMonths = allMonthlyData.map(m => m.period);
 
-  document.getElementById('sales-date-range').textContent =
-    `${allMonths[0]} to ${allMonths[allMonths.length - 1]} · ${allMonths.length} months`;
+  const curYear = String(new Date().getFullYear());
+  const yearMonths = allMonths.filter(m => m.startsWith(curYear));
+  const rangeMonths = yearMonths.length ? yearMonths : allMonths;
+  const rangeLabel = rangeMonths.length
+    ? `${MONTH_NAMES[parseInt(rangeMonths[0].slice(5))]} – ${MONTH_NAMES[parseInt(rangeMonths[rangeMonths.length-1].slice(5))]} ${curYear} · ${rangeMonths.length} months`
+    : '';
+  document.getElementById('sales-date-range').textContent = rangeLabel;
 
   const byMonth = {};
   allMonthlyData.forEach(m => {
