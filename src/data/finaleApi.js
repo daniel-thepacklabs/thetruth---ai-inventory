@@ -224,14 +224,29 @@ function buildAvgPriceMap() {
   return priceMap;
 }
 
+function estimatePrice(pid, priceMap, shopify, wholesale) {
+  const direct = priceMap[pid] || wholesale[pid] || shopify[pid];
+  if (direct) return direct;
+  const p = (pid || '').toUpperCase();
+  const packMatch = p.match(/(-\d+PK|-2P)$/);
+  if (!packMatch) return 0;
+  const packSize = p.includes('-10PK') ? 10 : p.includes('-8PK') ? 8 : p.includes('-6PK') ? 6 : p.includes('-5PK') ? 5 : 2;
+  const singlePid = pid.replace(/(-\d+PK|-2P)$/, '-01');
+  const singlePrice = priceMap[singlePid] || wholesale[singlePid] || shopify[singlePid];
+  if (singlePrice) return singlePrice * packSize * 0.7;
+  return 0;
+}
+
 function buildLiveSalesItems(products, period, priceMap) {
+  const shopify = priceMapsData.shopify || {};
+  const wholesale = priceMapsData.wholesale || {};
   const items = [];
   const field = period === getCurrentPeriod() ? 'salesThisMonth' : 'salesLastMonth';
   for (const p of products) {
     if (p.status !== 'Active') continue;
     const qty = num(p[field]);
     if (qty <= 0) continue;
-    const price = priceMap[p.productId] || 0;
+    const price = estimatePrice(p.productId, priceMap, shopify, wholesale);
     items.push({
       month: period,
       date: period + '-15',
@@ -300,7 +315,13 @@ export async function fetchAll() {
   }
 
   console.log('Fetching live data from Finale API...');
-  const products = await fetchLiveProducts();
+  let products;
+  try {
+    products = await fetchLiveProducts();
+  } catch (err) {
+    console.warn('Live API unavailable, falling back to static data:', err.message);
+    return fetchAllStatic();
+  }
   const active = products.filter(p => p.status === 'Active');
 
   const stock = toCSV(active.map(p => ({

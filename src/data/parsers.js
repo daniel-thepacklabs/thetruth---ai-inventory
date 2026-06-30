@@ -45,6 +45,7 @@ export function catSubcat(pid) {
   if (p.startsWith('VHW-')) return ['Components','VHW'];
   if (p.includes('L-Bar Sealer Film')) return ['Misc','Auto L-Bar Sealer Film'];
   if (p.startsWith('Film - ')) return ['Misc','Film'];
+  if (p.startsWith('Pack - Boveda')) return ['Components','Pack'];
   if (p.startsWith('Pack - ')) return ['Misc','Pack'];
   if (p.startsWith('ECC-')) return ['Edibles','ECC'];
   if (p.startsWith('EGBD-')) return ['Edibles','EGBD'];

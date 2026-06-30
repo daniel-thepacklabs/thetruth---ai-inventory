@@ -298,6 +298,47 @@ const GUMMY_FLAVORS = [
   },
 ];
 
+const FLOWER_MIXTURES = [
+  {
+    key: 'thcp',
+    label: 'THCP Flower Mixture',
+    color: 'var(--blue)',
+    ingredients: [
+      { name: 'Hemp Smalls', uom: 'g', wt: 0.77 },
+      { name: 'HHC', uom: 'g', wt: 0.2, liquid: true },
+      { name: 'THCP', uom: 'g', wt: 0.005, liquid: true },
+      { name: 'Terpenes', uom: 'g', wt: 0.026, liquid: true },
+    ],
+    flavors: [
+      { brand: 'Munchies', name: 'Berry Larry OG' },
+      { brand: 'Munchies', name: 'Magic Melon' },
+      { brand: 'Munchies', name: 'Peachy Dreams' },
+      { brand: 'Munchies', name: 'Strawberry Kush Pop' },
+      { brand: 'Munchies', name: 'Triple Berry Pie' },
+      { brand: 'Munchies', name: 'Tropical Splash' },
+      { brand: 'Imperial', name: 'Animal Cookies Cherry' },
+      { brand: 'Imperial', name: 'Apple Fritter' },
+      { brand: 'Imperial', name: 'Blueberry Donut' },
+      { brand: 'Imperial', name: 'Lemon Cherry Haze' },
+      { brand: 'Imperial', name: 'Orange Creamsicle' },
+      { brand: 'Imperial', name: 'Peanut Butter Breath' },
+    ],
+  },
+  {
+    key: 'thca',
+    label: 'THCA Flower Mixture',
+    color: 'var(--green)',
+    ingredients: [
+      { name: 'CBG Hemp', uom: 'g', wt: 0 },
+      { name: 'CBD Hemp', uom: 'g', wt: 0.72 },
+      { name: 'HHC', uom: 'g', wt: 0.162, liquid: true },
+      { name: 'Diluent/Terp', uom: 'g', wt: 0.018, liquid: true },
+      { name: 'THCA ISO', uom: 'g', wt: 0.1 },
+    ],
+    flavors: [],
+  },
+];
+
 let editingFormulation = null;
 
 const LIQUID_INGREDIENTS = {
@@ -334,6 +375,11 @@ function fmtG(v) {
 function fmtLbs(grams) {
   const lbs = grams / 453.592;
   return lbs.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' lbs';
+}
+
+function fmtLiters(grams) {
+  const liters = grams / 1000;
+  return liters.toLocaleString('en-US', { maximumFractionDigits: 3 }) + ' L';
 }
 
 function getInputId(catKey, prodIdx, varIdx, type) {
@@ -393,9 +439,11 @@ function recalculate() {
   }
 
   const gummyPieces = recalcGummies();
+  const flowerMixResult = recalcFlowerMixture(totals);
 
   renderFlowerTotals(flowerMix);
   renderGummyTotals(gummyPieces);
+  renderFlowerMixtureTotals(flowerMixResult);
   renderResults(totals);
 }
 
@@ -460,6 +508,90 @@ function renderGummyTotals(results) {
 
   html += '</tbody></table></div>';
   el.innerHTML = html;
+}
+
+function recalcFlowerMixture(totals) {
+  const results = [];
+  for (const fm of FLOWER_MIXTURES) {
+    const k = fm.key;
+    const totalEl = document.getElementById(`flower-mix-${k}-total`);
+    const lbsEl = document.getElementById(`flower-mix-${k}-lbs`);
+    const totalGrams = parseFloat(totalEl?.value) || 0;
+
+    let flavorTotal = 0;
+    for (const fl of fm.flavors) {
+      const flId = `flower-${k}-` + fl.name.replace(/\s+/g, '-').toLowerCase();
+      const el = document.getElementById(flId);
+      const grams = parseFloat(el?.value) || 0;
+      const lbsDisplay = document.getElementById(flId + '-lbs');
+      if (lbsDisplay) lbsDisplay.textContent = grams > 0 ? (grams / 453.592).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' lbs' : '0 lbs';
+      flavorTotal += grams;
+    }
+
+    const grandTotal = totalGrams + flavorTotal;
+    if (lbsEl) lbsEl.textContent = grandTotal > 0 ? Math.round(grandTotal / 453.592).toLocaleString() : '0';
+
+    if (grandTotal > 0) {
+      for (const ing of fm.ingredients) {
+        const needed = grandTotal * ing.wt;
+        if (needed > 0) {
+          if (!totals[ing.name]) totals[ing.name] = { grams: 0, sources: [] };
+          totals[ing.name].grams += needed;
+          totals[ing.name].sources.push({ product: fm.label, qty: needed });
+        }
+      }
+    }
+
+    results.push({ fm, grandTotal });
+  }
+  return results;
+}
+
+function renderFlowerMixtureTotals(results) {
+  const anchor = document.getElementById('calc-flower-totals');
+  if (!anchor) return;
+
+  let existing = document.getElementById('flower-mix-results');
+  if (!existing) {
+    existing = document.createElement('div');
+    existing.id = 'flower-mix-results';
+    anchor.parentElement.insertBefore(existing, anchor);
+  }
+
+  const active = results.filter(r => r.grandTotal > 0);
+  if (!active.length) { existing.innerHTML = ''; return; }
+
+  let html = '';
+  for (const { fm, grandTotal } of active) {
+    html += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:.75rem">
+      <div style="padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:13px;font-weight:600;color:${fm.color}">${fm.label} — Ingredients Required</span>
+        </div>
+        <span style="font-size:12px;font-weight:600;font-family:var(--font-mono);color:${fm.color}">${fmtG(grandTotal)} · ${Math.round(grandTotal / 453.592).toLocaleString()} lbs</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:var(--bg4)">
+          <th style="padding:.5rem 1rem;text-align:left;color:var(--text3);font-weight:500">Ingredient</th>
+          <th style="padding:.5rem .75rem;text-align:right;color:var(--text3);font-weight:500">Qty per Gram</th>
+          <th style="padding:.5rem .75rem;text-align:right;color:var(--text3);font-weight:500">Total Amount</th>
+          <th style="padding:.5rem 1rem;text-align:right;color:var(--text3);font-weight:500">Lbs / Liters</th>
+        </tr></thead><tbody>`;
+
+    for (const ing of fm.ingredients) {
+      const total = grandTotal * ing.wt;
+      const converted = ing.liquid ? fmtLiters(total) : fmtLbs(total);
+      html += `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:.5rem 1rem;font-weight:500;color:var(--text)">${ing.name}${ing.liquid ? ' <span style="font-size:9px;color:var(--text4)">(liquid)</span>' : ''}</td>
+        <td style="padding:.5rem .75rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${ing.wt}</td>
+        <td style="padding:.5rem .75rem;text-align:right;font-family:var(--font-mono);color:var(--green)">${fmtG(total)}</td>
+        <td style="padding:.5rem 1rem;text-align:right;font-family:var(--font-mono);color:${fm.color}">${converted}</td>
+      </tr>`;
+    }
+
+    html += '</tbody></table></div>';
+  }
+  existing.innerHTML = html;
 }
 
 function renderFlowerTotals(flowerMix) {
@@ -613,17 +745,32 @@ function renderFormulationEditor(catKey, prodIdx, varIdx) {
   editingFormulation = editorId;
 }
 
+const _sectionCollapsed = {};
+
+function sectionHeader(id, color, label, subtitle) {
+  const collapsed = _sectionCollapsed[id];
+  return `<div style="padding:.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="window.__calcToggleSection('${id}')">
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <span style="font-size:10px;color:var(--text3);transition:transform .2s;display:inline-block;transform:rotate(${collapsed ? '0' : '90'}deg)">&#9654;</span>
+      <span style="width:8px;height:8px;border-radius:50%;background:${color}"></span>
+      <span style="font-size:12px;font-weight:600;color:${color}">${label}</span>
+      ${subtitle ? `<span style="font-size:10px;color:var(--text3)">${subtitle}</span>` : ''}
+    </div>
+    <button onclick="event.stopPropagation();window.__calcResetSection('${id}')"
+      style="padding:2px 8px;background:var(--bg4);border:1px solid var(--border2);border-radius:3px;color:var(--text3);font-size:10px;cursor:pointer">Reset</button>
+  </div>`;
+}
+
 function renderProductInputs() {
   const container = document.getElementById('calc-product-inputs');
   let html = '';
 
   for (const [catKey, cat] of Object.entries(FORMULATIONS)) {
+    const secId = 'sec-' + catKey;
+    const collapsed = _sectionCollapsed[secId];
     html += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
-      <div style="padding:.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
-        <span style="width:8px;height:8px;border-radius:50%;background:${cat.color}"></span>
-        <span style="font-size:12px;font-weight:600;color:${cat.color}">${cat.label}</span>
-      </div>
-      <div style="display:grid;gap:0">`;
+      ${sectionHeader(secId, cat.color, cat.label, '')}
+      <div id="${secId}" style="display:${collapsed ? 'none' : 'grid'};gap:0">`;
 
     cat.products.forEach((prod, pi) => {
       prod.variants.forEach((v, vi) => {
@@ -673,13 +820,11 @@ function renderProductInputs() {
   }
 
   // Gummy Pieces section
+  const gummyId = 'sec-gummypieces';
+  const gummyCollapsed = _sectionCollapsed[gummyId];
   html += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
-    <div style="padding:.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--orange)"></span>
-      <span style="font-size:12px;font-weight:600;color:var(--orange)">Gummy Pieces Calculator</span>
-      <span style="font-size:10px;color:var(--text3)">Packaged → RAW pieces</span>
-    </div>
-    <div style="display:grid;gap:0">`;
+    ${sectionHeader(gummyId, 'var(--orange)', 'Gummy Pieces Calculator', 'Packaged → RAW pieces')}
+    <div id="${gummyId}" style="display:${gummyCollapsed ? 'none' : 'grid'};gap:0">`;
 
   for (const gf of GUMMY_FLAVORS) {
     const line = gf.line ? ` <span style="font-size:9px;color:var(--text3);background:var(--bg2);padding:0 4px;border-radius:2px">${gf.line}</span>` : '';
@@ -699,16 +844,101 @@ function renderProductInputs() {
 
   html += '</div></div>';
 
+  // Flower Mixture sections
+  for (const fm of FLOWER_MIXTURES) {
+    const k = fm.key;
+    const fmId = 'sec-flower-' + k;
+    const fmCollapsed = _sectionCollapsed[fmId];
+    html += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+      ${sectionHeader(fmId, fm.color, fm.label, '')}
+      <div id="${fmId}" style="display:${fmCollapsed ? 'none' : 'block'}">
+      <div style="padding:.75rem 1rem">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:9px;color:var(--text3);text-transform:uppercase">Total Flower Mixture (grams)</span>
+            <input type="number" id="flower-mix-${k}-total" value="0" min="0" step="1000"
+              oninput="window.__calcRecalc()"
+              style="width:160px;padding:6px 8px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:14px;font-family:var(--font-mono);text-align:center" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:9px;color:var(--text3);text-transform:uppercase">Pounds</span>
+            <div id="flower-mix-${k}-lbs" style="width:100px;padding:6px 8px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);color:${fm.color};font-size:14px;font-family:var(--font-mono);text-align:center;font-weight:600">0</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:.5rem">Formula: ${fm.ingredients.map(i => i.name + ' ' + i.wt + 'g').join(' · ')}</div>
+      </div>
+`;
+
+    if (fm.flavors.length) {
+      html += `<div style="border-top:1px solid var(--border);padding:.5rem 1rem .25rem">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:.5rem">By Flavor</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">`;
+
+      let lastBrand = '';
+      for (const fl of fm.flavors) {
+        const flId = `flower-${k}-` + fl.name.replace(/\s+/g, '-').toLowerCase();
+        const brandCell = fl.brand !== lastBrand
+          ? `<td style="padding:.4rem 0;width:70px;font-size:9px;color:var(--text3);vertical-align:middle"><span style="background:var(--bg2);padding:1px 5px;border-radius:3px">${fl.brand}</span></td>`
+          : `<td style="padding:.4rem 0;width:70px"></td>`;
+        lastBrand = fl.brand;
+        html += `<tr style="border-bottom:0.5px solid var(--border)">
+          ${brandCell}
+          <td style="padding:.4rem .5rem;font-size:12px;color:var(--text);font-weight:500">${fl.name}</td>
+          <td style="padding:.4rem .5rem;width:130px;text-align:center">
+            <input type="number" id="${flId}" value="0" min="0" step="1000"
+              oninput="window.__calcRecalc()"
+              style="width:120px;padding:4px 6px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:11px;font-family:var(--font-mono);text-align:center" />
+          </td>
+          <td id="${flId}-lbs" style="padding:.4rem .5rem;width:80px;text-align:right;font-size:11px;font-family:var(--font-mono);color:${fm.color}">0 lbs</td>
+        </tr>`;
+      }
+
+      html += `</table></div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
   container.innerHTML = html;
 }
 
+const _savedValues = {};
+
+function saveInputValues() {
+  document.querySelectorAll('#calc-product-inputs input[type="number"]').forEach(el => {
+    if (el.id && el.value !== '0' && el.value !== '') _savedValues[el.id] = el.value;
+  });
+}
+
+function restoreInputValues() {
+  for (const [id, val] of Object.entries(_savedValues)) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  }
+}
+
 export function renderCalculatorView() {
+  saveInputValues();
   renderProductInputs();
+  restoreInputValues();
   recalculate();
 
   window.__calcRecalc = recalculate;
+  window.__calcToggleSection = (id) => {
+    _sectionCollapsed[id] = !_sectionCollapsed[id];
+    const el = document.getElementById(id);
+    if (el) el.style.display = _sectionCollapsed[id] ? 'none' : (el.tagName === 'TABLE' ? 'table' : el.dataset.display || 'grid');
+    const arrow = el?.closest('[style*="border-radius"]')?.querySelector('span[style*="rotate"]');
+    if (arrow) arrow.style.transform = `rotate(${_sectionCollapsed[id] ? '0' : '90'}deg)`;
+  };
+  window.__calcResetSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.querySelectorAll('input[type="number"]').forEach(inp => { inp.value = '0'; delete _savedValues[inp.id]; });
+    recalculate();
+  };
   window.__calcResetAll = () => {
     document.querySelectorAll('#calc-product-inputs input[type="number"]').forEach(el => { el.value = '0'; });
+    Object.keys(_savedValues).forEach(k => delete _savedValues[k]);
     document.getElementById('calc-gummy-totals').innerHTML = '';
     recalculate();
   };

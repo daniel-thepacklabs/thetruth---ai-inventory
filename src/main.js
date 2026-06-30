@@ -85,7 +85,7 @@ function showView(view) {
   if (isInv)     render();
   if (isEdibles) { import('./views/edibles.js').then(m => m.renderEdiblesView()); }
   if (isAlerts)  { renderAlertSubcatChips(); renderAlerts(); }
-  if (isCalc && !_viewRendered.calculator) { _viewRendered.calculator = true; import('./views/calculator.js').then(m => m.renderCalculatorView()); }
+  if (isCalc) import('./views/calculator.js').then(m => m.renderCalculatorView());
   if (isCogs)    renderCogsView();
   if (isZeroPrice && !_viewRendered.zeroprice) { _viewRendered.zeroprice = true; renderZeroPriceView(); }
 }
@@ -124,6 +124,7 @@ async function syncFromFinale() {
     if (salesOrder || monthlyTotals || productSalesData) renderSalesView();
     _viewRendered.zeroprice = false;
     if (document.getElementById('zeroprice-view')?.style.display !== 'none') { _viewRendered.zeroprice = true; renderZeroPriceView(); }
+    if (document.getElementById('calculator-view')?.style.display !== 'none') import('./views/calculator.js').then(m => m.renderCalculatorView());
     if (document.getElementById('cogs-view')?.style.display !== 'none') renderCogsView();
     if (document.getElementById('edibles-view')?.style.display !== 'none') import('./views/edibles.js').then(m => m.renderEdiblesView());
 

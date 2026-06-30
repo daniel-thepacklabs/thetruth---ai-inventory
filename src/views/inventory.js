@@ -19,10 +19,10 @@ export function getStatus(item) {
   const ss = getSafetyStock(item);
   const ov = state.overrides[item.id] || {};
   const rp = ov.rp != null ? ov.rp : CATEGORY_THRESHOLDS[item.cat];
-  const totalMonths = item.dem > 0 ? (item.remaining + item.onOrder) / item.dem : 0;
-  if (totalMonths < 1)  return 'critical';
-  if (totalMonths < ss) return 'alert';
-  if (totalMonths < rp) return 'warning';
+  const onHandMonths = item.dem > 0 ? item.remaining / item.dem : 0;
+  if (onHandMonths < 1)  return 'critical';
+  if (onHandMonths < ss) return 'alert';
+  if (onHandMonths < rp) return 'warning';
   return 'ok';
 }
 
@@ -30,8 +30,8 @@ export function getReorderQty(item) {
   const ov  = state.overrides[item.id] || {};
   const rp  = ov.rp != null ? ov.rp : CATEGORY_THRESHOLDS[item.cat];
   const dem = getEffectiveDemand(item);
-  const totalMonths = dem > 0 ? (item.remaining + item.onOrder) / dem : 0;
-  const shortfall   = rp - totalMonths;
+  const onHandMonths = dem > 0 ? item.remaining / dem : 0;
+  const shortfall   = rp - onHandMonths;
   return shortfall > 0 ? Math.ceil(shortfall * dem) : 0;
 }
 
