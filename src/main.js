@@ -3,12 +3,14 @@ import { state } from './data/state.js';
 import { fetchAll } from './data/finaleApi.js';
 import { updateRangeLabel, renderSubcatChips, renderEdibleFilters, initEdibleFilterGlobals, setRenderFn as setFilterRender, toggleChip, togglePill, resetFilters, selectAllChips, clearAllChips, toggleSubcat, selectAllSubcats, clearAllSubcats, quickFilter, quickStatusFilter, setFilter, activateReorderOnly } from './ui/filters.js';
 import { openModal, closeModal, saveModal, resetOverride, updateModalPreview, setRenderFn as setModalRender } from './ui/modal.js';
-import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView } from './views/inventory.js';
+import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView, discontinueProduct, restoreProduct } from './views/inventory.js';
 import { renderSalesView } from './views/sales.js';
 import { exportForecastCSV, exportForecastPDF, exportMonthlyCSV, exportMonthlyPDF, exportByTypeCSV, exportByTypePDF, exportAllCSV } from './export.js';
 import { renderCogsView, exportCogsIngCSV, exportCogsIngPDF, exportCogsProductCSV, exportCogsProductPDF } from './views/cogs.js';
 import { renderZeroPriceView } from './views/zeroPriceItems.js';
 import { renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds } from './views/alerts.js';
+import { renderEdiblesView } from './views/edibles.js';
+import { renderCalculatorView } from './views/calculator.js';
 
 // ── Inject render() into modules that need it ──
 setFilterRender(render);
@@ -19,6 +21,7 @@ Object.assign(window, {
   // Inventory
   render, toggleRow, toggleSelect, selectAllVisible, clearSelection,
   removeSelected, exportSelected, removeFromView, updateBulkBar,
+  discontinueProduct, restoreProduct,
   // Modal
   openModal, closeModal, saveModal, resetOverride, updateModalPreview,
   // Filters
@@ -83,9 +86,9 @@ function showView(view) {
   });
 
   if (isInv)     render();
-  if (isEdibles) { import('./views/edibles.js').then(m => m.renderEdiblesView()); }
+  if (isEdibles) { renderEdiblesView(); }
   if (isAlerts)  { renderAlertSubcatChips(); renderAlerts(); }
-  if (isCalc) import('./views/calculator.js').then(m => m.renderCalculatorView());
+  if (isCalc) renderCalculatorView();
   if (isCogs)    renderCogsView();
   if (isZeroPrice && !_viewRendered.zeroprice) { _viewRendered.zeroprice = true; renderZeroPriceView(); }
 }
@@ -124,9 +127,9 @@ async function syncFromFinale() {
     if (salesOrder || monthlyTotals || productSalesData) renderSalesView();
     _viewRendered.zeroprice = false;
     if (document.getElementById('zeroprice-view')?.style.display !== 'none') { _viewRendered.zeroprice = true; renderZeroPriceView(); }
-    if (document.getElementById('calculator-view')?.style.display !== 'none') import('./views/calculator.js').then(m => m.renderCalculatorView());
+    if (document.getElementById('calculator-view')?.style.display !== 'none') renderCalculatorView();
     if (document.getElementById('cogs-view')?.style.display !== 'none') renderCogsView();
-    if (document.getElementById('edibles-view')?.style.display !== 'none') import('./views/edibles.js').then(m => m.renderEdiblesView());
+    if (document.getElementById('edibles-view')?.style.display !== 'none') renderEdiblesView();
 
     if (ts) {
       ts.textContent = 'Synced ' + new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });

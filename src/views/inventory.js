@@ -16,6 +16,7 @@ export function getEffectiveDemand(item) {
 }
 
 export function getStatus(item) {
+  if (item.consumed90 === 0) return 'zerodem';
   const ss = getSafetyStock(item);
   const ov = state.overrides[item.id] || {};
   const rp = ov.rp != null ? ov.rp : CATEGORY_THRESHOLDS[item.cat];
@@ -41,6 +42,7 @@ function statusConfig(s) {
     alert:    { label:'Alert',    badge:'badge-orange',  barColor:'#e07c3a' },
     warning:  { label:'Low',      badge:'badge-purple',  barColor:'#9b7fee' },
     ok:       { label:'OK',       badge:'badge-green',   barColor:'#52c97a' },
+    zerodem:  { label:'No Demand', badge:'badge-blue',   barColor:'#5b8def' },
   }[s];
 }
 
@@ -127,18 +129,19 @@ export function render() {
 
   let rows = state.RAW_DATA
     .filter(r => !state.removedIds.has(r.id))
+    .filter(r => state.toggles.discontinued || !state.discontinuedIds.has(r.id))
     .map(item => ({ ...item, status: getStatus(item), eff_dem: getEffectiveDemand(item) }));
 
   // Counts for stat cards (category-filtered but status-unfiltered)
   const visibleRows = rows.filter(r => state.activeCats.has(r.cat) && (state.activeSubcats.size >= state.ALL_SUBCAT_LIST.size || state.activeSubcats.has(r.subcat)));
-  const counts = { critical:0, alert:0, warning:0, ok:0 };
+  const counts = { critical:0, alert:0, warning:0, ok:0, zerodem:0 };
   visibleRows.forEach(r => counts[r.status]++);
   document.getElementById('cnt-all').textContent = visibleRows.length;
   ['critical','alert','warning','ok'].forEach(s => {
     document.getElementById('cnt-' + s).textContent = counts[s];
     document.getElementById('sv-' + s).textContent  = counts[s];
   });
-  document.getElementById('sv-adjusted').textContent = Object.keys(state.overrides).length;
+  document.getElementById('sv-zerodem').textContent = counts.zerodem;
 
   // Apply all filters
   rows = rows.filter(r => state.activeStatuses.has(r.status) && state.activeCats.has(r.cat));
@@ -148,7 +151,7 @@ export function render() {
   if (minDem > 0) rows = rows.filter(r => r.eff_dem >= minDem);
   if (state.toggles.reorder)   rows = rows.filter(r => getReorderQty(r) > 0);
   if (state.toggles.nodem)     rows = rows.filter(r => r.eff_dem > 0);
-  if (state.toggles.adjusted)  rows = rows.filter(r => !!state.overrides[r.id]);
+  if (state.toggles.zerodem)   rows = rows.filter(r => r.status === 'zerodem');
   if (state.toggles.onorder)   rows = rows.filter(r => r.onOrder > 0);
   if (state.activeEdibleFlavors.size < state.ALL_EDIBLE_FLAVORS.size) rows = rows.filter(r => r.cat !== 'Edibles' || (r.flavor && state.activeEdibleFlavors.has(r.flavor)));
   if (state.activeEdiblePacks.size < state.ALL_EDIBLE_PACKS.size) rows = rows.filter(r => r.cat !== 'Edibles' || (r.packType && state.activeEdiblePacks.has(r.packType)));
@@ -261,6 +264,9 @@ export function render() {
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-accent" onclick="openModal('${sid}')">⚙ Adjust thresholds</button>
           <button class="btn btn-danger" onclick="removeFromView('${sid}')">✕ Remove from view</button>
+          ${state.discontinuedIds.has(item.id)
+            ? `<button class="btn" style="background:var(--green);color:#fff" onclick="restoreProduct('${sid}')">↩ Restore</button>`
+            : `<button class="btn" style="background:var(--text3);color:#fff" onclick="discontinueProduct('${sid}')">⊘ Discontinue</button>`}
         </div>
       </div>
     </div>`;
@@ -271,5 +277,17 @@ export function removeFromView(id) {
   state.removedIds.add(id);
   state.selectedIds.delete(id);
   updateBulkBar();
+  render();
+}
+
+export function discontinueProduct(id) {
+  state.discontinuedIds.add(id);
+  localStorage.setItem('discontinued', JSON.stringify([...state.discontinuedIds]));
+  render();
+}
+
+export function restoreProduct(id) {
+  state.discontinuedIds.delete(id);
+  localStorage.setItem('discontinued', JSON.stringify([...state.discontinuedIds]));
   render();
 }

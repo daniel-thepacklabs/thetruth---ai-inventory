@@ -131,7 +131,7 @@ export function quickStatusFilter(status) {
 }
 
 export function setFilter(f) {
-  if (!['critical','alert','warning','ok'].includes(f)) return;
+  if (!['critical','alert','warning','ok','zerodem'].includes(f)) return;
   state.activeStatuses = new Set([f]);
   document.querySelectorAll('.chip[data-status]').forEach(c => c.classList.toggle('active', c.dataset.status === f));
   _render();
@@ -145,15 +145,15 @@ export function activateReorderOnly() {
 
 // ── Reset ──
 export function resetFilters() {
-  state.activeStatuses = new Set(['critical','alert','warning','ok']);
+  state.activeStatuses = new Set(['critical','alert','warning','ok','zerodem']);
   state.activeCats     = new Set(ALL_CATEGORIES);
   state.activeSubcats  = new Set(state.ALL_SUBCAT_LIST);
   state.activeEdibleFlavors = new Set(state.ALL_EDIBLE_FLAVORS);
   state.activeEdiblePacks = new Set(state.ALL_EDIBLE_PACKS);
-  state.toggles = { reorder:false, nodem:false, adjusted:false, onorder:false };
+  state.toggles = { reorder:false, nodem:false, zerodem:false, onorder:false, discontinued:false };
 
   document.querySelectorAll('.chip[data-status],.chip[data-cat]').forEach(c => c.classList.add('active'));
-  ['reorder','nodem','adjusted','onorder'].forEach(k => { const el = document.getElementById('tog-' + k); if (el) el.classList.remove('active'); });
+  ['reorder','nodem','zerodem','onorder','discontinued'].forEach(k => { const el = document.getElementById('tog-' + k); if (el) el.classList.remove('active'); });
 
 
   document.getElementById('maxMonths').value = 12;

@@ -116,8 +116,9 @@
         <div class="filter-divider"></div>
         <span class="toggle-pill" id="tog-reorder"    onclick="togglePill('reorder')"><span class="toggle-dot"></span>Needs reorder only</span>
         <span class="toggle-pill" id="tog-nodem"      onclick="togglePill('nodem')"><span class="toggle-dot"></span>Hide zero demand</span>
-        <span class="toggle-pill" id="tog-adjusted"   onclick="togglePill('adjusted')"><span class="toggle-dot"></span>Adjusted only</span>
+        <span class="toggle-pill" id="tog-zerodem"    onclick="togglePill('zerodem')"><span class="toggle-dot"></span>Zero consumption</span>
         <span class="toggle-pill" id="tog-onorder"    onclick="togglePill('onorder')"><span class="toggle-dot"></span>Has open PO</span>
+        <span class="toggle-pill" id="tog-discontinued" onclick="togglePill('discontinued')"><span class="toggle-dot"></span>Show discontinued</span>
       </div>
 
       <div class="filter-row">
@@ -179,9 +180,9 @@
           <div class="stat-label">Healthy <span style="font-weight:400;opacity:.7">(&gt;reorder)</span></div>
           <div class="stat-val c-green"  id="sv-ok">—</div>
         </div>
-        <div class="stat-card s-blue"   id="sc-adjusted" title="Manually adjusted items">
-          <div class="stat-label">Adjusted</div>
-          <div class="stat-val c-blue"  id="sv-adjusted">0</div>
+        <div class="stat-card s-blue"   id="sc-zerodem" onclick="setFilter('zerodem')" title="Items with zero consumption in past 90 days">
+          <div class="stat-label">Zero Consumption</div>
+          <div class="stat-val c-blue"  id="sv-zerodem">0</div>
         </div>
       </div>
 
