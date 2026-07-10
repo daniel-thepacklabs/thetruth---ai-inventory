@@ -125,9 +125,18 @@ function buildSalesCSV(products) {
   return toCSV(rows);
 }
 
-function buildConsumeCSV(days) {
+function buildConsumeCSV(days, liveProducts) {
   const src = days === 30 ? consumptionData.consume30 : consumptionData.consume90;
-  const rows = Object.entries(src)
+  const merged = { ...src };
+  if (liveProducts && days === 90) {
+    for (const p of liveProducts) {
+      const qty = num(p.consumptionQuantity);
+      if (qty > 0) {
+        merged[p.productId] = qty;
+      }
+    }
+  }
+  const rows = Object.entries(merged)
     .filter(([, qty]) => qty > 0)
     .map(([pid, qty]) => ({ 'Product ID': pid, 'Quantity sum': qty }));
   return rows.length ? toCSV(rows) : null;
@@ -335,8 +344,8 @@ export async function fetchAll() {
 
   const salesHistory = buildSalesCSV(products);
   const salesOrder = buildSalesOrderCSV(products);
-  const consume = buildConsumeCSV(90);
-  const consume30 = buildConsumeCSV(30);
+  const consume = buildConsumeCSV(90, active);
+  const consume30 = buildConsumeCSV(30, active);
 
   const withStock = active.filter(p => num(p.sfsOnHand) > 0).length;
   const withSales = active.filter(p => num(p.salesLast30Days) > 0 || num(p.salesLastMonth) > 0).length;

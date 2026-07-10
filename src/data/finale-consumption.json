@@ -643,7 +643,19 @@
     "VIC-NYSD-01": 588,
     "DBX-1GC-NYSD": 98,
     "Gummy - Mixed Berry - FMG - DOSED": 2375,
-    "MYL-FM-MB": 475
+    "MYL-FM-MB": 475,
+    "MYL-DD-BLOG": 2800,
+    "MYL-DD-MMJ": 2800,
+    "MYL-DD-PD": 2800,
+    "MYL-DD-SKP": 2800,
+    "MYL-DD-TBP": 2800,
+    "MYL-DD-TS": 2800,
+    "DBX-DD-BLOG": 560,
+    "DBX-DD-MMJ": 560,
+    "DBX-DD-PD": 560,
+    "DBX-DD-SKP": 560,
+    "DBX-DD-TBP": 560,
+    "DBX-DD-TS": 560
   },
   "consume30": {
     "Filled - Magic Melon Juice": 6484,

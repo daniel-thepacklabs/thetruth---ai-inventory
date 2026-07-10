@@ -97,59 +97,78 @@ function showView(view) {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 // ── Finale API sync ──
-async function syncFromFinale() {
+// Store module references on window so the sync function never holds stale closures.
+// Every time this module executes (including HMR), these are refreshed.
+window.__syncDeps = {
+  fetchAll, processData, processSalesReport, buildSubcatIndex,
+  state, updateRangeLabel, renderSubcatChips, renderEdibleFilters, render,
+  renderSalesView, renderZeroPriceView, renderCalculatorView, renderCogsView,
+  renderEdiblesView, _viewRendered,
+};
+
+// Define sync function on window — reads deps from window.__syncDeps at call time, never from closure.
+window.syncFromFinale = async function syncFromFinale() {
   const btn = document.getElementById('sync-btn');
   const ts  = document.getElementById('data-timestamp');
+
+  if (window.__syncRunning) {
+    console.log('[sync] Already running, skipping');
+    return;
+  }
+  window.__syncRunning = true;
+  console.log('[sync] Starting...');
   if (btn) { btn.textContent = '⟳ Syncing…'; btn.disabled = true; }
 
+  const d = window.__syncDeps;
   try {
-    const { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap } = await fetchAll();
+    const { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap } = await d.fetchAll();
 
     if (!stock || !salesHistory) {
+      console.warn('[sync] No stock/sales data returned');
       if (ts) { ts.textContent = 'Finale API not connected'; ts.style.color = 'var(--text3)'; }
       return;
     }
 
-    processData(stock, salesHistory, consume, consume30);
-    if (salesOrder) processSalesReport(salesOrder);
-    if (monthlyTotals) state.MONTHLY_TOTALS = monthlyTotals;
-    if (productSalesData && productSalesData.length) state.SALES_DATA = productSalesData;
-    if (costMap) state.COST_MAP = costMap;
-    if (priceMap) state.PRICE_MAP = priceMap;
-    if (shopifyPriceMap) state.SHOPIFY_PRICE_MAP = shopifyPriceMap;
-    if (wholesalePriceMap) state.WHOLESALE_PRICE_MAP = wholesalePriceMap;
+    d.processData(stock, salesHistory, consume, consume30);
+    if (salesOrder) d.processSalesReport(salesOrder);
+    if (monthlyTotals) d.state.MONTHLY_TOTALS = monthlyTotals;
+    if (productSalesData && productSalesData.length) d.state.SALES_DATA = productSalesData;
+    if (costMap) d.state.COST_MAP = costMap;
+    if (priceMap) d.state.PRICE_MAP = priceMap;
+    if (shopifyPriceMap) d.state.SHOPIFY_PRICE_MAP = shopifyPriceMap;
+    if (wholesalePriceMap) d.state.WHOLESALE_PRICE_MAP = wholesalePriceMap;
 
-    buildSubcatIndex();
-    updateRangeLabel();
-    renderSubcatChips();
-    renderEdibleFilters();
-    render();
-    if (salesOrder || monthlyTotals || productSalesData) renderSalesView();
-    _viewRendered.zeroprice = false;
-    if (document.getElementById('zeroprice-view')?.style.display !== 'none') { _viewRendered.zeroprice = true; renderZeroPriceView(); }
-    if (document.getElementById('calculator-view')?.style.display !== 'none') renderCalculatorView();
-    if (document.getElementById('cogs-view')?.style.display !== 'none') renderCogsView();
-    if (document.getElementById('edibles-view')?.style.display !== 'none') renderEdiblesView();
+    d.buildSubcatIndex();
+    d.updateRangeLabel();
+    d.renderSubcatChips();
+    d.renderEdibleFilters();
+    d.render();
+    if (salesOrder || monthlyTotals || productSalesData) d.renderSalesView();
+    d._viewRendered.zeroprice = false;
+    if (document.getElementById('zeroprice-view')?.style.display !== 'none') { d._viewRendered.zeroprice = true; d.renderZeroPriceView(); }
+    if (document.getElementById('calculator-view')?.style.display !== 'none') d.renderCalculatorView();
+    if (document.getElementById('cogs-view')?.style.display !== 'none') d.renderCogsView();
+    if (document.getElementById('edibles-view')?.style.display !== 'none') d.renderEdiblesView();
 
+    console.log('[sync] Complete');
     if (ts) {
       ts.textContent = 'Synced ' + new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
       ts.style.color = 'var(--green)';
     }
   } catch (err) {
-    console.error('Finale sync error:', err);
+    console.error('[sync] Error:', err);
     if (ts) { ts.textContent = 'Sync failed — ' + err.message; ts.style.color = 'var(--red)'; }
   } finally {
+    window.__syncRunning = false;
     if (btn) { btn.textContent = '⟳ Sync Finale'; btn.disabled = false; }
+    console.log('[sync] Button reset, __syncRunning =', window.__syncRunning);
   }
-}
+};
 
 // ── Init ──
 updateRangeLabel();
 if (!window.__finaleSyncStarted) {
   window.__finaleSyncStarted = true;
-  syncFromFinale();
+  window.syncFromFinale();
 }
-
-// expose for the sync button
-window.syncFromFinale = syncFromFinale;
 initEdibleFilterGlobals();

@@ -278,8 +278,8 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const [cat, subcat] = catSubcat(pid); if (!cat) return null;
       const sl = salesMap[pid] || { s90:0, s30:0, slm:0 };
       const consumed90 = consumeMap[pid] != null ? consumeMap[pid] : sl.s90;
-      const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
       const actual30   = consume30Map[pid] != null ? consume30Map[pid] : sl.s30;
+      const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
       const remaining = st.onHand - st.reserved;
       if (consumed90 === 0 && st.onHand <= 0) return null;
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
@@ -354,6 +354,75 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
   }).filter(Boolean);
 
   state.RAW_DATA = [...nonEdibleRows, ...rawRows];
+  aggregatePackagedFlower();
+}
+
+function aggregatePackagedFlower() {
+  const SIZE_GRAMS = { '3.5': 3.5, '14': 14, 'QP': 113.4, '1lb': 453.6, '450': 453.6 };
+
+  const flowerItems = state.RAW_DATA.filter(i => i.subcat === 'Flower');
+  const fitItems = state.RAW_DATA.filter(i => i.subcat === 'FIT' && /^FIT/i.test(i.id));
+
+  // Build normalized strain lookup for flower items
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const ALIASES = { bluenerdz: 'bluenerds' };
+  const flowerByStrain = {};
+  for (const f of flowerItems) {
+    const strain = f.id.replace('Flower - ', '');
+    flowerByStrain[norm(strain)] = f;
+  }
+
+  // Aggregate FIT items into flower strains
+  for (const fit of fitItems) {
+    if (fit.onHand <= 0) continue;
+
+    const desc = fit.desc;
+    const parts = desc.split(' - ').map(p => p.trim());
+
+    // Extract size from description (last meaningful part)
+    let sizeGrams = 0;
+    let strainName = '';
+    for (let j = parts.length - 1; j >= 0; j--) {
+      const p = parts[j];
+      if (/PACK$/i.test(p)) continue;
+      const sizeMatch = p.match(/^(\d+\.?\d*)\s*g?$/i);
+      if (sizeMatch) { sizeGrams = parseFloat(sizeMatch[1]); continue; }
+      if (/^QP$/i.test(p)) { sizeGrams = 113.4; continue; }
+      if (/^1\s*lb$/i.test(p)) { sizeGrams = 453.6; continue; }
+      if (sizeGrams > 0) { strainName = p; break; }
+    }
+
+    // Fallback: extract size from product ID
+    if (!sizeGrams) {
+      const idMatch = fit.id.match(/-(3\.5|14|450|QP)-/i);
+      if (idMatch) sizeGrams = SIZE_GRAMS[idMatch[1]] || 0;
+    }
+    if (!sizeGrams || !strainName) continue;
+
+    // Detect pack count from ID or description
+    const packMatch = fit.id.match(/-(\d+)PK$/i) || desc.match(/(\d+)\s*PACK/i);
+    const packQty = packMatch ? parseInt(packMatch[1]) : 1;
+
+    const totalGrams = fit.onHand * sizeGrams * packQty;
+
+    // Clean strain: strip leading type prefix like "Sativa -"
+    strainName = strainName.replace(/^(Sativa|Indica|Hybrid)\s*-?\s*/i, '');
+
+    // Match to flower strain (with alias fallback)
+    let key = norm(strainName);
+    if (ALIASES[key]) key = ALIASES[key];
+    const flower = flowerByStrain[key];
+    if (flower) {
+      flower.packagedGrams = (flower.packagedGrams || 0) + totalGrams;
+    }
+  }
+
+  for (const f of flowerItems) {
+    if (!f.packagedGrams) continue;
+    f.remaining = (f.onHand - (f.reserved || 0)) + f.packagedGrams;
+    f.months = f.dem > 0 ? parseFloat((f.remaining / f.dem).toFixed(4)) : 0;
+    f.totalInv = f.onHand + f.packagedGrams + f.onOrder;
+  }
 }
 
 export function processSalesReport(csv) {

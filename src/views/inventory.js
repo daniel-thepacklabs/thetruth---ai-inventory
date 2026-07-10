@@ -248,7 +248,9 @@ export function render() {
       </div>
       <div class="item-expand" id="exp-${CSS.escape(item.id)}">
         <div class="expand-grid">
-          <div class="expand-stat"><div class="expand-label">On hand</div><div class="expand-val">${fmt(item.onHand)}</div></div>
+          <div class="expand-stat"><div class="expand-label">On hand${item.packagedGrams ? ' (raw)' : ''}</div><div class="expand-val">${fmt(item.onHand)}</div></div>${item.packagedGrams ? `
+          <div class="expand-stat"><div class="expand-label">Packaged (FIT)</div><div class="expand-val" style="color:var(--blue)">${fmt(Math.round(item.packagedGrams))}g</div></div>
+          <div class="expand-stat"><div class="expand-label">Total flower</div><div class="expand-val" style="color:var(--green)">${fmt(Math.round(item.onHand + item.packagedGrams))}g</div></div>` : ''}
           <div class="expand-stat"><div class="expand-label">Reserved</div><div class="expand-val">${fmt(item.reserved || 0)}</div></div>
           <div class="expand-stat"><div class="expand-label">On order</div><div class="expand-val">${fmt(item.onOrder)}</div></div>
           <div class="expand-stat" title="Total units consumed in the last 90 days"><div class="expand-label">90-day consumed</div><div class="expand-val">${fmt(item.consumed90)}</div></div>
