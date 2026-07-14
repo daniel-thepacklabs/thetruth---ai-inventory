@@ -438,6 +438,7 @@ const SUBTYPE_TO_VARIANT = {
   'Mini Doink 5-Pack THCA': ['Mini Doink 5-Pack', 'THCA'],
   'Mini Doink 5-Pack THCP': ['Mini Doink 5-Pack', 'THCP'],
   'Double Doink': ['Double Doink', 'THCP'],
+  'Double Doink Jelly Hole': ['Double Doink', 'THCP'],
   'Imperial Loaded THCA': ['Imperial Loaded', 'THCA'],
   'Imperial Loaded THCP': ['Imperial Loaded', 'THCP'],
   'Jelly Hole THCA': ['Jelly Hole', 'THCA'],

@@ -324,7 +324,14 @@ function renderForecastByType(cm, lastMoPeriod, allMonths) {
       <td style="padding:.5rem .75rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${pCol}">${g.lastMoRev > 0 ? `${pace >= 0 ? '+' : ''}${pace.toFixed(1)}%` : '—'}</td>
     </tr>`;
 
-    g.subs.sort((a, b) => b.projRev - a.projRev).forEach(sub => {
+    g.subs.sort((a, b) => {
+      if (type === 'Prerolls') {
+        const aThca = a.subtype.includes('THCA') ? 0 : 1;
+        const bThca = b.subtype.includes('THCA') ? 0 : 1;
+        if (aThca !== bThca) return aThca - bThca;
+      }
+      return b.projRev - a.projRev;
+    }).forEach(sub => {
       const sp = sub.lastMoRev > 0 ? ((sub.projRev - sub.lastMoRev) / sub.lastMoRev * 100) : 0;
       const sCol = sp >= 0 ? 'var(--green)' : 'var(--red)';
       html += `<tr style="border-bottom:0.5px solid var(--border)">
@@ -445,7 +452,14 @@ function renderByProductType() {
       <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--orange)">${typeCogs > 0 ? $r(typeCogs) : '—'}</td>
       <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${tmCol}">${typeCogs > 0 ? typeMargin.toFixed(1) + '%' : '—'}</td>
     </tr>`;
-    Object.keys(tree[type]).sort().forEach(sub => {
+    Object.keys(tree[type]).sort((a, b) => {
+      if (type === 'Prerolls') {
+        const aThca = a.includes('THCA') ? 0 : 1;
+        const bThca = b.includes('THCA') ? 0 : 1;
+        if (aThca !== bThca) return aThca - bThca;
+      }
+      return a.localeCompare(b);
+    }).forEach(sub => {
       const sm = tree[type][sub];
       const sRev = Object.values(sm).reduce((s, v) => s + v.rev, 0);
       const sPacks = Object.values(sm).reduce((s, v) => s + v.packs, 0);
