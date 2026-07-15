@@ -120,7 +120,7 @@ export function renderSalesView() {
 
   const byMonth = {};
   allMonthlyData.forEach(m => {
-    byMonth[m.period] = { rev: m.revenue, units: m.units, orders: m.orders };
+    byMonth[m.period] = { rev: m.revenue, units: m.units, orders: m.orders, returns: m.returns || 0 };
   });
 
   renderCurrentMonthSummary(byMonth);
@@ -158,6 +158,7 @@ function renderMonthlyTable(allMonths, byMonth) {
   const totalUnits = filteredData.reduce((s, m) => s + m.units, 0);
   const totalOrders = filteredData.reduce((s, m) => s + m.orders, 0);
   const totalCogs = filteredData.reduce((s, m) => s + m.cogs, 0);
+  const totalReturns = filteredData.reduce((s, m) => s + (m.returns || 0), 0);
   const cm = getCurrentMonthInfo();
   const fullMonths = filteredData.filter(m => m.period !== cm.period);
   const avgRev = fullMonths.length ? fullMonths.reduce((s, m) => s + m.rev, 0) / fullMonths.length : 0;
@@ -170,7 +171,7 @@ function renderMonthlyTable(allMonths, byMonth) {
 
   const tbody = document.getElementById('sales-monthly-body');
   const monthList = months.map((m, i) => ({ m, ...byMonth[m], cogs: cogsByMonth[m] || 0, prev: i > 0 ? byMonth[months[i - 1]] : null }));
-  tbody.innerHTML = monthList.map(({ m, rev, units, orders, cogs, prev }) => {
+  tbody.innerHTML = monthList.map(({ m, rev, units, orders, cogs, returns, prev }) => {
     const aov = units > 0 ? rev / units : 0;
     const margin = rev > 0 ? ((rev - cogs) / rev) * 100 : 0;
     const mCol = cogs > 0 ? marginColor(margin) : 'var(--text3)';
@@ -191,6 +192,7 @@ function renderMonthlyTable(allMonths, byMonth) {
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${units.toLocaleString()}${isPartial && projected ? `<br><span style="font-size:10px;color:var(--blue)">proj: ${Math.round(units / cm.pctElapsed).toLocaleString()}</span>` : ''}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${orders.toLocaleString()}${isPartial && projected ? `<br><span style="font-size:10px;color:var(--blue)">proj: ${Math.round(orders / cm.pctElapsed).toLocaleString()}</span>` : ''}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${$f(aov)}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--red)">${(returns || 0) > 0 ? $f(returns) : '—'}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--orange)">${cogs > 0 ? $f(cogs) : '—'}</td>
       <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${mCol}">${cogs > 0 ? margin.toFixed(1) + '%' : '—'}</td>
       <td style="padding:.6rem 1rem">
@@ -215,6 +217,7 @@ function renderMonthlyTable(allMonths, byMonth) {
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${totalUnits.toLocaleString()}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${totalOrders.toLocaleString()}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700">${$f(avgAov)}</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--red)">${totalReturns > 0 ? $f(totalReturns) : '—'}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--orange)">${totalCogs > 0 ? $f(totalCogs) : '—'}</td>
     <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:${tmCol}">${totalCogs > 0 ? totalMargin.toFixed(1) + '%' : '—'}</td>
     <td></td>

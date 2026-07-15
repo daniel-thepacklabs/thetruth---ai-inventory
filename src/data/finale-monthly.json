@@ -4,73 +4,85 @@
       "period": "2025-07",
       "revenue": 2029455.7300000002,
       "units": 39573,
-      "orders": 2811
+      "orders": 2811,
+      "returns": 26937.08
     },
     {
       "period": "2025-08",
       "revenue": 2001439.3600000008,
       "units": 44078,
-      "orders": 3067
+      "orders": 3067,
+      "returns": 11160.00
     },
     {
       "period": "2025-09",
       "revenue": 2348964.080000003,
       "units": 49480,
-      "orders": 3511
+      "orders": 3511,
+      "returns": 19408.73
     },
     {
       "period": "2025-10",
       "revenue": 1725525.850000002,
       "units": 41836,
-      "orders": 3681
+      "orders": 3681,
+      "returns": 21913.53
     },
     {
       "period": "2025-11",
       "revenue": 1788911.300000002,
       "units": 39873,
-      "orders": 4410
+      "orders": 4410,
+      "returns": 5858.65
     },
     {
       "period": "2025-12",
       "revenue": 1811330.1900000013,
       "units": 41837,
-      "orders": 4334
+      "orders": 4334,
+      "returns": 89599.61
     },
     {
       "period": "2026-01",
       "revenue": 2433614.3900000034,
       "units": 51285,
-      "orders": 4378
+      "orders": 4378,
+      "returns": 65389.61
     },
     {
       "period": "2026-02",
       "revenue": 1925868.3700000022,
       "units": 42319,
-      "orders": 3953
+      "orders": 3953,
+      "returns": 20372.73
     },
     {
       "period": "2026-03",
       "revenue": 1803372.2800000028,
       "units": 41346,
-      "orders": 4303
+      "orders": 4303,
+      "returns": 64449.36
     },
     {
       "period": "2026-04",
       "revenue": 2012282.9400000018,
       "units": 50703,
-      "orders": 4652
+      "orders": 4652,
+      "returns": 171799.12
     },
     {
       "period": "2026-05",
       "revenue": 2509195.270000003,
       "units": 57412,
-      "orders": 4299
+      "orders": 4299,
+      "returns": 29441.00
     },
     {
       "period": "2026-06",
       "revenue": 1072617.8199999998,
       "units": 26625,
-      "orders": 1967
+      "orders": 1967,
+      "returns": 0
     }
   ]
 }

@@ -178,6 +178,11 @@ export function getSalesProductType(pid, desc) {
     if (['P5D-PD','P5D-MMJ','P5D-TBP','P5D-BLOG','P5D-SKP','P5D-TS'].some(x => pu.startsWith(x))) return ['Prerolls','Mini Doink 5-Pack THCP'];
     return ['Prerolls','Mini Doink 5-Pack THCA'];
   }
+  if (pu.startsWith('INF-DD')) return ['Prerolls','Double Doink Jelly Hole'];
+  if (pu.startsWith('INF-JH')) {
+    if (['INF-JH-BLOG','INF-JH-MMJ','INF-JH-PD','INF-JH-SKP','INF-JH-TBP','INF-JH-TS'].some(x => pu.startsWith(x))) return ['Prerolls','Jelly Hole THCP'];
+    return ['Prerolls','Jelly Hole THCA'];
+  }
   if (pu.startsWith('PDD')) {
     if (['PDD-BLOG','PDD-MMJ','PDD-PD','PDD-SKP','PDD-TBP','PDD-TS'].some(x => pu.startsWith(x))) return ['Prerolls','Double Doink Jelly Hole'];
     return ['Prerolls','Double Doink'];

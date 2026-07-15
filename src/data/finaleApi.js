@@ -217,6 +217,25 @@ async function fetchMonthRevenue(year, month) {
   return { revenue: Math.round(revenue * 100) / 100, units, orders };
 }
 
+async function fetchMonthReturns(year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const begin = `${month}/1/${year}`;
+  const end = `${month}/${daysInMonth}/${year}`;
+  let cursor = null, returns = 0;
+  while (true) {
+    const afterClause = cursor ? `, after: "${cursor}"` : '';
+    const q = `{ returnViewConnection(first: 1000${afterClause}, returnDate: { begin: "${begin}", end: "${end}" }) { pageInfo { hasNextPage endCursor } edges { node { subtotal } } } }`;
+    const data = await gql(q);
+    const conn = data.returnViewConnection;
+    conn.edges.forEach(e => {
+      returns += parseFloat((e.node.subtotal || '0').replace(/,/g, ''));
+    });
+    if (!conn.pageInfo.hasNextPage) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return Math.round(returns * 100) / 100;
+}
+
 function buildAvgPriceMap() {
   const byPid = {};
   (orderItemData.data || []).forEach(r => {
@@ -295,9 +314,9 @@ async function fetchLiveMonthlyData(products) {
 
   for (const period of livePeriods) {
     const [y, m] = period.split('-').map(Number);
-    console.log(`  Fetching live revenue for ${period}...`);
-    const rev = await fetchMonthRevenue(y, m);
-    months.push({ period, revenue: rev.revenue, units: rev.units, orders: rev.orders });
+    console.log(`  Fetching live revenue + returns for ${period}...`);
+    const [rev, ret] = await Promise.all([fetchMonthRevenue(y, m), fetchMonthReturns(y, m)]);
+    months.push({ period, revenue: rev.revenue, units: rev.units, orders: rev.orders, returns: ret });
 
     const liveItems = buildLiveSalesItems(products, period, priceMap);
     // Scale per-product estimated revenue to match actual order totals
