@@ -1,6 +1,6 @@
 import { processData, processSalesReport, buildSubcatIndex } from './data/parsers.js';
 import { state } from './data/state.js';
-import { fetchAll } from './data/finaleApi.js';
+import { fetchAll, fetchOrderItems } from './data/finaleApi.js';
 import { updateRangeLabel, renderSubcatChips, renderEdibleFilters, initEdibleFilterGlobals, setRenderFn as setFilterRender, toggleChip, togglePill, resetFilters, selectAllChips, clearAllChips, toggleSubcat, selectAllSubcats, clearAllSubcats, quickFilter, quickStatusFilter, setFilter, activateReorderOnly } from './ui/filters.js';
 import { openModal, closeModal, saveModal, resetOverride, updateModalPreview, setRenderFn as setModalRender } from './ui/modal.js';
 import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView, discontinueProduct, restoreProduct } from './views/inventory.js';
@@ -100,7 +100,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 // Store module references on window so the sync function never holds stale closures.
 // Every time this module executes (including HMR), these are refreshed.
 window.__syncDeps = {
-  fetchAll, processData, processSalesReport, buildSubcatIndex,
+  fetchAll, fetchOrderItems, processData, processSalesReport, buildSubcatIndex,
   state, updateRangeLabel, renderSubcatChips, renderEdibleFilters, render,
   renderSalesView, renderZeroPriceView, renderCalculatorView, renderCogsView,
   renderEdiblesView, _viewRendered,

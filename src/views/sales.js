@@ -613,7 +613,39 @@ function renderSalesByState() {
     <td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--green);font-size:11px">${$f(grandTotal)}</td>
   </tr>`;
 
-  window.__stateDetail = (st, period, clickedTd) => {
+  function buildDrilldownHTML(d, name) {
+    const byCat = {};
+    Object.entries(d.products).forEach(([pid, pd]) => {
+      const [cat, sub] = getSalesProductType(pid, '');
+      const catKey = cat + '|' + sub;
+      if (!byCat[catKey]) byCat[catKey] = { cat, sub, revenue: 0, units: 0 };
+      byCat[catKey].revenue += pd.revenue;
+      byCat[catKey].units += pd.units;
+    });
+    const sorted = Object.values(byCat).sort((a, b) => b.revenue - a.revenue);
+    const totalItemized = sorted.reduce((s, c) => s + c.revenue, 0);
+
+    let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <span style="font-size:12px;font-weight:600;color:var(--text)">${name} — ${d.period}</span>
+      <span style="font-size:11px;color:var(--text3)">Total: ${$f(d.revenue)} · ${d.shipments} shipments · Itemized: ${$f(totalItemized)}</span>
+    </div>`;
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    html += '<tr style="background:var(--bg3)"><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Category</th><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Subcategory</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Revenue</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Units</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">% of Itemized</th></tr>';
+    sorted.forEach(c => {
+      const pct = totalItemized > 0 ? (c.revenue / totalItemized * 100).toFixed(1) : '0';
+      html += `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:.4rem .6rem;color:var(--text)">${c.cat}</td>
+        <td style="padding:.4rem .6rem;color:var(--text2)">${c.sub}</td>
+        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green)">${$f(c.revenue)}</td>
+        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${c.units.toLocaleString()}</td>
+        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${pct}%</td>
+      </tr>`;
+    });
+    html += '</table>';
+    return html;
+  }
+
+  window.__stateDetail = async (st, period, clickedTd) => {
     const colSpan = months.length + 2;
     const existing = document.getElementById('state-detail-row');
     if (existing) {
@@ -625,57 +657,41 @@ function renderSalesByState() {
     const key = `${st}|${period}`;
     const d = data[key];
     const name = STATE_NAMES[st] || st;
+    if (!d) return;
 
     const detailRow = document.createElement('tr');
     detailRow.id = 'state-detail-row';
     detailRow.dataset.key = key;
+    detailRow.innerHTML = `<td colspan="${colSpan}" style="padding:.75rem 1rem;background:var(--bg);border-bottom:2px solid var(--accent)"><div style="font-size:12px;color:var(--text3)">Loading ${name} — ${period} breakdown… (${d.orderIds?.length || 0} orders)</div></td>`;
 
-    let inner = '';
-    if (!d || !d.products || !Object.keys(d.products).length) {
-      inner = `<div style="font-size:12px;color:var(--text3);padding:.5rem 0">No product-level detail for ${name} — ${period} (most shipments contain multiple products)</div>`;
-    } else {
-      const byCat = {};
-      Object.entries(d.products).forEach(([pid, pd]) => {
-        const [cat, sub] = getSalesProductType(pid, '');
-        const catKey = cat + '|' + sub;
-        if (!byCat[catKey]) byCat[catKey] = { cat, sub, revenue: 0, units: 0 };
-        byCat[catKey].revenue += pd.revenue;
-        byCat[catKey].units += pd.units;
-      });
-      const sorted = Object.values(byCat).sort((a, b) => b.revenue - a.revenue);
-      const trackedRev = sorted.reduce((s, c) => s + c.revenue, 0);
-      const untrackedRev = d.revenue - trackedRev;
-
-      inner = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-        <span style="font-size:12px;font-weight:600;color:var(--text)">${name} — ${period}</span>
-        <span style="font-size:11px;color:var(--text3)">Total: ${$f(d.revenue)} · ${d.shipments} shipments</span>
-      </div>`;
-      inner += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-      inner += '<tr style="background:var(--bg3)"><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Category</th><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Subcategory</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Revenue</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Units</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">% of Total</th></tr>';
-      sorted.forEach(c => {
-        const pct = d.revenue > 0 ? (c.revenue / d.revenue * 100).toFixed(1) : '0';
-        inner += `<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:.4rem .6rem;color:var(--text)">${c.cat}</td>
-          <td style="padding:.4rem .6rem;color:var(--text2)">${c.sub}</td>
-          <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green)">${$f(c.revenue)}</td>
-          <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${c.units.toLocaleString()}</td>
-          <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${pct}%</td>
-        </tr>`;
-      });
-      if (untrackedRev > 0) {
-        const pct = (untrackedRev / d.revenue * 100).toFixed(1);
-        inner += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem;color:var(--text3)" colspan="2">Multi-product orders (unattributed)</td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${$f(untrackedRev)}</td><td></td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${pct}%</td></tr>`;
-      }
-      inner += '</table>';
-    }
-
-    detailRow.innerHTML = `<td colspan="${colSpan}" style="padding:.75rem 1rem;background:var(--bg);border-bottom:2px solid var(--accent)">${inner}</td>`;
     const parentRow = clickedTd?.closest('tr');
     if (parentRow && parentRow.nextSibling) {
       parentRow.parentNode.insertBefore(detailRow, parentRow.nextSibling);
     } else if (parentRow) {
       parentRow.parentNode.appendChild(detailRow);
     }
+    detailRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    if (d.orderIds?.length && window.__syncDeps?.fetchOrderItems) {
+      try {
+        const orderProducts = await window.__syncDeps.fetchOrderItems(d.orderIds);
+        Object.entries(orderProducts).forEach(([pid, pd]) => {
+          if (!d.products[pid]) d.products[pid] = { revenue: 0, units: 0 };
+          d.products[pid].revenue += pd.revenue;
+          d.products[pid].units += pd.units;
+        });
+        d.orderIds = [];
+      } catch (err) {
+        console.warn('Failed to fetch order items:', err);
+      }
+    }
+
+    if (!Object.keys(d.products).length) {
+      detailRow.querySelector('td').innerHTML = `<div style="font-size:12px;color:var(--text3);padding:.5rem 0">No product-level detail for ${name} — ${period}</div>`;
+      return;
+    }
+
+    detailRow.querySelector('td').innerHTML = buildDrilldownHTML(d, name);
     detailRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 

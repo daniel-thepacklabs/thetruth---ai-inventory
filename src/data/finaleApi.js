@@ -239,11 +239,14 @@ async function fetchMonthReturns(year, month) {
 async function fetchShipmentsByState(beginDate, endDate) {
   let cursor = null;
   const byStateMonth = {};
+  let shipCount = 0;
   while (true) {
     const afterClause = cursor ? `, after: "${cursor}"` : '';
-    const q = `{ shipmentViewConnection(first: 1000${afterClause}, shipDate: { begin: "${beginDate}", end: "${endDate}" }) { pageInfo { hasNextPage endCursor } edges { node { type status shipDate subtotal totalUnits product { productId } shipTo { stateRegion } } } } }`;
+    const q = `{ shipmentViewConnection(first: 1000${afterClause}, shipDate: { begin: "${beginDate}", end: "${endDate}" }) { pageInfo { hasNextPage endCursor } edges { node { type status shipDate subtotal totalUnits product { productId } shipTo { stateRegion } order { orderId } } } } }`;
     const data = await gql(q);
     const conn = data.shipmentViewConnection;
+    shipCount += conn.edges.length;
+    console.log(`  State shipments: ${shipCount} fetched...`);
     conn.edges.forEach(e => {
       const n = e.node;
       if (n.type !== 'Sale' || n.status !== 'Shipped') return;
@@ -253,11 +256,13 @@ async function fetchShipmentsByState(beginDate, endDate) {
       const amt = parseFloat((n.subtotal || '0').replace(/,/g, ''));
       const units = parseInt(n.totalUnits || 0);
       const pid = n.product ? n.product.productId : 'Unknown';
+      const orderId = n.order?.orderId || '';
       const key = `${st}|${period}`;
-      if (!byStateMonth[key]) byStateMonth[key] = { state: st, period, revenue: 0, units: 0, shipments: 0, products: {} };
+      if (!byStateMonth[key]) byStateMonth[key] = { state: st, period, revenue: 0, units: 0, shipments: 0, products: {}, orderIds: new Set() };
       byStateMonth[key].revenue += amt;
       byStateMonth[key].units += units;
       byStateMonth[key].shipments++;
+      if (orderId) byStateMonth[key].orderIds.add(orderId);
       if (pid !== 'Multiple products') {
         if (!byStateMonth[key].products[pid]) byStateMonth[key].products[pid] = { revenue: 0, units: 0 };
         byStateMonth[key].products[pid].revenue += amt;
@@ -267,7 +272,34 @@ async function fetchShipmentsByState(beginDate, endDate) {
     if (!conn.pageInfo.hasNextPage) break;
     cursor = conn.pageInfo.endCursor;
   }
+  // Convert Sets to arrays for JSON serialization
+  Object.values(byStateMonth).forEach(v => { v.orderIds = [...v.orderIds]; });
   return byStateMonth;
+}
+
+export async function fetchOrderItems(orderIds) {
+  const products = {};
+  for (let i = 0; i < orderIds.length; i += 20) {
+    const batch = orderIds.slice(i, i + 20);
+    const results = await Promise.all(batch.map(oid =>
+      gql(`{ orderViewConnection(first: 1, search: "${oid}") { edges { node { orderId itemList(first: 200) { edges { node { product { productId } quantity subtotal } } } } } } }`)
+    ));
+    results.forEach(data => {
+      const edges = data.orderViewConnection?.edges;
+      if (!edges?.length) return;
+      edges[0].node.itemList?.edges?.forEach(item => {
+        const pid = item.node.product?.productId;
+        const sub = parseFloat((item.node.subtotal || '0').replace(/,/g, ''));
+        const qty = parseInt(item.node.quantity || 0);
+        if (pid) {
+          if (!products[pid]) products[pid] = { revenue: 0, units: 0 };
+          products[pid].revenue += sub;
+          products[pid].units += qty;
+        }
+      });
+    });
+  }
+  return products;
 }
 
 function buildAvgPriceMap() {
