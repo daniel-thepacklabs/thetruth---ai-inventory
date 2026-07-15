@@ -522,15 +522,54 @@ function renderByProductType() {
 
 const STATE_NAMES = {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'Washington DC',GU:'Guam',PR:'Puerto Rico',VI:'US Virgin Islands',AS:'American Samoa',MP:'Northern Mariana Islands'};
 
+function getQuarter(period) {
+  const m = parseInt(period.split('-')[1]);
+  if (m <= 3) return 'Q1';
+  if (m <= 6) return 'Q2';
+  if (m <= 9) return 'Q3';
+  return 'Q4';
+}
+
+function getFilteredMonths(allMonths) {
+  const yearSel = document.getElementById('state-year-filter');
+  const qSel = document.getElementById('state-quarter-filter');
+  const year = yearSel?.value || 'all';
+  const quarter = qSel?.value || 'all';
+  return allMonths.filter(m => {
+    if (year !== 'all' && !m.startsWith(year)) return false;
+    if (quarter !== 'all' && getQuarter(m) !== quarter) return false;
+    return true;
+  });
+}
+
 function renderSalesByState() {
   const data = state.SALES_BY_STATE;
   const thead = document.getElementById('sales-state-head');
   const tbody = document.getElementById('sales-state-body');
   if (!thead || !tbody || !data || !Object.keys(data).length) return;
 
-  const months = [...new Set(Object.values(data).map(d => d.period))].sort();
+  const allMonths = [...new Set(Object.values(data).map(d => d.period))].sort();
+
+  const yearSel = document.getElementById('state-year-filter');
+  if (yearSel && yearSel.options.length <= 1) {
+    const years = [...new Set(allMonths.map(m => m.split('-')[0]))].sort();
+    years.forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      yearSel.appendChild(opt);
+    });
+  }
+
+  const months = getFilteredMonths(allMonths);
+  if (!months.length) {
+    thead.innerHTML = '';
+    tbody.innerHTML = '<tr><td style="padding:2rem;text-align:center;color:var(--text3)">No data for selected period</td></tr>';
+    return;
+  }
+
   const stateMap = {};
   Object.values(data).forEach(d => {
+    if (!months.includes(d.period)) return;
     if (!stateMap[d.state]) stateMap[d.state] = { total: 0, months: {} };
     stateMap[d.state].months[d.period] = d;
     stateMap[d.state].total += d.revenue;
@@ -619,5 +658,18 @@ function renderSalesByState() {
     html += '</table>';
     drilldown.style.display = 'block';
     drilldown.innerHTML = html;
+  };
+
+  window.__filterStateSales = () => {
+    document.getElementById('state-drilldown').style.display = 'none';
+    renderSalesByState();
+  };
+
+  window.__exportStateCSV = () => {
+    import('../export.js').then(m => m.exportTableCSV('sales-state-table', 'sales-by-state.csv'));
+  };
+
+  window.__exportStatePDF = () => {
+    import('../export.js').then(m => m.exportTablePDF('sales-state-table', 'Monthly Sales by State', 'sales-by-state.pdf'));
   };
 }

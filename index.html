@@ -311,8 +311,22 @@
 
         <!-- Sales by State -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
-          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap">
             <span style="font-size:12px;font-weight:500;color:var(--text)">Monthly Sales by State</span>
+            <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+              <select id="state-year-filter" onchange="window.__filterStateSales()" style="font-size:11px;padding:2px 6px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:4px">
+                <option value="all">All Years</option>
+              </select>
+              <select id="state-quarter-filter" onchange="window.__filterStateSales()" style="font-size:11px;padding:2px 6px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:4px">
+                <option value="all">All Quarters</option>
+                <option value="Q1">Q1</option>
+                <option value="Q2">Q2</option>
+                <option value="Q3">Q3</option>
+                <option value="Q4">Q4</option>
+              </select>
+              <button onclick="window.__exportStateCSV()" style="font-size:10px;padding:2px 8px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:4px;cursor:pointer">↓ CSV</button>
+              <button onclick="window.__exportStatePDF()" style="font-size:10px;padding:2px 8px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:4px;cursor:pointer">↓ PDF</button>
+            </div>
           </div>
           <div style="overflow-x:auto">
             <table id="sales-state-table" style="width:100%;border-collapse:collapse;font-size:12px">
