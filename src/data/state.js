@@ -21,6 +21,7 @@ export const state = {
   PRICE_MAP: {},
   SHOPIFY_PRICE_MAP: {},
   WHOLESALE_PRICE_MAP: {},
+  SALES_BY_STATE: {},
   ALL_EDIBLE_FLAVORS: new Set(),
   ALL_EDIBLE_PACKS: new Set(),
   activeEdibleFlavors: new Set(),

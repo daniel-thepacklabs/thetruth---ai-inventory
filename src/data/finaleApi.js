@@ -236,6 +236,40 @@ async function fetchMonthReturns(year, month) {
   return Math.round(returns * 100) / 100;
 }
 
+async function fetchShipmentsByState(beginDate, endDate) {
+  let cursor = null;
+  const byStateMonth = {};
+  while (true) {
+    const afterClause = cursor ? `, after: "${cursor}"` : '';
+    const q = `{ shipmentViewConnection(first: 1000${afterClause}, shipDate: { begin: "${beginDate}", end: "${endDate}" }) { pageInfo { hasNextPage endCursor } edges { node { type status shipDate subtotal totalUnits product { productId } shipTo { stateRegion } } } } }`;
+    const data = await gql(q);
+    const conn = data.shipmentViewConnection;
+    conn.edges.forEach(e => {
+      const n = e.node;
+      if (n.type !== 'Sale' || n.status !== 'Shipped') return;
+      const st = (n.shipTo && n.shipTo.stateRegion) || 'Unknown';
+      const d = new Date(n.shipDate);
+      const period = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const amt = parseFloat((n.subtotal || '0').replace(/,/g, ''));
+      const units = parseInt(n.totalUnits || 0);
+      const pid = n.product ? n.product.productId : 'Unknown';
+      const key = `${st}|${period}`;
+      if (!byStateMonth[key]) byStateMonth[key] = { state: st, period, revenue: 0, units: 0, shipments: 0, products: {} };
+      byStateMonth[key].revenue += amt;
+      byStateMonth[key].units += units;
+      byStateMonth[key].shipments++;
+      if (pid !== 'Multiple products') {
+        if (!byStateMonth[key].products[pid]) byStateMonth[key].products[pid] = { revenue: 0, units: 0 };
+        byStateMonth[key].products[pid].revenue += amt;
+        byStateMonth[key].products[pid].units += units;
+      }
+    });
+    if (!conn.pageInfo.hasNextPage) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return byStateMonth;
+}
+
 function buildAvgPriceMap() {
   const byPid = {};
   (orderItemData.data || []).forEach(r => {
@@ -402,7 +436,23 @@ export async function fetchAll() {
   const shopifyPriceMap = priceMapsData.shopify || {};
   const wholesalePriceMap = priceMapsData.wholesale || {};
 
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap };
+  console.log('Fetching shipped sales by state...');
+  let salesByState = {};
+  try {
+    const allPeriods = monthlyTotals.map(m => m.period).sort();
+    const firstPeriod = allPeriods[0];
+    const lastPeriod = allPeriods[allPeriods.length - 1];
+    const [fy, fm] = firstPeriod.split('-').map(Number);
+    const [ly, lm] = lastPeriod.split('-').map(Number);
+    const lastDays = new Date(ly, lm, 0).getDate();
+    salesByState = await fetchShipmentsByState(`${fm}/1/${fy}`, `${lm}/${lastDays}/${ly}`);
+    const totalStateRev = Object.values(salesByState).reduce((s, d) => s + d.revenue, 0);
+    console.log(`  ${Object.keys(salesByState).length} states, $${Math.round(totalStateRev).toLocaleString()} total shipped revenue`);
+  } catch (err) {
+    console.warn('State sales fetch failed:', err.message);
+  }
+
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState };
 }
 
 async function fetchAllStatic() {
@@ -437,5 +487,5 @@ async function fetchAllStatic() {
   const shopifyPriceMap = priceMapsData.shopify || {};
   const wholesalePriceMap = priceMapsData.wholesale || {};
 
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap };
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState: {} };
 }

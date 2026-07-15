@@ -138,6 +138,7 @@ export function renderSalesView() {
   renderByProductType();
 
   renderForecast(allMonths, byMonth);
+  renderSalesByState();
 }
 
 function renderMonthlyTable(allMonths, byMonth) {
@@ -517,4 +518,106 @@ function renderByProductType() {
   </tr>`;
 
   tbody.innerHTML = html;
+}
+
+const STATE_NAMES = {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'Washington DC',GU:'Guam',PR:'Puerto Rico',VI:'US Virgin Islands',AS:'American Samoa',MP:'Northern Mariana Islands'};
+
+function renderSalesByState() {
+  const data = state.SALES_BY_STATE;
+  const thead = document.getElementById('sales-state-head');
+  const tbody = document.getElementById('sales-state-body');
+  if (!thead || !tbody || !data || !Object.keys(data).length) return;
+
+  const months = [...new Set(Object.values(data).map(d => d.period))].sort();
+  const stateMap = {};
+  Object.values(data).forEach(d => {
+    if (!stateMap[d.state]) stateMap[d.state] = { total: 0, months: {} };
+    stateMap[d.state].months[d.period] = d;
+    stateMap[d.state].total += d.revenue;
+  });
+  const states = Object.keys(stateMap).sort((a, b) => stateMap[b].total - stateMap[a].total);
+
+  const th = s => `<th style="padding:.5rem .6rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap;font-size:11px">${s}</th>`;
+  thead.innerHTML = `<tr style="background:var(--bg3)">
+    <th style="padding:.5rem .6rem;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap;font-size:11px;position:sticky;left:0;background:var(--bg3);z-index:1">State</th>
+    ${months.map(m => th(m.slice(2))).join('')}
+    ${th('Total')}
+  </tr>`;
+
+  const grandTotal = states.reduce((s, st) => s + stateMap[st].total, 0);
+  const monthTotals = {};
+  months.forEach(m => { monthTotals[m] = states.reduce((s, st) => s + (stateMap[st].months[m]?.revenue || 0), 0); });
+
+  const maxStateRev = stateMap[states[0]]?.total || 1;
+
+  tbody.innerHTML = states.map(st => {
+    const sd = stateMap[st];
+    const name = STATE_NAMES[st] || st;
+    const pct = grandTotal > 0 ? (sd.total / grandTotal * 100).toFixed(1) : '0';
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:.5rem .6rem;font-weight:500;color:var(--text);white-space:nowrap;position:sticky;left:0;background:var(--bg2);z-index:1" title="${name} — ${pct}% of total">
+        ${st}
+        <div style="height:2px;background:var(--bg4);border-radius:1px;margin-top:2px"><div style="height:100%;width:${(sd.total/maxStateRev*100).toFixed(1)}%;background:var(--blue);border-radius:1px"></div></div>
+      </td>
+      ${months.map(m => {
+        const md = sd.months[m];
+        if (!md) return '<td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3);font-size:11px">—</td>';
+        return `<td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green);font-size:11px;cursor:pointer" onclick="window.__stateDetail('${st}','${m}')" title="Click for ${name} ${m} breakdown">${$f(md.revenue)}</td>`;
+      }).join('')}
+      <td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--green);font-size:11px">${$f(sd.total)}</td>
+    </tr>`;
+  }).join('');
+
+  tbody.innerHTML += `<tr style="background:var(--bg3);border-top:2px solid var(--border2)">
+    <td style="padding:.5rem .6rem;font-weight:700;color:var(--accent);position:sticky;left:0;background:var(--bg3);z-index:1">TOTAL (${states.length})</td>
+    ${months.map(m => `<td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--green);font-size:11px">${$f(monthTotals[m] || 0)}</td>`).join('')}
+    <td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--green);font-size:11px">${$f(grandTotal)}</td>
+  </tr>`;
+
+  window.__stateDetail = (st, period) => {
+    const drilldown = document.getElementById('state-drilldown');
+    if (!drilldown) return;
+    const key = `${st}|${period}`;
+    const d = data[key];
+    if (!d || !d.products || !Object.keys(d.products).length) {
+      drilldown.style.display = 'block';
+      drilldown.innerHTML = `<div style="font-size:12px;color:var(--text3)">No product-level detail for ${STATE_NAMES[st] || st} — ${period} (most shipments contain multiple products)</div>`;
+      return;
+    }
+    const byCat = {};
+    Object.entries(d.products).forEach(([pid, pd]) => {
+      const [cat, sub] = getSalesProductType(pid, '');
+      const catKey = cat + '|' + sub;
+      if (!byCat[catKey]) byCat[catKey] = { cat, sub, revenue: 0, units: 0 };
+      byCat[catKey].revenue += pd.revenue;
+      byCat[catKey].units += pd.units;
+    });
+    const sorted = Object.values(byCat).sort((a, b) => b.revenue - a.revenue);
+    const trackedRev = sorted.reduce((s, c) => s + c.revenue, 0);
+    const untrackedRev = d.revenue - trackedRev;
+    const name = STATE_NAMES[st] || st;
+    let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <span style="font-size:12px;font-weight:600;color:var(--text)">${name} — ${period}</span>
+      <span style="font-size:11px;color:var(--text3)">Total: ${$f(d.revenue)} · ${d.shipments} shipments</span>
+    </div>`;
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    html += '<tr style="background:var(--bg3)"><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Category</th><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Subcategory</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Revenue</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Units</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">% of State</th></tr>';
+    sorted.forEach(c => {
+      const pct = d.revenue > 0 ? (c.revenue / d.revenue * 100).toFixed(1) : '0';
+      html += `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:.4rem .6rem;color:var(--text)">${c.cat}</td>
+        <td style="padding:.4rem .6rem;color:var(--text2)">${c.sub}</td>
+        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green)">${$f(c.revenue)}</td>
+        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${c.units.toLocaleString()}</td>
+        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${pct}%</td>
+      </tr>`;
+    });
+    if (untrackedRev > 0) {
+      const pct = (untrackedRev / d.revenue * 100).toFixed(1);
+      html += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem;color:var(--text3)" colspan="2">Multi-product orders (unattributed)</td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${$f(untrackedRev)}</td><td></td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${pct}%</td></tr>`;
+    }
+    html += '</table>';
+    drilldown.style.display = 'block';
+    drilldown.innerHTML = html;
+  };
 }
