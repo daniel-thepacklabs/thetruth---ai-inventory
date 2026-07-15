@@ -601,7 +601,7 @@ function renderSalesByState() {
       ${months.map(m => {
         const md = sd.months[m];
         if (!md) return '<td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3);font-size:11px">—</td>';
-        return `<td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green);font-size:11px;cursor:pointer" onclick="window.__stateDetail('${st}','${m}')" title="Click for ${name} ${m} breakdown">${$f(md.revenue)}</td>`;
+        return `<td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green);font-size:11px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" onclick="window.__stateDetail('${st}','${m}',this)" title="Click for ${name} ${m} breakdown">${$f(md.revenue)}</td>`;
       }).join('')}
       <td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--green);font-size:11px">${$f(sd.total)}</td>
     </tr>`;
@@ -613,55 +613,75 @@ function renderSalesByState() {
     <td style="padding:.5rem .6rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--green);font-size:11px">${$f(grandTotal)}</td>
   </tr>`;
 
-  window.__stateDetail = (st, period) => {
-    const drilldown = document.getElementById('state-drilldown');
-    if (!drilldown) return;
+  window.__stateDetail = (st, period, clickedTd) => {
+    const colSpan = months.length + 2;
+    const existing = document.getElementById('state-detail-row');
+    if (existing) {
+      const wasKey = existing.dataset.key;
+      existing.remove();
+      if (wasKey === `${st}|${period}`) return;
+    }
+
     const key = `${st}|${period}`;
     const d = data[key];
-    if (!d || !d.products || !Object.keys(d.products).length) {
-      drilldown.style.display = 'block';
-      drilldown.innerHTML = `<div style="font-size:12px;color:var(--text3)">No product-level detail for ${STATE_NAMES[st] || st} — ${period} (most shipments contain multiple products)</div>`;
-      return;
-    }
-    const byCat = {};
-    Object.entries(d.products).forEach(([pid, pd]) => {
-      const [cat, sub] = getSalesProductType(pid, '');
-      const catKey = cat + '|' + sub;
-      if (!byCat[catKey]) byCat[catKey] = { cat, sub, revenue: 0, units: 0 };
-      byCat[catKey].revenue += pd.revenue;
-      byCat[catKey].units += pd.units;
-    });
-    const sorted = Object.values(byCat).sort((a, b) => b.revenue - a.revenue);
-    const trackedRev = sorted.reduce((s, c) => s + c.revenue, 0);
-    const untrackedRev = d.revenue - trackedRev;
     const name = STATE_NAMES[st] || st;
-    let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-      <span style="font-size:12px;font-weight:600;color:var(--text)">${name} — ${period}</span>
-      <span style="font-size:11px;color:var(--text3)">Total: ${$f(d.revenue)} · ${d.shipments} shipments</span>
-    </div>`;
-    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-    html += '<tr style="background:var(--bg3)"><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Category</th><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Subcategory</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Revenue</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Units</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">% of State</th></tr>';
-    sorted.forEach(c => {
-      const pct = d.revenue > 0 ? (c.revenue / d.revenue * 100).toFixed(1) : '0';
-      html += `<tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:.4rem .6rem;color:var(--text)">${c.cat}</td>
-        <td style="padding:.4rem .6rem;color:var(--text2)">${c.sub}</td>
-        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green)">${$f(c.revenue)}</td>
-        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${c.units.toLocaleString()}</td>
-        <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${pct}%</td>
-      </tr>`;
-    });
-    if (untrackedRev > 0) {
-      const pct = (untrackedRev / d.revenue * 100).toFixed(1);
-      html += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem;color:var(--text3)" colspan="2">Multi-product orders (unattributed)</td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${$f(untrackedRev)}</td><td></td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${pct}%</td></tr>`;
+
+    const detailRow = document.createElement('tr');
+    detailRow.id = 'state-detail-row';
+    detailRow.dataset.key = key;
+
+    let inner = '';
+    if (!d || !d.products || !Object.keys(d.products).length) {
+      inner = `<div style="font-size:12px;color:var(--text3);padding:.5rem 0">No product-level detail for ${name} — ${period} (most shipments contain multiple products)</div>`;
+    } else {
+      const byCat = {};
+      Object.entries(d.products).forEach(([pid, pd]) => {
+        const [cat, sub] = getSalesProductType(pid, '');
+        const catKey = cat + '|' + sub;
+        if (!byCat[catKey]) byCat[catKey] = { cat, sub, revenue: 0, units: 0 };
+        byCat[catKey].revenue += pd.revenue;
+        byCat[catKey].units += pd.units;
+      });
+      const sorted = Object.values(byCat).sort((a, b) => b.revenue - a.revenue);
+      const trackedRev = sorted.reduce((s, c) => s + c.revenue, 0);
+      const untrackedRev = d.revenue - trackedRev;
+
+      inner = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+        <span style="font-size:12px;font-weight:600;color:var(--text)">${name} — ${period}</span>
+        <span style="font-size:11px;color:var(--text3)">Total: ${$f(d.revenue)} · ${d.shipments} shipments</span>
+      </div>`;
+      inner += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+      inner += '<tr style="background:var(--bg3)"><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Category</th><th style="padding:.4rem .6rem;text-align:left;color:var(--text3)">Subcategory</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Revenue</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">Units</th><th style="padding:.4rem .6rem;text-align:right;color:var(--text3)">% of Total</th></tr>';
+      sorted.forEach(c => {
+        const pct = d.revenue > 0 ? (c.revenue / d.revenue * 100).toFixed(1) : '0';
+        inner += `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:.4rem .6rem;color:var(--text)">${c.cat}</td>
+          <td style="padding:.4rem .6rem;color:var(--text2)">${c.sub}</td>
+          <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--green)">${$f(c.revenue)}</td>
+          <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${c.units.toLocaleString()}</td>
+          <td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono)">${pct}%</td>
+        </tr>`;
+      });
+      if (untrackedRev > 0) {
+        const pct = (untrackedRev / d.revenue * 100).toFixed(1);
+        inner += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem .6rem;color:var(--text3)" colspan="2">Multi-product orders (unattributed)</td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${$f(untrackedRev)}</td><td></td><td style="padding:.4rem .6rem;text-align:right;font-family:var(--font-mono);color:var(--text3)">${pct}%</td></tr>`;
+      }
+      inner += '</table>';
     }
-    html += '</table>';
-    drilldown.style.display = 'block';
-    drilldown.innerHTML = html;
+
+    detailRow.innerHTML = `<td colspan="${colSpan}" style="padding:.75rem 1rem;background:var(--bg);border-bottom:2px solid var(--accent)">${inner}</td>`;
+    const parentRow = clickedTd?.closest('tr');
+    if (parentRow && parentRow.nextSibling) {
+      parentRow.parentNode.insertBefore(detailRow, parentRow.nextSibling);
+    } else if (parentRow) {
+      parentRow.parentNode.appendChild(detailRow);
+    }
+    detailRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
   window.__filterStateSales = () => {
-    document.getElementById('state-drilldown').style.display = 'none';
+    const existing = document.getElementById('state-detail-row');
+    if (existing) existing.remove();
     renderSalesByState();
   };
 
