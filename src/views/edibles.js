@@ -47,14 +47,15 @@ function buildEuphoriaTable(edibles) {
     const g = byFlavor[r.flavor][ctKey];
     const packMult = getPackMultiplier(r.id);
     // Convert to single-unit equivalents: 1 unit of 5PK = 5 singles
-    const singlesOnHand = r.onHand * packMult;
+    const avail = r.onHand - (r.reserved || 0);
+    const singlesOnHand = avail * packMult;
     const singlesOnOrder = r.onOrder * packMult;
     const monthlySales = (r.s90 || 0) / 3;
     const singlesSales = monthlySales * packMult;
     g.onHand += singlesOnHand;
     g.onOrder += singlesOnOrder;
     g.sales += singlesSales;
-    g.skus.push({ id: r.id, packType: r.packType, packMult, onHand: r.onHand, singlesOnHand, onOrder: r.onOrder, singlesOnOrder, sales: monthlySales, singlesSales });
+    g.skus.push({ id: r.id, packType: r.packType, packMult, onHand: avail, singlesOnHand, onOrder: r.onOrder, singlesOnOrder, sales: monthlySales, singlesSales });
   });
 
   // Also collect RAW per flavor
@@ -85,12 +86,12 @@ function buildEuphoriaTable(edibles) {
   html += `<th style="${hs}text-align:center;border-left:2px solid var(--border)" colspan="2">RAW</th>`;
   html += '</tr><tr style="background:rgba(255,255,255,0.03)">';
   ctSizes.forEach(() => {
-    html += `<th style="${hs}border-left:2px solid var(--border)"><span style="color:var(--green)">On Hand</span></th>`;
-    html += `<th style="${hs}"><span style="color:var(--blue)">Total Supply</span></th>`;
+    html += `<th style="${hs}border-left:2px solid var(--border)"><span style="color:var(--green)">Available</span></th>`;
+    html += `<th style="${hs}">Total Supply</th>`;
     html += `<th style="${hs}"><span style="color:var(--yellow)">Monthly Sales</span></th>`;
     html += `<th style="${hs}"><span style="color:var(--orange)">MOS</span></th>`;
   });
-  html += `<th style="${hs}border-left:2px solid var(--border)"><span style="color:var(--green)">On Hand</span></th>`;
+  html += `<th style="${hs}border-left:2px solid var(--border)"><span style="color:var(--green)">Available</span></th>`;
   html += `<th style="${hs}"><span style="color:var(--blue)">On Order</span></th>`;
   html += '</tr></thead>';
 
@@ -210,11 +211,12 @@ function buildOtherLinesTable(edibles) {
       return;
     }
     const mult = getPiecesPerUnit(r.id, r.desc);
-    f.onHand += r.onHand * mult;
+    const avail = r.onHand - (r.reserved || 0);
+    f.onHand += avail * mult;
     f.onOrder += r.onOrder * mult;
     f.sales += monthlySales * mult;
-    f.totalInv += (r.onHand + r.onOrder) * mult;
-    f.skus.push({ id: r.id, packType: r.packType || '—', onHand: r.onHand, onOrder: r.onOrder, sales: monthlySales, unitOnHand: r.onHand * mult, unitOnOrder: r.onOrder * mult, unitSales: monthlySales * mult });
+    f.totalInv += (avail + r.onOrder) * mult;
+    f.skus.push({ id: r.id, packType: r.packType || '—', onHand: avail, onOrder: r.onOrder, sales: monthlySales, unitOnHand: avail * mult, unitOnOrder: r.onOrder * mult, unitSales: monthlySales * mult });
   });
 
   const lineOrder = ['Froot Jam', 'Microdose', 'Crunchies', ''];
@@ -244,7 +246,7 @@ function buildOtherLinesTable(edibles) {
   html += '<thead><tr style="background:rgba(255,255,255,0.03)">';
   html += `<th style="${hs}text-align:left;min-width:160px">Flavor</th>`;
   html += `<th style="${hs}text-align:left">Line</th>`;
-  html += `<th style="${hs}"><span style="color:var(--green)">On Hand</span></th>`;
+  html += `<th style="${hs}"><span style="color:var(--green)">Available</span></th>`;
   html += `<th style="${hs}"><span style="color:var(--blue)">On Order</span></th>`;
   html += `<th style="${hs}">Total Supply</th>`;
   html += `<th style="${hs}"><span style="color:var(--yellow)">Monthly Sales</span></th>`;

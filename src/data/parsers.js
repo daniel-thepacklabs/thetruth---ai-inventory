@@ -307,19 +307,18 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
 
   // Map packaged edible SKUs → RAW SKU, aggregate sales as piece demand
   const PACKAGED_TO_RAW = {
-    'EGBD':    'Gummy - Blue Dream - 20mg - RAW',
-    'EGKB':    'Gummy - Kiwi Burst - 20mg - RAW',
-    'EGMCR':   'Gummy - Mango Crush - 30mg - RAW',
-    'EGPL':    'Gummy - Pink Lemonade - 20mg - RAW',
+    'EGBD':    'RGM-FE-BD',
+    'EGKB':    'RGM-FE-KB',
+    'EGMCR':   'RGM-FE-MCR',
+    'EGPL':    'RGM-FE-PL',
     'EGFJ-AN': 'Gummy - Appleberry Nectar RAW',
     'EGFJ-SD': 'Gummy - Strawberry Dream RAW',
     'EGFJ-TP': 'Gummy - Tropical Passion RAW',
   };
-  // EGMB and EGSS are shared codes — distinguish by mg number
   function resolveRawSku(pid) {
     const p = pid.toUpperCase();
-    if (p.startsWith('EGSS-100-') || p.startsWith('EGSS-400-')) return 'Gummy - Strawberry Shortcake - 20mg - RAW';
-    if (p.startsWith('EGMB-125-') || p.startsWith('EGMB-500-')) return 'Gummy - Midnight Berry - 25mg - RAW';
+    if (p.startsWith('EGSS-100-') || p.startsWith('EGSS-400-')) return 'RGM-FE-SS';
+    if (p.startsWith('EGMB-125-') || p.startsWith('EGMB-500-')) return 'RGM-FE-MB';
     for (const [prefix, raw] of Object.entries(PACKAGED_TO_RAW)) {
       if (p.startsWith(prefix + '-')) return raw;
     }
@@ -344,13 +343,17 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
     const actual30 = dem.s30;
     const remaining = st.onHand - st.reserved;
     const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
-    if (consumed90 === 0 && st.onHand === 0) return null;
+    if (consumed90 === 0 && st.onHand === 0 && st.onOrder === 0) return null;
+    const RAW_FLAVOR = {
+      'RGM-FE-BD': 'Blue Dream', 'RGM-FE-KB': 'Kiwi Burst', 'RGM-FE-MCR': 'Mango Crush',
+      'RGM-FE-PL': 'Pink Lemonade', 'RGM-FE-MB': 'Midnight Berry', 'RGM-FE-SS': 'Strawberry Shortcake',
+    };
     const flavorMatch = rawSku.match(/^Gummy - (.+?)(?:\s*-\s*\d+mg\s*)?-?\s*RAW$/);
-    const rawFlavor = flavorMatch ? flavorMatch[1].trim() : rawSku;
+    const rawFlavor = RAW_FLAVOR[rawSku] || (flavorMatch ? flavorMatch[1].trim() : rawSku);
     return {
       id: rawSku, desc: st.desc || rawSku, cat: 'Edibles', subcat: 'Gummy RAW',
       consumed90, runRate30, actual30, dem: runRate30,
-      s30: dem.s30, slm: dem.slm,
+      s90: dem.s90, s30: dem.s30, slm: dem.slm,
       onHand: st.onHand, onOrder: st.onOrder, reserved: st.reserved,
       remaining, totalInv: st.onHand + st.onOrder, months, ss: 1.75,
       hasConsumption: false, has30Consumption: false,
