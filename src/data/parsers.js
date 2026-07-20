@@ -106,33 +106,31 @@ export function getEdiblePackType(pid) {
   return null;
 }
 
-export function getPiecesPerUnit(pid, desc) {
+export function getPiecesPerBag(pid, desc) {
   const p = (pid || '').toUpperCase();
   const d = (desc || '');
-  let piecesPerBag = 1;
-  if (p.startsWith('EGFJ-')) {
-    piecesPerBag = 10;
-  } else {
-    const ctMatch = d.match(/(\d+)(?:ct|CT|pc)\b/);
-    if (ctMatch) {
-      piecesPerBag = parseInt(ctMatch[1]);
-    } else if (p.includes('-05-') || /-05$/.test(p)) {
-      piecesPerBag = 5;
-    } else if (p.includes('-20-') || /-20$/.test(p)) {
-      piecesPerBag = 20;
-    } else if (p.includes('-100-') || p.includes('-125-') || p.includes('-150-')) {
-      piecesPerBag = 5;
-    } else if (p.includes('-400-') || p.includes('-500-') || p.includes('-600-')) {
-      piecesPerBag = 20;
-    }
-  }
-  let packMultiplier = 1;
-  if (p.includes('-02P'))       packMultiplier = 2;
-  else if (p.includes('-03P'))  packMultiplier = 3;
-  else if (p.includes('-5PK'))  packMultiplier = 5;
-  else if (p.includes('-8PK'))  packMultiplier = 8;
-  else if (p.includes('-10PK')) packMultiplier = 10;
-  return piecesPerBag * packMultiplier;
+  if (p.startsWith('EGFJ-')) return 10;
+  const ctMatch = d.match(/(\d+)(?:ct|CT|pc)\b/);
+  if (ctMatch) return parseInt(ctMatch[1]);
+  if (p.includes('-05-') || /-05$/.test(p)) return 5;
+  if (p.includes('-20-') || /-20$/.test(p)) return 20;
+  if (p.includes('-100-') || p.includes('-125-') || p.includes('-150-')) return 5;
+  if (p.includes('-400-') || p.includes('-500-') || p.includes('-600-')) return 20;
+  return 1;
+}
+
+export function getPackMultiplier(pid) {
+  const p = (pid || '').toUpperCase();
+  if (p.includes('-02P'))       return 2;
+  if (p.includes('-03P'))       return 3;
+  if (p.includes('-5PK'))       return 5;
+  if (p.includes('-8PK'))       return 8;
+  if (p.includes('-10PK'))      return 10;
+  return 1;
+}
+
+export function getPiecesPerUnit(pid, desc) {
+  return getPiecesPerBag(pid, desc) * getPackMultiplier(pid);
 }
 
 export function getEdibleFlavor(pid, desc) {
@@ -297,7 +295,7 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       return {
         id: pid, desc: st.desc, cat, subcat,
         consumed90, runRate30, actual30, dem: runRate30,
-        s30: sl.s30, slm: sl.slm,
+        s90: sl.s90, s30: sl.s30, slm: sl.slm,
         onHand: st.onHand, onOrder: st.onOrder, reserved: st.reserved,
         remaining, totalInv: st.onHand + st.onOrder, months, ss: 1.75,
         hasConsumption: consumeMap[pid] != null,
