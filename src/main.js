@@ -11,6 +11,7 @@ import { renderZeroPriceView } from './views/zeroPriceItems.js';
 import { renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds } from './views/alerts.js';
 import { renderEdiblesView } from './views/edibles.js';
 import { renderCalculatorView } from './views/calculator.js';
+import { renderValuationView } from './views/valuation.js';
 
 // ── Inject render() into modules that need it ──
 setFilterRender(render);
@@ -53,6 +54,7 @@ function showView(view) {
   const isEdibles = view === 'edibles';
   const isCogs = view === 'cogs';
   const isZeroPrice = view === 'zeroprice';
+  const isValuation = view === 'valuation';
 
   document.getElementById('sales-view').style.display  = isSales   ? 'block' : 'none';
   document.getElementById('alerts-view').style.display = isAlerts  ? 'block' : 'none';
@@ -60,6 +62,7 @@ function showView(view) {
   document.getElementById('edibles-view').style.display = isEdibles ? 'block' : 'none';
   document.getElementById('cogs-view').style.display = isCogs ? 'block' : 'none';
   document.getElementById('zeroprice-view').style.display = isZeroPrice ? 'block' : 'none';
+  document.getElementById('valuation-view').style.display = isValuation ? 'block' : 'none';
   document.getElementById('items-list').style.display  = isInv     ? '' : 'none';
   document.getElementById('empty-state').style.display = 'none';
 
@@ -80,16 +83,18 @@ function showView(view) {
   const fbar = document.querySelector('.filter-bar');
   if (fbar) fbar.style.display = (isInv || isEdibles) ? '' : 'none';
 
-  ['inventory','sales','alerts','calculator','edibles','cogs','zeroprice'].forEach(v => {
+  ['inventory','sales','alerts','calculator','edibles','cogs','zeroprice','valuation'].forEach(v => {
     const el = document.getElementById('nav-' + v);
     if (el) el.style.color = v === view ? 'var(--accent)' : '';
   });
 
   if (isInv)     render();
+  if (isSales)   renderSalesView();
   if (isEdibles) { renderEdiblesView(); }
   if (isAlerts)  { renderAlertSubcatChips(); renderAlerts(); }
   if (isCalc) renderCalculatorView();
   if (isCogs)    renderCogsView();
+  if (isValuation) renderValuationView();
   if (isZeroPrice && !_viewRendered.zeroprice) { _viewRendered.zeroprice = true; renderZeroPriceView(); }
 }
 

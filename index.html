@@ -37,6 +37,9 @@
     <div class="nav-item" onclick="showView('calculator')" id="nav-calculator">
       <span class="dot" style="background:var(--purple)"></span> Material Calculator
     </div>
+    <div class="nav-item" onclick="showView('valuation')" id="nav-valuation">
+      <span class="dot" style="background:var(--green)"></span> Inventory Valuation
+    </div>
     <div class="nav-item" onclick="showView('cogs')" id="nav-cogs">
       <span class="dot" style="background:var(--yellow)"></span> COGS
     </div>
@@ -248,7 +251,7 @@
         </div>
 
         <!-- Forecast cards -->
-        <div id="forecast-section" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
+        <div id="forecast-section" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
           <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
             <span style="font-size:12px;font-weight:500;color:var(--text)">Forecast</span>
             <span style="font-size:10px;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:3px" id="forecast-basis">—</span>
@@ -365,6 +368,7 @@
       </div><!-- end sales-view -->
 
       <!-- Material Calculator view -->
+      <div id="valuation-view" style="display:none;padding:1rem"></div>
       <div id="cogs-view" style="display:none;padding:1rem"></div>
       <div id="zeroprice-view" style="display:none;padding:1rem"></div>
 

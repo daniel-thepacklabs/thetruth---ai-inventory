@@ -72,11 +72,12 @@ export function catSubcat(pid) {
   if (p.startsWith('VLR-')) return ['WIP','VLR'];
   if (p.startsWith('FMX-')) return ['Raw Material','FMX'];
   if (p.startsWith('Flower - ')) return ['Raw Material','Flower'];
-  if (p.startsWith('Glue - ')) return ['Raw Material','Glue'];
+  if (p.startsWith('Glue - ')) return ['WIP','Glue'];
   if (p.startsWith('ISO - ')) return ['Raw Material','ISO'];
   if (p.startsWith('Oil - ')) return ['Raw Material','Oil'];
   if (p.startsWith('TRP-')) return ['Raw Material','TRP'];
   if (p.startsWith('Diamond - ')) return ['Raw Material','Diamond'];
+  if (p.startsWith('FLR-')) return ['Raw Material','FLR'];
   if (p.startsWith('FIT') || p.startsWith('CDS-')) return ['WIP','FIT'];
   if (p.startsWith('VIP-')) return ['WIP','VIP'];
   if (p.startsWith('MM-') || p.startsWith('MMCC-')) return ['Marketing','MM'];
@@ -90,6 +91,12 @@ export function catSubcat(pid) {
   if (p.startsWith('Mylar - ')) return ['Packaging','MYL'];
   if (p.startsWith('Filled ')) return ['WIP','Filled'];
   if (p.startsWith('Triangle Cannabis')) return ['Packaging','LBL'];
+  if (p.startsWith('DGM-')) return ['WIP','DGM'];
+  if (p.startsWith('INF-')) return ['WIP','INF'];
+  if (p.startsWith('OMX-')) return ['WIP','OMX'];
+  if (p.startsWith('RGM-')) return ['WIP','RGM'];
+  if (p.startsWith('VIT-')) return ['WIP','VIT'];
+  if (p.startsWith('PIB-')) return ['Marketing','PIB'];
   return ['Misc','Other'];
 }
 
@@ -207,6 +214,7 @@ export function getSalesProductType(pid, desc) {
   if (pu.startsWith('EGBB')) return ['Edibles','Functional Microdose'];
   if (pu.startsWith('ECC')) return ['Edibles','Cereal Crunchies'];
   if (pu.startsWith('EGHB') || pu.startsWith('EGSW')) return ['Edibles','D8 Edibles'];
+  if (pu.startsWith('FLR')) return ['Raw Material','FLR'];
   if (pu.startsWith('FIT')) {
     const isFakies = ['FITDR','FITGUS','FITHZ','FITICC','FITIP','FITJC','FITSFV','FITSSFV','FITTW','FITWC'].some(x => pu.startsWith(x));
     const line = isFakies ? 'Fakies' : 'Zaza';
@@ -362,6 +370,53 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
     };
   }).filter(Boolean);
 
+  // Derive FLR demand from FIT sales (convert to grams consumed)
+  const FIT_TO_FLR = {
+    'DR': 'FLR-FKS-DR', 'GUS': 'FLR-FKS-GUS', 'HZ': 'FLR-FKS-HZ', 'ICC': 'FLR-FKS-ICC',
+    'IP': 'FLR-FKS-IP', 'JC': 'FLR-FKS-JC', 'SFV': 'FLR-FKS-SFV', 'TW': 'FLR-FKS-TW', 'WC': 'FLR-FKS-WC',
+    '24K': 'FLR-ZAZ-24K', 'AS': 'FLR-ZAZ-AS', 'BN': 'FLR-ZAZ-BN', 'G33': 'FLR-ZAZ-G33',
+    'GDP': 'FLR-ZAZ-GDP', 'GM': 'FLR-ZAZ-GM', 'GR': 'FLR-ZAZ-GR', 'LCG': 'FLR-ZAZ-LCG',
+    'PR': 'FLR-ZAZ-PR', 'PRM': 'FLR-ZAZ-PRM', 'SD': 'FLR-ZAZ-SD', 'WR': 'FLR-ZAZ-WR',
+    'SBN': 'FLR-SML-BN', 'SCC': 'FLR-SML-CC', 'SWR': 'FLR-SML-WR',
+  };
+  const FIT_SIZE_GRAMS = { '3.5': 3.5, '14': 14, '450': 453.6, 'QP': 113.4 };
+  const flrDemand = {};
+  for (const [pid, sl] of Object.entries(salesMap)) {
+    const p = pid.toUpperCase();
+    if (!p.startsWith('FIT')) continue;
+    const strainMatch = p.match(/^FIT([A-Z0-9]+)-/);
+    if (!strainMatch) continue;
+    const flrId = FIT_TO_FLR[strainMatch[1]];
+    if (!flrId) continue;
+    const sizeMatch = p.match(/-(3\.5|14|450|QP)-/i);
+    const sizeGrams = sizeMatch ? (FIT_SIZE_GRAMS[sizeMatch[1]] || 0) : 0;
+    if (!sizeGrams) continue;
+    const packMatch = p.match(/-(\d+)PK$/i);
+    const packQty = packMatch ? parseInt(packMatch[1]) : 1;
+    const gramsPerUnit = sizeGrams * packQty;
+    if (!flrDemand[flrId]) flrDemand[flrId] = { s90: 0, s30: 0, slm: 0 };
+    flrDemand[flrId].s90 += sl.s90 * gramsPerUnit;
+    flrDemand[flrId].s30 += sl.s30 * gramsPerUnit;
+    flrDemand[flrId].slm += sl.slm * gramsPerUnit;
+  }
+
+  // Add derived FIT demand to FLR items' consumption + any direct FLR consumption
+  for (const row of nonEdibleRows) {
+    if (!/^FLR-/i.test(row.id)) continue;
+    const derived = flrDemand[row.id];
+    if (derived) {
+      const directConsume = row.consumed90 || 0;
+      row.consumed90 = directConsume + derived.s90;
+      row.s90 = (row.s90 || 0) + derived.s90;
+      row.s30 = (row.s30 || 0) + derived.s30;
+      row.slm = (row.slm || 0) + derived.slm;
+      row.dem = parseFloat((row.consumed90 / 3).toFixed(2));
+      row.runRate30 = row.dem;
+      row.remaining = row.onHand - (row.reserved || 0);
+      row.months = row.dem > 0 ? parseFloat((row.remaining / row.dem).toFixed(4)) : 0;
+    }
+  }
+
   state.RAW_DATA = [...nonEdibleRows, ...rawRows];
   aggregatePackagedFlower();
 }
@@ -370,9 +425,10 @@ function aggregatePackagedFlower() {
   const SIZE_GRAMS = { '3.5': 3.5, '14': 14, 'QP': 113.4, '1lb': 453.6, '450': 453.6 };
 
   const flowerItems = state.RAW_DATA.filter(i => i.subcat === 'Flower');
-  const fitItems = state.RAW_DATA.filter(i => i.subcat === 'FIT' && /^FIT/i.test(i.id));
+  const flrItems = state.RAW_DATA.filter(i => /^FLR-/i.test(i.id));
+  const fitItems = state.RAW_DATA.filter(i => /^FIT/i.test(i.id));
 
-  // Build normalized strain lookup for flower items
+  // Build normalized strain lookup for "Flower - " items
   const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
   const ALIASES = { bluenerdz: 'bluenerds' };
   const flowerByStrain = {};
@@ -381,14 +437,21 @@ function aggregatePackagedFlower() {
     flowerByStrain[norm(strain)] = f;
   }
 
-  // Aggregate FIT items into flower strains
-  for (const fit of fitItems) {
-    if (fit.onHand <= 0) continue;
+  // Build FLR lookup by strain code: FLR-FKS-DR → DR, FLR-ZAZ-24K → 24K, FLR-SML-BN → SBN
+  const flrByCode = {};
+  for (const f of flrItems) {
+    const m = f.id.match(/^FLR-(FKS|ZAZ|SML)-(.+)$/i);
+    if (!m) continue;
+    const line = m[1].toUpperCase();
+    const strain = m[2].toUpperCase();
+    const fitCode = line === 'SML' ? 'S' + strain : strain;
+    flrByCode[fitCode] = f;
+  }
 
+  // Extract size and pack info from a FIT item
+  function parseFit(fit) {
     const desc = fit.desc;
     const parts = desc.split(' - ').map(p => p.trim());
-
-    // Extract size from description (last meaningful part)
     let sizeGrams = 0;
     let strainName = '';
     for (let j = parts.length - 1; j >= 0; j--) {
@@ -400,33 +463,52 @@ function aggregatePackagedFlower() {
       if (/^1\s*lb$/i.test(p)) { sizeGrams = 453.6; continue; }
       if (sizeGrams > 0) { strainName = p; break; }
     }
-
-    // Fallback: extract size from product ID
     if (!sizeGrams) {
       const idMatch = fit.id.match(/-(3\.5|14|450|QP)-/i);
       if (idMatch) sizeGrams = SIZE_GRAMS[idMatch[1]] || 0;
     }
-    if (!sizeGrams || !strainName) continue;
-
-    // Detect pack count from ID or description
     const packMatch = fit.id.match(/-(\d+)PK$/i) || desc.match(/(\d+)\s*PACK/i);
     const packQty = packMatch ? parseInt(packMatch[1]) : 1;
+    strainName = (strainName || '').replace(/^(Sativa|Indica|Hybrid)\s*-?\s*/i, '');
+    return { sizeGrams, strainName, packQty };
+  }
 
+  for (const fit of fitItems) {
+    if (fit.onHand <= 0) continue;
+    const { sizeGrams, strainName, packQty } = parseFit(fit);
+    if (!sizeGrams) continue;
     const totalGrams = fit.onHand * sizeGrams * packQty;
 
-    // Clean strain: strip leading type prefix like "Sativa -"
-    strainName = strainName.replace(/^(Sativa|Indica|Hybrid)\s*-?\s*/i, '');
+    // Match to FLR item by strain code from FIT product ID
+    const fitCodeMatch = fit.id.match(/^FIT([A-Z0-9]+)-/i);
+    if (fitCodeMatch) {
+      const flr = flrByCode[fitCodeMatch[1].toUpperCase()];
+      if (flr) {
+        flr.packagedGrams = (flr.packagedGrams || 0) + totalGrams;
+      }
+    }
 
-    // Match to flower strain (with alias fallback)
-    let key = norm(strainName);
-    if (ALIASES[key]) key = ALIASES[key];
-    const flower = flowerByStrain[key];
-    if (flower) {
-      flower.packagedGrams = (flower.packagedGrams || 0) + totalGrams;
+    // Match to "Flower - " items by strain name
+    if (strainName) {
+      let key = norm(strainName);
+      if (ALIASES[key]) key = ALIASES[key];
+      const flower = flowerByStrain[key];
+      if (flower) {
+        flower.packagedGrams = (flower.packagedGrams || 0) + totalGrams;
+      }
     }
   }
 
+  // Update totals for "Flower - " items
   for (const f of flowerItems) {
+    if (!f.packagedGrams) continue;
+    f.remaining = (f.onHand - (f.reserved || 0)) + f.packagedGrams;
+    f.months = f.dem > 0 ? parseFloat((f.remaining / f.dem).toFixed(4)) : 0;
+    f.totalInv = f.onHand + f.packagedGrams + f.onOrder;
+  }
+
+  // Update totals for FLR items
+  for (const f of flrItems) {
     if (!f.packagedGrams) continue;
     f.remaining = (f.onHand - (f.reserved || 0)) + f.packagedGrams;
     f.months = f.dem > 0 ? parseFloat((f.remaining / f.dem).toFixed(4)) : 0;

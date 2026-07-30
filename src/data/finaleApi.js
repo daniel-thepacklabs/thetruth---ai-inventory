@@ -2,6 +2,7 @@ import salesData from './finale-sales.json';
 import consumptionData from './finale-consumption.json';
 import monthlyData from './finale-monthly.json';
 import orderItemData from './finale-order-items.json';
+import stockDataStatic from './finale-stock.json';
 import priceMapsData from './price-maps.json';
 
 const ACCOUNT = import.meta.env.VITE_FINALE_ACCOUNT || 'deltamunchies';
@@ -488,7 +489,7 @@ export async function fetchAll() {
 }
 
 async function fetchAllStatic() {
-  const stockData = (await import('./finale-stock.json')).default;
+  const stockData = stockDataStatic;
   const stock = toCSV(stockData.map(p => ({
     'Location': 'SFS-HQ',
     'Product ID': p.sku,

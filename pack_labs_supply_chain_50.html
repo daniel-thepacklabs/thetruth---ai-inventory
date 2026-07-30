@@ -1,0 +1,2242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Supply Chain Dashboard — The Pack Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f11;
+    --bg2: #13161a;
+    --bg3: #1a1e24;
+    --bg4: #21262e;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaed;
+    --text2: #8b9199;
+    --text3: #555c66;
+    --accent: #e8c547;
+    --accent2: #b89a2e;
+    --red: #e05252;
+    --red-bg: rgba(224,82,82,0.12);
+    --red-border: rgba(224,82,82,0.25);
+    --orange: #e07c3a;
+    --orange-bg: rgba(224,124,58,0.12);
+    --orange-border: rgba(224,124,58,0.25);
+    --purple: #9b7fee;
+    --purple-bg: rgba(155,127,238,0.12);
+    --purple-border: rgba(155,127,238,0.25);
+    --green: #52c97a;
+    --green-bg: rgba(82,201,122,0.1);
+    --green-border: rgba(82,201,122,0.22);
+    --blue: #5ba3e0;
+    --blue-bg: rgba(91,163,224,0.1);
+    --blue-border: rgba(91,163,224,0.22);
+    --font-sans: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --r: 8px;
+    --r2: 12px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 0 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .sidebar-logo .brand { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+  .sidebar-logo .sub { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--font-mono); }
+
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; padding: 0 1.25rem; margin: 1rem 0 0.4rem; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0.45rem 1.25rem;
+    font-size: 13px; color: var(--text2); cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(232,197,71,0.06); }
+  .nav-item .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .dot-orange { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .dot-purple { background: var(--purple); }
+  .dot-green { background: var(--green); }
+  .dot-blue { background: var(--blue); }
+  .nav-item .count { margin-left: auto; font-family: var(--font-mono); font-size: 11px; }
+
+  .sidebar-footer { margin-top: auto; padding: 1rem 1.25rem 0; border-top: 1px solid var(--border); font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+
+  /* ── Main ── */
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.875rem 1.5rem;
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 10;
+  }
+
+  .search-wrap { position: relative; flex: 1; max-width: 400px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.4; }
+  .search-wrap input {
+    width: 100%; padding: 0.45rem 0.75rem 0.45rem 34px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--r); color: var(--text); font-size: 13px; font-family: var(--font-sans);
+    outline: none; transition: border-color 0.15s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap input::placeholder { color: var(--text3); }
+
+  select {
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--r); color: var(--text2); font-size: 13px;
+    padding: 0.45rem 0.75rem; outline: none; cursor: pointer; font-family: var(--font-sans);
+    transition: border-color 0.15s;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .ts { font-size: 11px; color: var(--text3); font-family: var(--font-mono); white-space: nowrap; }
+
+  /* ── Content ── */
+  .content { padding: 1rem; flex: 1; }
+
+  /* ── Stat cards ── */
+  .stat-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r2);
+    padding: 0.875rem 1rem; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden;
+  }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0; transition: opacity 0.2s; }
+  .stat-card:hover { border-color: var(--border2); background: var(--bg3); }
+  .stat-card.active { border-color: var(--border2); background: var(--bg3); }
+  .stat-card.active::before { opacity: 1; }
+  .stat-card.s-red::before, .stat-card.s-red.active { border-top-color: var(--red); }
+  .stat-card.s-red::before { background: var(--red); }
+  .stat-card.s-orange::before { background: var(--orange); }
+  .stat-card.s-orange.active { border-top-color: var(--orange); }
+  .stat-card.s-purple::before { background: var(--purple); }
+  .stat-card.s-purple.active { border-top-color: var(--purple); }
+  .stat-card.s-green::before { background: var(--green); }
+  .stat-card.s-green.active { border-top-color: var(--green); }
+  .stat-card.s-blue::before { background: var(--blue); }
+  .stat-card.s-blue.active { border-top-color: var(--blue); }
+  .stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .stat-val { font-family: var(--font-mono); font-size: 26px; font-weight: 500; line-height: 1; }
+  .stat-val.c-red { color: var(--red); }
+  .stat-val.c-orange { color: var(--orange); }
+  .stat-val.c-purple { color: var(--purple); }
+  .stat-val.c-green { color: var(--green); }
+  .stat-val.c-blue { color: var(--blue); }
+
+  /* ── Legend ── */
+  .legend { display: flex; gap: 16px; margin-bottom: 1rem; font-size: 11px; color: var(--text3); align-items: center; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-tick { width: 2px; height: 12px; border-radius: 1px; }
+  .t-safety { background: var(--orange); }
+  .t-reorder { background: var(--red); }
+
+  /* ── Item rows ── */
+  .dropzone {
+    border: 2px dashed var(--border2); border-radius: var(--r2); padding: 1.5rem 1rem;
+    text-align: center; background: var(--bg3); transition: all .15s;
+  }
+  .dropzone.over { border-color: var(--accent); background: rgba(232,197,71,0.05); }
+  .dropzone.done { border-style: solid; border-color: var(--green); background: rgba(82,201,122,0.06); }
+  .items-list { display: flex; flex-direction: column; gap: 4px; max-height: calc(100vh - 420px); overflow-y: auto; padding-right: 4px; }
+  .items-list::-webkit-scrollbar { width: 6px; }
+  .items-list::-webkit-scrollbar-track { background: var(--bg3); border-radius: 3px; }
+  .items-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  .items-list::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  .item-row {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--r2); overflow: hidden;
+    transition: border-color 0.15s;
+    animation: fadeIn 0.2s ease both;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .item-row:hover { border-color: var(--border2); }
+
+  .item-header {
+    display: flex; flex-direction: row; align-items: stretch;
+    cursor: pointer;
+  }
+
+  .item-left { min-width: 0; flex: 1; }
+  .item-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px; }
+  .item-id { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--text); }
+  .item-desc { font-size: 12px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
+
+  .badge {
+    font-size: 10px; padding: 1px 7px; border-radius: 20px;
+    font-weight: 500; white-space: nowrap; border: 1px solid;
+  }
+  .badge-red { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .badge-orange { background: var(--orange-bg); color: var(--orange); border-color: var(--orange-border); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-border); }
+  .badge-green { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
+  .badge-gray { background: var(--bg4); color: var(--text3); border-color: var(--border2); }
+  .badge-accent { background: rgba(232,197,71,0.1); color: var(--accent); border-color: rgba(232,197,71,0.25); }
+
+  /* Burn bar */
+  .bar-wrap { position: relative; height: 5px; background: var(--bg4); border-radius: 3px; }
+  .bar-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+  .bar-tick { position: absolute; top: -3px; width: 2px; height: 11px; border-radius: 1px; }
+
+  .item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .months-val { font-family: var(--font-mono); font-size: 20px; font-weight: 500; line-height: 1; }
+  .months-unit { font-size: 10px; color: var(--text3); margin-left: 2px; }
+  .chevron { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+
+  /* ── Expand panel ── */
+  .item-expand {
+    border-top: 1px solid var(--border);
+    padding: 0.875rem 1rem;
+    background: var(--bg);
+    display: none;
+  }
+  .item-expand.open { display: block; }
+
+  .expand-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 0.75rem; }
+  .expand-stat { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 0.5rem 0.75rem; }
+  .expand-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .expand-val { font-family: var(--font-mono); font-size: 14px; font-weight: 500; }
+  .expand-val.pos { color: var(--red); }
+  .expand-val.neg { color: var(--green); }
+
+  .notes-box {
+    background: var(--blue-bg); border: 1px solid var(--blue-border);
+    border-radius: var(--r); padding: 0.5rem 0.75rem;
+    font-size: 12px; color: var(--blue);
+    margin-bottom: 0.75rem; display: none;
+  }
+  .notes-box.visible { display: block; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.4rem 0.875rem;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--r); color: var(--text2); font-size: 12px;
+    font-family: var(--font-sans); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--bg4); color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .btn-accent { background: rgba(232,197,71,0.1); border-color: rgba(232,197,71,0.3); color: var(--accent); }
+  .btn-accent:hover { background: rgba(232,197,71,0.18); }
+  .btn-danger { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
+  .btn-danger:hover { background: rgba(224,82,82,0.2); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 100;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: var(--r2); width: 500px; max-width: 92vw;
+    max-height: 90vh; overflow-y: auto;
+    animation: modalIn 0.18s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+  .modal-header {
+    padding: 1.25rem 1.25rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .modal-id { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--text); }
+  .modal-desc { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .modal-close { background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; line-height: 1; padding: 2px; }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .modal-stat { background: var(--bg3); border-radius: var(--r); padding: 0.6rem 0.75rem; }
+  .modal-stat .lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .modal-stat .val { font-family: var(--font-mono); font-size: 18px; font-weight: 500; }
+
+  .modal-controls { padding: 0.875rem 1.25rem; display: flex; flex-direction: column; gap: 16px; border-bottom: 1px solid var(--border); }
+
+  .control-group label { font-size: 12px; color: var(--text2); display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .control-group label span { font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 500; }
+  .control-group .sys-note { font-size: 10px; color: var(--text3); margin-top: 3px; font-family: var(--font-mono); }
+
+  input[type=range] {
+    width: 100%; height: 4px; background: var(--bg4);
+    border-radius: 2px; outline: none; border: none;
+    -webkit-appearance: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--accent);
+    border: 2px solid var(--bg2); cursor: pointer;
+  }
+
+  textarea {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--r); color: var(--text); font-size: 12px;
+    font-family: var(--font-sans); padding: 0.5rem 0.75rem;
+    resize: vertical; outline: none; min-height: 60px;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text3); }
+
+  .modal-result { padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .reorder-preview { background: var(--bg3); border-radius: var(--r); padding: 0.75rem 1rem; }
+  .reorder-preview .lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .reorder-preview .val { font-family: var(--font-mono); font-size: 22px; font-weight: 500; }
+
+  .modal-actions { padding: 0.875rem 1.25rem; display: flex; gap: 8px; }
+
+  /* ── Empty ── */
+  .empty { text-align: center; padding: 4rem 1rem; color: var(--text3); }
+  .empty svg { margin: 0 auto 12px; display: block; opacity: 0.3; }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.5rem; display: flex; flex-direction: column; gap: 10px;
+  }
+  .filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .filter-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; min-width: 64px; }
+
+  .chip {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px; cursor: pointer;
+    border: 1px solid var(--border2); background: var(--bg3); color: var(--text2);
+    transition: all 0.12s; white-space: nowrap; user-select: none;
+  }
+  .chip:hover { border-color: rgba(255,255,255,0.22); color: var(--text); }
+  .chip.active { background: rgba(232,197,71,0.12); border-color: rgba(232,197,71,0.4); color: var(--accent); }
+  .chip.chip-red.active { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
+  .chip.chip-orange.active { background: var(--orange-bg); border-color: var(--orange-border); color: var(--orange); }
+  .chip.chip-purple.active { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple); }
+  .chip.chip-green.active { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+  .chip.chip-blue.active { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+
+  .toggle-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; padding: 3px 10px; border-radius: 20px; cursor: pointer;
+    border: 1px solid var(--border2); background: var(--bg3); color: var(--text2);
+    transition: all 0.12s; user-select: none;
+  }
+  .toggle-pill:hover { border-color: rgba(255,255,255,0.22); color: var(--text); }
+  .toggle-pill.active { background: rgba(232,197,71,0.12); border-color: rgba(232,197,71,0.4); color: var(--accent); }
+  .toggle-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  .range-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 180px; max-width: 300px; }
+  .range-wrap input[type=range] { flex: 1; }
+  .range-val { font-family: var(--font-mono); font-size: 11px; color: var(--accent); min-width: 36px; text-align: right; }
+
+  .filter-divider { width: 1px; height: 16px; background: var(--border2); flex-shrink: 0; }
+
+  .bulk-bar {
+    background: rgba(232,197,71,0.06); border: 1px solid rgba(232,197,71,0.2);
+    border-radius: var(--r); padding: 0.5rem 0.875rem;
+    display: none; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+  .bulk-bar.visible { display: flex; }
+  .bulk-info { font-size: 12px; color: var(--accent); flex: 1; }
+  .btn-sm { font-size: 11px; padding: 0.3rem 0.75rem; }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .stat-row { grid-template-columns: repeat(3, 1fr); }
+    .expand-grid { grid-template-columns: repeat(3, 1fr); }
+    #topbar-logo, #topbar-title { display: block !important; }
+  }
+  @media (max-width: 600px) {
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .expand-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://thepacklabs.com/wp-content/uploads/2025/03/packlogo.png" alt="The Pack Labs" style="width:140px; height:auto; display:block; margin-bottom:10px; filter:brightness(0) invert(1);" />
+      <div class="sub">Supply Chain Dashboard</div>
+    </div>
+
+    <div class="nav-label" style="margin-top:1rem;">Views</div>
+    <div class="nav-item" onclick="showView('inventory')" id="nav-inventory" style="font-weight:500;color:var(--accent)">
+      <span class="dot" style="background:var(--accent)"></span> Inventory
+    </div>
+    <div class="nav-item" onclick="showView('sales')" id="nav-sales">
+      <span class="dot" style="background:var(--blue)"></span> Monthly Sales
+    </div>
+    <div class="nav-item" onclick="showView('alerts')" id="nav-alerts">
+      <span class="dot" style="background:var(--red)"></span> Consumption Alerts
+    </div>
+    <div class="nav-item active" data-filter="all" onclick="setFilter('all',this)">
+      <span class="dot" style="background:var(--text3)"></span>
+      All items
+      <span class="count" id="cnt-all">—</span>
+    </div>
+    <div class="nav-item" data-filter="critical" onclick="setFilter('critical',this)">
+      <span class="dot dot-red"></span>
+      Critical
+      <span class="count" id="cnt-critical">—</span>
+    </div>
+    <div class="nav-item" data-filter="alert" onclick="setFilter('alert',this)">
+      <span class="dot dot-orange"></span>
+      Alert
+      <span class="count" id="cnt-alert">—</span>
+    </div>
+    <div class="nav-item" data-filter="warning" onclick="setFilter('warning',this)">
+      <span class="dot dot-purple"></span>
+      Low stock
+      <span class="count" id="cnt-warning">—</span>
+    </div>
+    <div class="nav-item" data-filter="ok" onclick="setFilter('ok',this)">
+      <span class="dot dot-green"></span>
+      Healthy
+      <span class="count" id="cnt-ok">—</span>
+    </div>
+
+    <div class="nav-label">Category</div>
+    <div class="nav-item" onclick="quickFilter('Packaging')">
+      <span class="dot dot-purple"></span> Packaging
+    </div>
+    <div class="nav-item" onclick="quickFilter('Components')">
+      <span class="dot dot-blue"></span> Components
+    </div>
+    <div class="nav-item" onclick="quickFilter('Raw Material')">
+      <span class="dot dot-green"></span> Raw Material
+    </div>
+    <div class="nav-item" onclick="quickFilter('WIP')">
+      <span class="dot dot-red"></span> WIP
+    </div>
+    <div class="nav-item" onclick="quickFilter('Edibles')">
+      <span class="dot dot-orange"></span> Edibles
+    </div>
+    <div class="nav-item" onclick="quickFilter('Misc')">
+      <span class="dot" style="background:var(--text3)"></span> Misc
+    </div>
+    <div class="nav-item" onclick="quickFilter('Marketing')">
+      <span class="dot" style="background:var(--accent)"></span> Marketing
+    </div>
+
+    <div class="nav-label" style="margin-top:1.25rem;">Quick actions</div>
+    <div class="nav-item" onclick="quickStatusFilter('critical')"><span class="dot dot-red"></span> Show critical only</div>
+    <div class="nav-item" onclick="quickStatusFilter('alert')"><span class="dot dot-orange"></span> Show alerts only</div>
+    <div class="nav-item" onclick="activateReorderOnly()"><span class="dot" style="background:var(--accent)"></span> Needs reorder</div>
+    <div class="nav-item" onclick="resetFilters()"><span class="dot" style="background:var(--text3)"></span> Reset all filters</div>
+
+    <div class="sidebar-footer">
+      Updated 05/20/2026<br>90-day window · Finale
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <img src="https://thepacklabs.com/wp-content/uploads/2025/03/packlogo.png" alt="The Pack Labs" style="height:28px; width:auto; filter:brightness(0) invert(1); flex-shrink:0; display:none;" id="topbar-logo" />
+      <span style="font-size:13px; font-weight:500; color:var(--text); white-space:nowrap; flex-shrink:0; display:none;" id="topbar-title">Supply Chain Dashboard</span>
+      <div class="search-wrap">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search" placeholder="Search product ID or description…" oninput="render()" />
+      </div>
+      <select id="sortSel" onchange="render()">
+        <option value="urgency">Most urgent first</option>
+        <option value="demand">Highest demand</option>
+        <option value="id">Product ID A–Z</option>
+        <option value="onhand_desc">On-hand ↓</option>
+        <option value="onhand_asc">On-hand ↑</option>
+      </select>
+      <div class="topbar-right">
+        <span class="ts" id="data-timestamp" style="color:var(--text3);">—</span>
+        <button class="btn btn-accent" id="topbar-upload-btn" onclick="document.getElementById('upload-panel').style.display='block';document.getElementById('items-list').style.display='none';document.getElementById('upload-panel').scrollIntoView({behavior:'smooth'})" style="font-size:11px;padding:3px 10px;">↑ Upload data</button>
+
+        <span class="ts" id="showing-count">— items</span>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <!-- Row 1: Status chips + toggles -->
+      <div class="filter-row">
+        <span class="filter-label">Status</span>
+        <span class="chip chip-red active" data-status="critical" onclick="toggleChip(this,'status')">Critical</span>
+        <span class="chip chip-orange active" data-status="alert" onclick="toggleChip(this,'status')">Alert</span>
+        <span class="chip chip-purple active" data-status="warning" onclick="toggleChip(this,'status')">Low stock</span>
+        <span class="chip chip-green active" data-status="ok" onclick="toggleChip(this,'status')">Healthy</span>
+        <div class="filter-divider"></div>
+        <span class="toggle-pill" id="tog-reorder" onclick="togglePill('reorder')"><span class="toggle-dot"></span>Needs reorder only</span>
+        <span class="toggle-pill" id="tog-nodem" onclick="togglePill('nodem')"><span class="toggle-dot"></span>Hide zero demand</span>
+        <span class="toggle-pill" id="tog-adjusted" onclick="togglePill('adjusted')"><span class="toggle-dot"></span>Adjusted only</span>
+        <span class="toggle-pill" id="tog-onorder" onclick="togglePill('onorder')"><span class="toggle-dot"></span>Has open PO</span>
+        <div class="filter-divider"></div>
+        <span class="toggle-pill active" id="tog-combined" onclick="togglePill('combined')" style="background:rgba(232,197,71,0.1);border-color:rgba(232,197,71,0.3);color:var(--accent)"><span class="toggle-dot"></span>Combined SKUs</span>
+        <span class="toggle-pill active" id="tog-individual" onclick="togglePill('individual')" style="background:rgba(91,163,224,0.1);border-color:rgba(91,163,224,0.3);color:var(--blue)"><span class="toggle-dot"></span>Individual SKUs</span>
+      </div>
+
+      <!-- Row 2: Category chips -->
+      <div class="filter-row">
+        <span class="filter-label">Category</span>
+        <span class="chip chip-purple active" data-cat="Packaging" onclick="toggleChip(this,'cat')">Packaging</span>
+        <span class="chip chip-blue active" data-cat="Components" onclick="toggleChip(this,'cat')">Components</span>
+        <span class="chip chip-green active" data-cat="Raw Material" onclick="toggleChip(this,'cat')">Raw Material</span>
+        <span class="chip chip-red active" data-cat="WIP" onclick="toggleChip(this,'cat')">WIP</span>
+        <span class="chip chip-orange active" data-cat="Edibles" onclick="toggleChip(this,'cat')">Edibles</span>
+        <span class="chip active" data-cat="Misc" onclick="toggleChip(this,'cat')">Misc</span>
+        <span class="chip chip-accent active" data-cat="Marketing" onclick="toggleChip(this,'cat')">Marketing</span>
+        <div class="filter-divider"></div>
+        <span class="chip" onclick="selectAllChips('cat')">All</span>
+        <span class="chip" onclick="clearAllChips('cat')">None</span>
+      </div>
+
+      <!-- Row 2b: Subcategory chips (dynamic) -->
+      <div class="filter-row" id="subcat-row" style="padding-left:72px;">
+        <span class="filter-label" style="font-size:9px;min-width:52px;">Sub</span>
+        <span id="subcat-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></span>
+        <span class="chip" id="subcat-all" onclick="selectAllSubcats()" style="font-size:10px;padding:2px 8px;">All</span>
+        <span class="chip" id="subcat-none" onclick="clearAllSubcats()" style="font-size:10px;padding:2px 8px;">None</span>
+      </div>
+
+      <!-- Row 3: Months range -->
+      <div class="filter-row">
+        <span class="filter-label">Max months</span>
+        <div class="range-wrap">
+          <input type="range" id="maxMonths" min="0" max="12" step="0.5" value="12" oninput="updateRangeLabel();render()" />
+          <span class="range-val" id="maxMonthsVal">All</span>
+        </div>
+        <div class="filter-divider"></div>
+        <span class="filter-label">Min demand</span>
+        <div class="range-wrap">
+          <input type="range" id="minDemand" min="0" max="50000" step="500" value="0" oninput="updateRangeLabel();render()" />
+          <span class="range-val" id="minDemandVal">Any</span>
+        </div>
+        <div class="filter-divider"></div>
+        <button class="btn btn-sm" onclick="resetFilters()" style="font-size:11px;padding:3px 10px;">↺ Reset filters</button>
+      </div>
+    </div>
+
+    <div class="content" id="main-content">
+      <!-- Stat cards -->
+      <div class="stat-row">
+        <div class="stat-card s-red" id="sc-critical" onclick="setFilter('critical', null)" title="Total supply (on hand + on order) below 1 month">
+          <div class="stat-label">Critical <span style="font-weight:400;opacity:.7">(&lt;1mo)</span></div>
+          <div class="stat-val c-red" id="sv-critical">—</div>
+        </div>
+        <div class="stat-card s-orange" id="sc-alert" onclick="setFilter('alert', null)" title="Total supply (on hand + on order) below 2 months">
+          <div class="stat-label">Alert <span style="font-weight:400;opacity:.7">(1–2mo)</span></div>
+          <div class="stat-val c-orange" id="sv-alert">—</div>
+        </div>
+        <div class="stat-card s-purple" id="sc-warning" onclick="setFilter('warning', null)" title="Total supply (on hand + on order) below reorder point for category">
+          <div class="stat-label">Low stock <span style="font-weight:400;opacity:.7">(2mo–reorder)</span></div>
+          <div class="stat-val c-purple" id="sv-warning">—</div>
+        </div>
+        <div class="stat-card s-green" id="sc-ok" onclick="setFilter('ok', null)" title="Total supply (on hand + on order) above reorder point">
+          <div class="stat-label">Healthy <span style="font-weight:400;opacity:.7">(&gt;reorder)</span></div>
+          <div class="stat-val c-green" id="sv-ok">—</div>
+        </div>
+        <div class="stat-card s-blue" id="sc-adjusted" title="Manually adjusted items">
+          <div class="stat-label">Adjusted</div>
+          <div class="stat-val c-blue" id="sv-adjusted">0</div>
+        </div>
+      </div>
+
+      <!-- Bulk action bar -->
+      <div class="bulk-bar" id="bulk-bar">
+        <span class="bulk-info" id="bulk-info">0 items selected</span>
+        <button class="btn btn-sm btn-accent" onclick="selectAllVisible()">Select all visible</button>
+        <button class="btn btn-sm" onclick="clearSelection()">Clear selection</button>
+        <div class="filter-divider"></div>
+        <button class="btn btn-sm btn-danger" onclick="removeSelected()">✕ Remove selected from list</button>
+        <button class="btn btn-sm" onclick="exportSelected()">↓ Export selected (CSV)</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <span style="color:var(--text3); font-size:11px;">Burn bar:</span>
+        <span class="legend-item"><span class="legend-tick" style="background:var(--green);width:10px;height:4px;border-radius:1px;display:inline-block;vertical-align:middle"></span> On hand</span>
+        <span class="legend-item"><span class="legend-tick" style="background:var(--blue);width:10px;height:4px;border-radius:1px;display:inline-block;vertical-align:middle;opacity:.7"></span> On order</span>
+        <span class="legend-item"><span class="legend-tick t-safety"></span> Safety stock (2mo)</span>
+        <span class="legend-item"><span class="legend-tick t-reorder"></span> Reorder point (by category: Packaging/Components/Misc 3mo · Edibles 1mo · Raw Material 0.75mo · WIP 0.5mo · Marketing 6mo)</span>
+        <div class="filter-divider" style="margin:0 4px;"></div>
+        <span style="font-size:11px; color:var(--text3);">☑ Click checkbox to select · Click row to expand</span>
+        <span style="margin-left:auto; font-size:11px; color:var(--text3);" id="showing-count-legend"></span>
+      </div>
+
+      <!-- Upload panel — shown when no data loaded -->
+      <div id="upload-panel" style="
+        background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+        padding:2.5rem 2rem;margin-bottom:1rem;
+      ">
+        <div style="text-align:center;margin-bottom:2rem;">
+          <div style="font-size:36px;margin-bottom:.75rem;opacity:0.6">📂</div>
+          <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:.35rem;">Upload Finale exports to load the dashboard</div>
+          <div style="font-size:12px;color:var(--text3);">Files 1–3 power the Inventory dashboard. File 4 powers the Monthly Sales view. Export from Finale or Google Sheets as CSV or XLSX.</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <label for="fi-stock" style="cursor:pointer;">
+            <div id="dz-stock" class="dropzone"
+            ondragover="event.preventDefault();dzOver('dz-stock')"
+            ondragleave="dzLeave('dz-stock')"
+            ondrop="event.preventDefault();dzLeave('dz-stock');handleDrop(event,'stock')">
+              <div style="font-size:22px;margin-bottom:.4rem;">📦</div>
+              <div id="stock-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:.2rem;">1 · Stock on hand, reserved &amp; on order</div>
+              <div id="stock-sub" style="font-size:10px;color:var(--text3);">Stock_on_hand_reserved_on_order.xlsx</div>
+            </div>
+            <input type="file" id="fi-stock" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileInput(event,'stock')">
+          </label>
+          <label for="fi-sales" style="cursor:pointer;">
+            <div id="dz-sales" class="dropzone"
+            ondragover="event.preventDefault();dzOver('dz-sales')"
+            ondragleave="dzLeave('dz-sales')"
+            ondrop="event.preventDefault();dzLeave('dz-sales');handleDrop(event,'sales')">
+              <div style="font-size:22px;margin-bottom:.4rem;">📊</div>
+              <div id="sales-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:.2rem;">2 · Inventory View Stock &amp; Sales History</div>
+              <div id="sales-sub" style="font-size:10px;color:var(--text3);">Inventory_View_Stock_and_Sales_History_Report.xlsx</div>
+            </div>
+            <input type="file" id="fi-sales" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileInput(event,'sales')">
+          </label>
+          <label for="fi-consume" style="cursor:pointer;">
+            <div id="dz-consume" class="dropzone"
+            ondragover="event.preventDefault();dzOver('dz-consume')"
+            ondragleave="dzLeave('dz-consume')"
+            ondrop="event.preventDefault();dzLeave('dz-consume');handleDrop(event,'consume')">
+              <div style="font-size:22px;margin-bottom:.4rem;">🔥</div>
+              <div id="consume-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:.2rem;">3 · Consumed Products by Product ID</div>
+              <div id="consume-sub" style="font-size:10px;color:var(--text3);">ConsumedProductsByProductId.xlsx</div>
+            </div>
+            <input type="file" id="fi-consume" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileInput(event,'consume')">
+          </label>
+          <label for="fi-salesorder" style="cursor:pointer;">
+            <div id="dz-salesorder" class="dropzone"
+            ondragover="event.preventDefault();dzOver('dz-salesorder')"
+            ondragleave="dzLeave('dz-salesorder')"
+            ondrop="event.preventDefault();dzLeave('dz-salesorder');handleDrop(event,'salesorder')">
+              <div style="font-size:22px;margin-bottom:.4rem;">💰</div>
+              <div id="salesorder-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:.2rem;">4 · Sales Order w/ Detail</div>
+              <div id="salesorder-sub" style="font-size:10px;color:var(--text3);">SalesOrderWDetail.xlsx — for Monthly Sales view</div>
+            </div>
+            <input type="file" id="fi-salesorder" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileInput(event,'salesorder')">
+          </label>
+          <label for="fi-consume30" style="cursor:pointer;">
+            <div id="dz-consume30" class="dropzone"
+            ondragover="event.preventDefault();dzOver('dz-consume30')"
+            ondragleave="dzLeave('dz-consume30')"
+            ondrop="event.preventDefault();dzLeave('dz-consume30');handleDrop(event,'consume30')">
+              <div style="font-size:22px;margin-bottom:.4rem;">📅</div>
+              <div id="consume30-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:.2rem;">5 · Last 30 Days Consumption</div>
+              <div id="consume30-sub" style="font-size:10px;color:var(--text3);">ConsumedProductsByProductId (last 30 days)</div>
+            </div>
+            <input type="file" id="fi-consume30" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileInput(event,'consume30')">
+          </label>
+        </div>
+        <button id="upload-btn" onclick="loadFiles()" disabled style="
+          width:100%;padding:.7rem;font-size:13px;font-weight:500;border-radius:var(--r);
+          border:1px solid var(--border2);background:var(--bg3);color:var(--text3);
+          cursor:not-allowed;transition:all .15s;
+        ">Load dashboard</button>
+      </div>
+
+      <!-- Items list -->
+      <div class="items-list" id="items-list" style="display:none"></div>
+
+      <div class="empty" id="empty-state" style="display:none">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/>
+        </svg>
+        No items match your filters
+      </div>
+
+      <!-- Sales view -->
+      <div id="sales-view" style="display:none;padding:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+          <div>
+            <div style="font-size:15px;font-weight:500;color:var(--text)">Monthly Sales</div>
+            <div style="font-size:12px;color:var(--text3)" id="sales-date-range">Upload a Sales Order report to view</div>
+          </div>
+          <label for="fi-salesreport" style="cursor:pointer">
+            <div class="btn btn-accent" style="font-size:12px">↑ Upload Sales Report</div>
+            <input type="file" id="fi-salesreport" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleSalesReport(event)">
+          </label>
+        </div>
+
+        <!-- KPI cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem" id="sales-kpis">
+          <div class="stat-card s-blue"><div class="stat-label">Total Revenue</div><div class="stat-val c-blue" id="kpi-revenue">—</div></div>
+          <div class="stat-card s-green"><div class="stat-label">Total Units</div><div class="stat-val c-green" id="kpi-units">—</div></div>
+          <div class="stat-card s-orange"><div class="stat-label">Avg Monthly Rev</div><div class="stat-val c-orange" id="kpi-avg-rev">—</div></div>
+          <div class="stat-card s-purple"><div class="stat-label">Avg Monthly Units</div><div class="stat-val c-purple" id="kpi-avg-units">—</div></div>
+        </div>
+
+        <!-- Monthly breakdown table -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text)">Monthly Breakdown</div>
+          <div style="overflow-x:auto">
+            <table id="sales-monthly-table" style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="background:var(--bg3)">
+                  <th style="padding:.6rem 1rem;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap">Month</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Revenue</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Units Sold</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Orders</th>
+                  <th style="padding:.6rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Avg Order Value</th>
+                  <th style="padding:.6rem 1rem;text-align:left;color:var(--text3);font-weight:500">vs Prior Month</th>
+                </tr>
+              </thead>
+              <tbody id="sales-monthly-body">
+                <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text3)">No data — upload a Sales Order report</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Monthly by product type table -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+            <span style="font-size:12px;font-weight:500;color:var(--text)">Monthly Revenue by Product Type & Subcategory</span>
+          </div>
+          <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px" id="by-type-table">
+              <thead id="by-type-head" style="position:sticky;top:0;z-index:2"></thead>
+              <tbody id="by-type-body">
+                <tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--text3)">No data — upload a Sales Order report</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Edibles Individual Pieces Report -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-top:1rem">
+          <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+            <span style="font-size:14px">🍬</span>
+            <span style="font-size:12px;font-weight:500;color:var(--text)">Edibles — Individual Pieces Report</span>
+            <span style="font-size:11px;color:var(--text3)">All SKUs converted to individual gummy pieces · RAW=1pc · 5ct bag=5pc · 20ct bag=20pc · display box multiplied by bag count</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:.4rem">
+                <span style="font-size:11px;color:var(--text3)">Reorder point</span>
+                <select id="edible-reorder-mo" onchange="renderEdiblePieces()" style="font-size:11px;padding:2px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2)">
+                  <option value="1">1 month</option>
+                  <option value="2">2 months</option>
+                  <option value="3" selected>3 months</option>
+                  <option value="4">4 months</option>
+                  <option value="6">6 months</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:center;gap:.4rem">
+                <span style="font-size:11px;color:var(--text3)">Safety stock</span>
+                <select id="edible-ss-mo" onchange="renderEdiblePieces()" style="font-size:11px;padding:2px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2)">
+                  <option value="0.5">0.5 month</option>
+                  <option value="1" selected>1 month</option>
+                  <option value="1.5">1.5 months</option>
+                  <option value="2">2 months</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">
+              <thead id="edible-pieces-head" style="position:sticky;top:0;z-index:1"></thead>
+              <tbody id="edible-pieces-body">
+                <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text3)">Upload Sales Order report to see individual pieces data</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div class="modal-id" id="m-id">—</div>
+        <div class="modal-desc" id="m-desc">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="lbl">On hand</div><div class="val" id="m-onhand">—</div></div>
+      <div class="modal-stat"><div class="lbl">Months on-hand</div><div class="val" id="m-months">—</div></div>
+    </div>
+    <div class="modal-controls">
+      <div class="control-group">
+        <label>Safety stock (months) <span id="m-ss-val">1.75</span></label>
+        <input type="range" id="m-ss" min="0.25" max="6" step="0.25" value="1.75" oninput="updateModalPreview()" />
+      </div>
+      <div class="control-group">
+        <label>Reorder point (months) <span id="m-rp-val">1.75</span></label>
+        <input type="range" id="m-rp" min="0.25" max="6" step="0.25" value="1.75" oninput="updateModalPreview()" />
+      </div>
+      <div class="control-group">
+        <label>Monthly demand override <span id="m-dem-val">—</span></label>
+        <input type="range" id="m-dem" min="1" max="1000" step="1" value="100" oninput="updateModalPreview()" />
+        <div class="sys-note" id="m-sys-dem">System value: —</div>
+      </div>
+      <div class="control-group">
+        <label>Notes</label>
+        <textarea id="m-notes" placeholder="Add context for this adjustment…"></textarea>
+      </div>
+    </div>
+    <div class="modal-result">
+      <div class="reorder-preview">
+        <div class="lbl">Suggested reorder qty (adjusted)</div>
+        <div class="val" id="m-reorder">—</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="saveOverride()" style="flex:1">Save adjustments</button>
+      <button class="btn btn-danger" id="m-reset-btn" onclick="resetOverride()" style="display:none">Reset</button>
+    </div>
+  </div>
+</div>
+
+      <!-- Consumption Alerts view -->
+      <div id="alerts-view" style="display:none;padding:1rem">
+
+        <!-- Filter + threshold bar -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:.65rem 1rem;margin-bottom:.75rem;display:flex;flex-direction:column;gap:.5rem">
+          <!-- Row 1: Search + Category + Subcategory -->
+          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+            <div style="position:relative;flex:1;min-width:160px;max-width:280px">
+              <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none">🔍</span>
+              <input type="text" id="alert-search" placeholder="Search product ID or description…"
+                oninput="renderAlerts()"
+                style="width:100%;padding:.35rem .65rem .35rem 26px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:12px;outline:none"/>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap" id="alert-cat-chips">
+              <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Cat</span>
+              <span class="chip active" data-acat="Packaging"   onclick="toggleAlertChip(this,'cat')">Packaging</span>
+              <span class="chip active" data-acat="Components"  onclick="toggleAlertChip(this,'cat')">Components</span>
+              <span class="chip active" data-acat="Raw Material" onclick="toggleAlertChip(this,'cat')">Raw Material</span>
+              <span class="chip active" data-acat="WIP"         onclick="toggleAlertChip(this,'cat')">WIP</span>
+              <span class="chip active" data-acat="Edibles"     onclick="toggleAlertChip(this,'cat')">Edibles</span>
+              <span class="chip active" data-acat="Misc"        onclick="toggleAlertChip(this,'cat')">Misc</span>
+              <span class="chip active" data-acat="Marketing"   onclick="toggleAlertChip(this,'cat')">Marketing</span>
+              <span class="chip" onclick="document.querySelectorAll('[data-acat]').forEach(c=>{alertActiveCats.add(c.dataset.acat);c.classList.add('active')});renderAlerts()" style="font-size:10px;padding:1px 7px">All</span>
+              <span class="chip" onclick="alertActiveCats.clear();document.querySelectorAll('[data-acat]').forEach(c=>c.classList.remove('active'));renderAlerts()" style="font-size:10px;padding:1px 7px">None</span>
+            </div>
+          </div>
+          <!-- Row 2: Subcat chips (dynamic) + thresholds -->
+          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+            <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Sub</span>
+            <div id="alert-subcat-chips" style="display:flex;gap:5px;flex-wrap:wrap;flex:1"></div>
+            <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:.4rem">
+                <span style="font-size:11px;color:var(--red)">🔺</span>
+                <input type="range" id="spike-threshold" min="5" max="100" step="5" value="15" oninput="updateAlertThresholds()" style="width:90px">
+                <span style="font-size:11px;font-weight:500;color:var(--red);font-family:var(--font-mono);min-width:34px" id="spike-val">+15%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.4rem">
+                <span style="font-size:11px;color:var(--green)">🔻</span>
+                <input type="range" id="drop-threshold" min="5" max="100" step="5" value="20" oninput="updateAlertThresholds()" style="width:90px">
+                <span style="font-size:11px;font-weight:500;color:var(--green);font-family:var(--font-mono);min-width:34px" id="drop-val">-20%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side by side tables -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div style="background:var(--bg2);border:1px solid rgba(224,82,82,.3);border-radius:var(--r2);overflow:hidden">
+            <div style="padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem;background:rgba(224,82,82,.07)">
+              <span>🔺</span>
+              <span style="font-size:12px;font-weight:600;color:var(--red)">Consumption Spikes</span>
+              <span style="margin-left:auto;font-size:11px;background:rgba(224,82,82,.15);color:var(--red);padding:1px 8px;border-radius:20px;font-family:var(--font-mono)" id="spike-count">—</span>
+            </div>
+            <div style="overflow-y:auto;max-height:calc(100vh - 340px)">
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <thead style="position:sticky;top:0;z-index:1">
+                  <tr style="background:var(--bg3)">
+                    <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Product</th>
+                    <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Sub</th>
+                    <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Run rate</th>
+                    <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Last 30d</th>
+                    <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Change</th>
+                  </tr>
+                </thead>
+                <tbody id="spikes-body">
+                  <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text3)">Upload both consumption files to see spikes</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid rgba(82,201,122,.25);border-radius:var(--r2);overflow:hidden">
+            <div style="padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem;background:rgba(82,201,122,.07)">
+              <span>🔻</span>
+              <span style="font-size:12px;font-weight:600;color:var(--green)">Consumption Drops</span>
+              <span style="margin-left:auto;font-size:11px;background:rgba(82,201,122,.15);color:var(--green);padding:1px 8px;border-radius:20px;font-family:var(--font-mono)" id="drop-count">—</span>
+            </div>
+            <div style="overflow-y:auto;max-height:calc(100vh - 340px)">
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <thead style="position:sticky;top:0;z-index:1">
+                  <tr style="background:var(--bg3)">
+                    <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Product</th>
+                    <th style="padding:.45rem .75rem;text-align:left;color:var(--text3);font-weight:500">Sub</th>
+                    <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Run rate</th>
+                    <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Last 30d</th>
+                    <th style="padding:.45rem .75rem;text-align:right;color:var(--text3);font-weight:500">Change</th>
+                  </tr>
+                </thead>
+                <tbody id="drops-body">
+                  <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text3)">Upload both consumption files to see drops</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- end alerts-view -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ── Constants ──
+const CATEGORY_THRESHOLDS = {
+  'Packaging':3,'Components':3,'Misc':3,'Edibles':3,'WIP':.5,'Raw Material':.75,'Marketing':6
+};
+
+// Subcategory-specific safety stock overrides (months)
+const SUBCAT_SAFETY_STOCK = {
+  // Raw Material subcategories
+  'Flower': 0.5,
+  'FMX':    0.5,
+  'Glue':   0.5,
+  'ISO':    0.5,
+  'Oil':    0.5,
+  'TRP':    0.5,
+  // Edibles — 2 month production lead time
+  'Gummy':  1.0,
+  'ECC':    1.0,
+  'EGBD':   1.0,
+  'EGFJ':   1.0,
+  'EGKB':   1.0,
+  'EGBB':   1.0,
+  'EGMB':   1.0,
+  'EGMCR':  1.0,
+  'EGPL':   1.0,
+  'EGSS':   1.0,
+};
+
+// Returns safety stock for an item — subcategory override takes priority
+function getSafetyStock(item) {
+  const ov = overrides[item.id]||{};
+  if (ov.ss != null) return ov.ss;
+  if (SUBCAT_SAFETY_STOCK[item.subcat] != null) return SUBCAT_SAFETY_STOCK[item.subcat];
+  return 2.0; // default safety stock
+}
+const CAT_BADGE = {
+  'Packaging':'badge-purple','Components':'badge-blue','Misc':'badge-gray',
+  'Edibles':'badge-orange','WIP':'badge-red','Raw Material':'badge-green','Marketing':'badge-accent'
+};
+const SUBCAT_COLORS = {
+  'DBX':'badge-purple','INS':'badge-purple','LBL':'badge-purple','LID':'badge-purple',
+  'MYL':'badge-purple','Rigid Box':'badge-purple','SLV':'badge-purple','TRY':'badge-purple',
+  'TUB':'badge-purple','Tube':'badge-purple','Box':'badge-purple',
+  'CON':'badge-blue','VHW':'badge-blue',
+  'Auto L-Bar Sealer Film':'badge-gray','Film':'badge-gray','Pack':'badge-gray',
+  'ECC':'badge-orange','EGBD':'badge-orange','EGFJ':'badge-orange','EGKB':'badge-orange',
+  'EGBB':'badge-orange','EGMB':'badge-orange','EGMCR':'badge-orange','EGPL':'badge-orange',
+  'EGSS':'badge-orange','Gummy':'badge-orange',
+  'FLD':'badge-red','Filled':'badge-red','Infused':'badge-red','Infusion Mixture':'badge-red',
+  'Mixture':'badge-red','Oil Mixture':'badge-red','P5D':'badge-red','PDD':'badge-red',
+  'PIL':'badge-red','PJH':'badge-red','VIC':'badge-red','VLR':'badge-red','VLRSB':'badge-red',
+  'FMX':'badge-green','Flower':'badge-green','Glue':'badge-green','ISO':'badge-green',
+  'Oil':'badge-green','TRP':'badge-green','IM':'badge-accent'
+};
+
+// ── State ──
+let RAW_DATA = [];
+let overrides = {}, removedIds = new Set(), selectedIds = new Set();
+let activeStatuses = new Set(['critical','alert','warning','ok']);
+let activeCats = new Set(['Packaging','Components','Raw Material','WIP','Edibles','Misc','Marketing']);
+let activeSubcats = new Set();
+let toggles = {reorder:false,nodem:false,adjusted:false,onorder:false,combined:true,individual:true};
+let activeModalId = null;
+let stockFile = null, salesFile = null, consumeFile = null, salesOrderFile = null, consume30File = null;
+const ALL_SUBCATS = {}, ALL_SUBCAT_LIST = new Set();
+
+// ── File upload ──
+function dzOver(id) { document.getElementById(id).classList.add('over'); }
+function dzLeave(id) { document.getElementById(id).classList.remove('over'); }
+function handleDrop(e, type) { const f=e.dataTransfer.files[0]; if(f) setFile(f,type); }
+function handleFileInput(e, type) { const f=e.target.files[0]; if(f) setFile(f,type); }
+function setFile(f, type) {
+  if(type==='stock') stockFile=f;
+  else if(type==='sales') salesFile=f;
+  else if(type==='consume') consumeFile=f;
+  else if(type==='salesorder') { salesOrderFile=f; }
+  else if(type==='consume30') { consume30File=f; }
+  const dz=document.getElementById('dz-'+type);
+  dz.classList.remove('over'); dz.classList.add('done');
+  document.getElementById(type+'-label').textContent=f.name;
+  document.getElementById(type+'-label').style.color='var(--green)';
+  document.getElementById(type+'-sub').textContent=(f.size/1024).toFixed(1)+' KB — ready';
+  document.getElementById(type+'-sub').style.color='var(--green)';
+  if(stockFile && salesFile) {
+    const btn=document.getElementById('upload-btn');
+    btn.disabled=false; btn.style.background='var(--accent)';
+    btn.style.color='#0d0f11'; btn.style.borderColor='var(--accent)'; btn.style.cursor='pointer';
+    const extras=[];
+    if(consumeFile) extras.push('consumption');
+    if(salesOrderFile) extras.push('sales orders');
+    btn.textContent='Load dashboard' + (extras.length ? ' + '+extras.join(' & ') : '');
+  }
+}
+function readFile(f) {
+  return new Promise((resolve,reject)=>{
+    const ext=f.name.split('.').pop().toLowerCase();
+    if(ext==='csv'){
+      const r=new FileReader(); r.onload=e=>resolve(e.target.result); r.onerror=reject; r.readAsText(f);
+    } else if(window.XLSX){
+      const r=new FileReader();
+      r.onload=e=>{try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});resolve(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]));}catch(err){reject(err);}};
+      r.onerror=reject; r.readAsArrayBuffer(f);
+    } else { reject(new Error('Please use CSV format')); }
+  });
+}
+async function loadFiles() {
+  const btn=document.getElementById('upload-btn');
+  btn.textContent='Processing…'; btn.disabled=true;
+  try {
+    const promises = [readFile(stockFile), readFile(salesFile)];
+    if (consumeFile)    promises.push(readFile(consumeFile));
+    if (salesOrderFile) promises.push(readFile(salesOrderFile));
+    if (consume30File)  promises.push(readFile(consume30File));
+    const results  = await Promise.all(promises);
+    const stockCSV = results[0];
+    const salesCSV = results[1];
+    let idx = 2;
+    const consumeCSV    = consumeFile    ? results[idx++] : null;
+    const salesOrderCSV = salesOrderFile ? results[idx++] : null;
+    const consume30CSV  = consume30File  ? results[idx++] : null;
+
+    processData(stockCSV, salesCSV, consumeCSV, consume30CSV);
+    if (salesOrderCSV) processSalesReport(salesOrderCSV);
+
+    document.getElementById('upload-panel').style.display='none';
+    document.getElementById('items-list').style.display='block';
+    const ts=document.getElementById('data-timestamp');
+    if(ts){
+      const parts=['Loaded '+new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})];
+      if(consumeFile)    parts.push('90d consumption ✓');
+      if(consume30File)  parts.push('30d consumption ✓');
+      if(salesOrderFile) parts.push('sales ✓');
+      ts.textContent=parts.join(' · ');
+      ts.style.color='var(--green)';
+    }
+  } catch(err){ alert('Error loading files: '+err.message+'\n\nMake sure you are uploading the correct Finale exports.'); }
+  btn.textContent='Load dashboard'; btn.disabled=false;
+}
+
+// ── CSV parsing ──
+function parseCSV(text) {
+  const lines=text.trim().split('\n'), hdr=parseLine(lines[0]);
+  return lines.slice(1).map(l=>{const v=parseLine(l),o={};hdr.forEach((h,i)=>o[h.trim().replace(/\r/,'')]=(v[i]||'').trim());return o;}).filter(r=>Object.values(r).some(v=>v));
+}
+function parseLine(l) {
+  const r=[];let c='',q=false;
+  for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else c+=ch;}
+  r.push(c);return r;
+}
+function n(v){return parseFloat((v||'0').replace(/,/g,''))||0;}
+function fmt(v){return Math.round(v).toLocaleString();}
+function fmtDec(v,d=2){return parseFloat(v).toFixed(d);}
+
+// ── Category assignment ──
+function catSubcat(pid) {
+  const p=pid.trim();
+  if(p.startsWith('IM-')) return ['Marketing','IM'];
+  if(p.startsWith('DBX-')||p.startsWith('Display Box')) return ['Packaging','DBX'];
+  if(p.startsWith('INS-')) return ['Packaging','INS'];
+  if(p.startsWith('LBL-')) return ['Packaging','LBL'];
+  if(p.startsWith('LID-')) return ['Packaging','LID'];
+  if(p.startsWith('MYL-')) return ['Packaging','MYL'];
+  if(p.startsWith('Rigid')) return ['Packaging','Rigid Box'];
+  if(p.startsWith('SLV-')) return ['Packaging','SLV'];
+  if(p.startsWith('TRY-')) return ['Packaging','TRY'];
+  if(p.startsWith('TUB-')) return ['Packaging','TUB'];
+  if(p.startsWith('Tube - ')) return ['Packaging','Tube'];
+  if(p.startsWith('Box - Imperial')) return ['Packaging','Box'];
+  if(p.startsWith('CON-')) return ['Components','CON'];
+  if(p.startsWith('VHW-')) return ['Components','VHW'];
+  if(p.includes('L-Bar Sealer Film')) return ['Misc','Auto L-Bar Sealer Film'];
+  if(p.startsWith('Film - ')) return ['Misc','Film'];
+  if(p.startsWith('Pack - ')) return ['Misc','Pack'];
+  if(p.startsWith('ECC-')) return ['Edibles','ECC'];
+  if(p.startsWith('EGBD-')) return ['Edibles','EGBD'];
+  if(p.startsWith('EGFJ-')) return ['Edibles','EGFJ'];
+  if(p.startsWith('EGKB-')) return ['Edibles','EGKB'];
+  if(p.startsWith('EGBB-')) return ['Edibles','EGBB'];
+  if(p.startsWith('EGMB-')) return ['Edibles','EGMB'];
+  if(p.startsWith('EGMCR-')) return ['Edibles','EGMCR'];
+  if(p.startsWith('EGPL-')) return ['Edibles','EGPL'];
+  if(p.startsWith('EGSS-')) return ['Edibles','EGSS'];
+  if(p.startsWith('Gummy - ')||p.startsWith('Cereal Crunchies')) return ['Edibles','Gummy'];
+  if(p.startsWith('FLD-')) return ['WIP','FLD'];
+  if(p.startsWith('Filled - ')) return ['WIP','Filled'];
+  if(p.startsWith('Infused - ')) return ['WIP','Infused'];
+  if(p.startsWith('Infusion Mixture - ')) return ['WIP','Infusion Mixture'];
+  if(p.startsWith('Mixture - ')) return ['WIP','Mixture'];
+  if(p.startsWith('Oil Mixture - ')) return ['WIP','Oil Mixture'];
+  if(p.startsWith('P5D-')) return ['WIP','P5D'];
+  if(p.startsWith('PDD-')) return ['WIP','PDD'];
+  if(p.startsWith('PIL-')) return ['WIP','PIL'];
+  if(p.startsWith('PJH-')) return ['WIP','PJH'];
+  if(p.startsWith('VIC-')) return ['WIP','VIC'];
+  if(p.startsWith('VLRSB-')) return ['WIP','VLRSB'];
+  if(p.startsWith('VLR-')) return ['WIP','VLR'];
+  if(p.startsWith('FMX-')) return ['Raw Material','FMX'];
+  if(p.startsWith('Flower - ')) return ['Raw Material','Flower'];
+  if(p.startsWith('Glue - ')) return ['Raw Material','Glue'];
+  if(p.startsWith('ISO - ')) return ['Raw Material','ISO'];
+  if(p.startsWith('Oil - ')) return ['Raw Material','Oil'];
+  if(p.startsWith('TRP-')) return ['Raw Material','TRP'];
+  return [null,null];
+}
+
+// ── Data processing ──
+function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
+  const stockRows=parseCSV(stockCSV), salesRows=parseCSV(salesCSV), stockMap={};
+
+  // Stock sheet — filter SFS-HQ, aggregate by product
+  stockRows.forEach(r=>{
+    if((r['Location']||'').trim()!=='SFS-HQ') return;
+    const pid=(r['Product ID']||'').trim(); if(!pid) return;
+    if(!stockMap[pid]) stockMap[pid]={onHand:0,onOrder:0,reserved:0,desc:''};
+    stockMap[pid].onHand+=n(r['On hand']); stockMap[pid].onOrder+=n(r['On order']);
+    stockMap[pid].reserved+=n(r['Reserved']);
+    if(!stockMap[pid].desc) stockMap[pid].desc=(r['Description']||'').trim();
+  });
+
+  // Sales sheet — 90-day & 30-day sales
+  // Sales sheet — flexible column matching in case CSV headers have extra spaces/chars
+  const salesMap={};
+  salesRows.forEach(r => {
+    const pid=(r['Product ID']||'').trim(); if(!pid) return;
+    // Flexible column lookup — try exact then partial match
+    const col = (names, row) => {
+      for (const n of names) { if (row[n] !== undefined) return n; }
+      // partial match fallback
+      const keys = Object.keys(row);
+      for (const n of names) {
+        const k = keys.find(k => k.toLowerCase().includes(n.toLowerCase().replace('sales ','')));
+        if (k) return k;
+      }
+      return null;
+    };
+    const c90  = col(['Sales last 90 days','Sales Last 90 Days'], r);
+    const c30  = col(['Sales last 30 days','Sales Last 30 Days'], r);
+    const clm  = col(['Sales last month','Sales Last Month'], r);
+    salesMap[pid]={
+      s90: n(c90 ? r[c90] : '0'),
+      s30: n(c30 ? r[c30] : '0'),
+      slm: n(clm ? r[clm] : '0'),
+    };
+  });
+
+  // Consumption sheet — 90-day consumed quantity → 30-day run rate
+  const consumeMap={};
+  if(consumeCSV) {
+    const consumeRows = parseCSV(consumeCSV);
+    consumeRows.forEach(r=>{
+      const pid=(r['Product ID']||'').trim(); if(!pid) return;
+      consumeMap[pid] = n(r['Quantity sum']);
+    });
+  }
+
+  // 30-day consumption sheet — actual last 30 days consumed
+  const consume30Map={};
+  if(consume30CSV) {
+    const consume30Rows = parseCSV(consume30CSV);
+    consume30Rows.forEach(r=>{
+      const pid=(r['Product ID']||'').trim(); if(!pid) return;
+      consume30Map[pid] = n(r['Quantity sum']);
+    });
+  }
+
+  // ── Non-edible items: one row per SKU ──
+  const nonEdibleRows = Object.entries(stockMap)
+    .filter(([pid]) => !/^(EG|ECC)/i.test(pid))
+    .map(([pid,st]) => {
+      const [cat,subcat]=catSubcat(pid); if(!cat) return null;
+      const sl=salesMap[pid]||{s90:0,s30:0,slm:0};
+      const consumed90 = consumeMap[pid] != null ? consumeMap[pid] : sl.s90;
+      const runRate30  = parseFloat((consumed90/3).toFixed(2));
+      const actual30   = consume30Map[pid] != null ? consume30Map[pid] : sl.s30;
+      const dem        = runRate30;
+      if(consumeCSV && consumed90 === 0) return null;
+      const remaining=st.onHand-st.reserved;
+      const months=dem>0?parseFloat((remaining/dem).toFixed(4)):0;
+      return {
+        id:pid, desc:st.desc, cat, subcat,
+        consumed90, runRate30, actual30, dem,
+        s30:sl.s30, slm:sl.slm,
+        onHand:st.onHand, onOrder:st.onOrder, reserved:st.reserved,
+        remaining, totalInv:st.onHand+st.onOrder, months, ss:1.75,
+        hasConsumption: consumeMap[pid] != null,
+        has30Consumption: consume30Map[pid] != null,
+        isEdibleFlavor: false,
+      };
+    }).filter(Boolean);
+
+  // ── Edible items: consolidate all SKUs of same flavor → individual pieces ──
+  // Build EDIBLE_ONHAND by flavor first
+  EDIBLE_ONHAND = {};
+  Object.entries(stockMap).forEach(([pid, st]) => {
+    if (!/^(EG|ECC)/i.test(pid)) return;
+    const flavor = getEdibleFlavor(pid, st.desc);
+    const ppu    = getPiecesPerUnit(pid, st.desc);
+    if (!EDIBLE_ONHAND[flavor]) EDIBLE_ONHAND[flavor] = {onHand:0, onOrder:0, reserved:0, desc:'', subcat:''};
+    EDIBLE_ONHAND[flavor].onHand   += Math.max(0, st.onHand) * ppu;
+    EDIBLE_ONHAND[flavor].onOrder  += st.onOrder * ppu;
+    EDIBLE_ONHAND[flavor].reserved += st.reserved * ppu;
+    if (!EDIBLE_ONHAND[flavor].desc) EDIBLE_ONHAND[flavor].desc = st.desc;
+  });
+
+  // Build edible rows from EDIBLE_ONHAND — one row per flavor
+  // Demand comes from SALES_DATA if loaded, otherwise fallback to salesMap
+  const edibleRows = Object.entries(EDIBLE_ONHAND).map(([flavor, oh]) => {
+    // Get avg monthly pieces sold from SALES_DATA
+    let avgMoPieces = 0;
+    if (SALES_DATA.length) {
+      const flavorSales = SALES_DATA.filter(r => /^(EG|ECC)/i.test(r.pid) && getEdibleFlavor(r.pid, r.desc) === flavor);
+      const totalPieces = flavorSales.reduce((s,r) => s + r.qty * getPiecesPerUnit(r.pid, r.desc), 0);
+      const months = [...new Set(flavorSales.map(r => r.month))];
+      avgMoPieces = months.length > 0 ? totalPieces / months.length : 0;
+    }
+    const dem = parseFloat(avgMoPieces.toFixed(2));
+    const remaining = oh.onHand - oh.reserved;
+    const totalSupply = oh.onHand + oh.onOrder;
+    const months = dem > 0 ? parseFloat((totalSupply / dem).toFixed(4)) : 0;
+    return {
+      id: 'EDIBLE-' + flavor.replace(/\s+/g, '-').toUpperCase(),
+      desc: flavor,
+      cat: 'Edibles',
+      subcat: 'Gummy',
+      consumed90: dem * 3,
+      runRate30: dem,
+      actual30: 0,
+      dem,
+      s30: 0, slm: 0,
+      onHand: oh.onHand,
+      onOrder: oh.onOrder,
+      reserved: oh.reserved,
+      remaining: totalSupply, // use total supply for month calc
+      totalInv: totalSupply,
+      months,
+      ss: 1.75,
+      hasConsumption: false,
+      has30Consumption: false,
+      isEdibleFlavor: true,
+      flavorName: flavor,
+    };
+  }).filter(r => r.dem > 0 || r.onHand > 0);
+
+  RAW_DATA = [...nonEdibleRows, ...edibleRows];
+
+  buildSubcatIndex(); updateRangeLabel(); render();
+}
+
+// ── Subcat index ──
+function buildSubcatIndex() {
+  Object.keys(ALL_SUBCATS).forEach(k=>delete ALL_SUBCATS[k]);
+  ALL_SUBCAT_LIST.clear();
+  RAW_DATA.forEach(item=>{
+    if(!ALL_SUBCATS[item.cat]) ALL_SUBCATS[item.cat]=new Set();
+    ALL_SUBCATS[item.cat].add(item.subcat);
+    ALL_SUBCAT_LIST.add(item.subcat);
+  });
+  activeSubcats=new Set(ALL_SUBCAT_LIST);
+  renderSubcatChips();
+}
+function renderSubcatChips() {
+  const container=document.getElementById('subcat-chips'); if(!container) return;
+  const relevant=new Set();
+  activeCats.forEach(cat=>{if(ALL_SUBCATS[cat]) ALL_SUBCATS[cat].forEach(s=>relevant.add(s));});
+  const list=[...ALL_SUBCAT_LIST].filter(s=>{for(const cat of activeCats){if(ALL_SUBCATS[cat]&&ALL_SUBCATS[cat].has(s)) return true;} return false;}).sort();
+  container.innerHTML=list.map(s=>{
+    const cls=SUBCAT_COLORS[s]||'badge-gray';
+    return `<span class="chip ${cls} ${activeSubcats.has(s)?'active':''}" data-subcat="${s}" onclick="toggleSubcat(this,'${s.replace(/'/g,"\'")}')"`
+      +` style="font-size:10px;padding:2px 8px;">${s}</span>`;
+  }).join('');
+}
+function toggleSubcat(el,val){if(activeSubcats.has(val)) activeSubcats.delete(val); else activeSubcats.add(val);el.classList.toggle('active',activeSubcats.has(val));render();}
+function selectAllSubcats(){ALL_SUBCAT_LIST.forEach(s=>activeSubcats.add(s));document.querySelectorAll('[data-subcat]').forEach(c=>c.classList.add('active'));render();}
+function clearAllSubcats(){activeSubcats.clear();document.querySelectorAll('[data-subcat]').forEach(c=>c.classList.remove('active'));render();}
+
+// ── Status ──
+function getStatus(item) {
+  const ss = getSafetyStock(item);
+  const ov = overrides[item.id]||{};
+  const rp = ov.rp!=null ? ov.rp : CATEGORY_THRESHOLDS[item.cat];
+  const totalMonths = item.dem>0 ? (item.remaining+item.onOrder)/item.dem : 0;
+  if(totalMonths<1)  return 'critical';
+  if(totalMonths<ss) return 'alert';
+  if(totalMonths<rp) return 'warning';
+  return 'ok';
+}
+function getEffectiveDemand(item){return(overrides[item.id]&&overrides[item.id].dem)||item.dem;}
+function getReorderQty(item) {
+  const ov = overrides[item.id]||{};
+  const ss = getSafetyStock(item);
+  const rp = ov.rp != null ? ov.rp : CATEGORY_THRESHOLDS[item.cat];
+  const dem = getEffectiveDemand(item);
+  const totalMonths = dem > 0 ? (item.remaining + item.onOrder) / dem : 0;
+  // How much more do we need to reach the reorder point?
+  // Positive = need to order, negative = already covered
+  const shortfall = rp - totalMonths;
+  return shortfall > 0 ? Math.ceil(shortfall * dem) : 0;
+}
+function statusConfig(s){return{critical:{label:'Critical',badge:'badge-red',barColor:'#e05252'},alert:{label:'Alert',badge:'badge-orange',barColor:'#e07c3a'},warning:{label:'Low',badge:'badge-purple',barColor:'#9b7fee'},ok:{label:'OK',badge:'badge-green',barColor:'#52c97a'}}[s];}
+
+// ── Chip / filter helpers ──
+function toggleChip(el,group){
+  const val=el.dataset.status||el.dataset.cat;
+  const set=group==='status'?activeStatuses:activeCats;
+  if(set.has(val)) set.delete(val); else set.add(val);
+  el.classList.toggle('active',set.has(val));
+  if(group==='cat') renderSubcatChips();
+  render();
+}
+function selectAllChips(group){
+  if(group==='cat'){document.querySelectorAll('.chip[data-cat]').forEach(c=>{activeCats.add(c.dataset.cat);c.classList.add('active')});renderSubcatChips();}
+  else{document.querySelectorAll('.chip[data-status]').forEach(c=>{activeStatuses.add(c.dataset.status);c.classList.add('active')});}
+  render();
+}
+function clearAllChips(group){
+  if(group==='cat'){activeCats.clear();document.querySelectorAll('.chip[data-cat]').forEach(c=>c.classList.remove('active'));renderSubcatChips();}
+  render();
+}
+function togglePill(key) {
+  toggles[key] = !toggles[key];
+  const el = document.getElementById('tog-'+key);
+  if (!el) return;
+  el.classList.toggle('active', toggles[key]);
+  // combined/individual have special active styling
+  if (key === 'combined') {
+    el.style.background = toggles[key] ? 'rgba(232,197,71,0.1)' : '';
+    el.style.borderColor = toggles[key] ? 'rgba(232,197,71,0.3)' : '';
+    el.style.color = toggles[key] ? 'var(--accent)' : '';
+  }
+  if (key === 'individual') {
+    el.style.background = toggles[key] ? 'rgba(91,163,224,0.1)' : '';
+    el.style.borderColor = toggles[key] ? 'rgba(91,163,224,0.3)' : '';
+    el.style.color = toggles[key] ? 'var(--blue)' : '';
+  }
+  render();
+}
+function updateRangeLabel(){
+  const mv=parseFloat(document.getElementById('maxMonths').value);
+  document.getElementById('maxMonthsVal').textContent=mv>=12?'All':mv.toFixed(1)+'mo';
+  const md=parseInt(document.getElementById('minDemand').value);
+  document.getElementById('minDemandVal').textContent=md===0?'Any':fmt(md)+'/mo';
+}
+function resetFilters(){
+  activeStatuses=new Set(['critical','alert','warning','ok']);
+  activeCats=new Set(['Packaging','Components','Raw Material','WIP','Edibles','Misc','Marketing']);
+  activeSubcats=new Set(ALL_SUBCAT_LIST);
+  toggles={reorder:false,nodem:false,adjusted:false,onorder:false,combined:true,individual:true};
+  document.querySelectorAll('.chip[data-status],.chip[data-cat]').forEach(c=>c.classList.add('active'));
+  ['reorder','nodem','adjusted','onorder'].forEach(k=>{const el=document.getElementById('tog-'+k);if(el)el.classList.remove('active');});
+  // Reset combined/individual to active
+  const togCombined=document.getElementById('tog-combined');
+  if(togCombined){togCombined.classList.add('active');togCombined.style.background='rgba(232,197,71,0.1)';togCombined.style.borderColor='rgba(232,197,71,0.3)';togCombined.style.color='var(--accent)';}
+  const togIndividual=document.getElementById('tog-individual');
+  if(togIndividual){togIndividual.classList.add('active');togIndividual.style.background='rgba(91,163,224,0.1)';togIndividual.style.borderColor='rgba(91,163,224,0.3)';togIndividual.style.color='var(--blue)';}
+
+  document.getElementById('maxMonths').value=12; document.getElementById('minDemand').value=0;
+  document.getElementById('search').value=''; document.getElementById('sortSel').value='urgency';
+  updateRangeLabel(); renderSubcatChips(); render();
+}
+function quickFilter(cat){
+  activeCats=new Set([cat]);
+  document.querySelectorAll('.chip[data-cat]').forEach(c=>c.classList.toggle('active',c.dataset.cat===cat));
+  renderSubcatChips(); render();
+}
+function quickStatusFilter(status){
+  activeStatuses=new Set([status]);
+  document.querySelectorAll('.chip[data-status]').forEach(c=>c.classList.toggle('active',c.dataset.status===status));
+  render();
+}
+
+function setFilter(f){
+  if(!['critical','alert','warning','ok'].includes(f)) return;
+  activeStatuses=new Set([f]);
+  document.querySelectorAll('.chip[data-status]').forEach(c=>c.classList.toggle('active',c.dataset.status===f));
+  render();
+}
+function activateReorderOnly(){toggles.reorder=true;document.getElementById('tog-reorder').classList.add('active');render();}
+
+// ── Selection ──
+function toggleSelect(id,e){
+  e.stopPropagation();
+  if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+  const cb=document.getElementById('cb-'+CSS.escape(id)); if(cb) cb.checked=selectedIds.has(id);
+  const row=document.getElementById('row-'+CSS.escape(id)); if(row) row.style.outline=selectedIds.has(id)?'1.5px solid rgba(232,197,71,0.5)':'';
+  updateBulkBar();
+}
+function selectAllVisible(){document.querySelectorAll('.item-row').forEach(r=>{const id=r.id.replace('row-','');selectedIds.add(decodeURIComponent(id));r.style.outline='1.5px solid rgba(232,197,71,0.5)';const cb=r.querySelector('input[type=checkbox]');if(cb) cb.checked=true;});updateBulkBar();}
+function clearSelection(){selectedIds.clear();document.querySelectorAll('.item-row').forEach(r=>r.style.outline='');document.querySelectorAll('.item-row input[type=checkbox]').forEach(cb=>cb.checked=false);updateBulkBar();}
+function updateBulkBar(){const bar=document.getElementById('bulk-bar');const count=selectedIds.size;bar.classList.toggle('visible',count>0);document.getElementById('bulk-info').textContent=count+' item'+(count!==1?'s':'')+' selected';}
+function removeSelected(){if(!selectedIds.size) return;const nn=selectedIds.size;selectedIds.forEach(id=>removedIds.add(id));selectedIds.clear();updateBulkBar();render();const t=document.createElement('div');t.textContent=nn+' item'+(nn!==1?'s':'')+' removed';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1e24;border:1px solid rgba(232,197,71,0.3);color:#e8c547;padding:8px 18px;border-radius:8px;font-size:12px;z-index:200;transition:opacity 0.4s;';document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},2500);}
+function exportSelected(){
+  if(!selectedIds.size) return;
+  const items=RAW_DATA.filter(r=>selectedIds.has(r.id));
+  const header='Product ID,Description,Category,Subcategory,On Hand,On Order,Monthly Demand,Months On Hand,Reorder Qty';
+  const rows=items.map(item=>[item.id,'"'+item.desc.replace(/"/g,'""')+'"',item.cat,item.subcat,item.onHand,item.onOrder,Math.round(getEffectiveDemand(item)),fmtDec(item.months),getReorderQty(item)].join(','));
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent([header,...rows].join('\n'));a.download='pack_labs_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+// ── Render ──
+function render() {
+  if(!RAW_DATA.length) return;
+  const search=document.getElementById('search').value.toLowerCase();
+  const sort=document.getElementById('sortSel').value;
+  const maxMo=parseFloat(document.getElementById('maxMonths').value);
+  const minDem=parseInt(document.getElementById('minDemand').value);
+  let rows=RAW_DATA.filter(r=>!removedIds.has(r.id)).map(item=>({...item,status:getStatus(item),eff_dem:getEffectiveDemand(item)}));
+
+  // Count by status AFTER applying category/subcat filters so cards match what's shown
+  const visibleRows=rows.filter(r=>activeCats.has(r.cat)&&(activeSubcats.size>=ALL_SUBCAT_LIST.size||activeSubcats.has(r.subcat)));
+  const counts={critical:0,alert:0,warning:0,ok:0};
+  visibleRows.forEach(r=>counts[r.status]++);
+  document.getElementById('cnt-all').textContent=visibleRows.length;
+  ['critical','alert','warning','ok'].forEach(s=>{document.getElementById('cnt-'+s).textContent=counts[s];document.getElementById('sv-'+s).textContent=counts[s];});
+  document.getElementById('sv-adjusted').textContent=Object.keys(overrides).length;
+  rows=rows.filter(r=>activeStatuses.has(r.status)&&activeCats.has(r.cat));
+  if(activeSubcats.size<ALL_SUBCAT_LIST.size) rows=rows.filter(r=>activeSubcats.has(r.subcat));
+  if(search) rows=rows.filter(r=>r.id.toLowerCase().includes(search)||r.desc.toLowerCase().includes(search));
+  if(maxMo<12) rows=rows.filter(r=>r.months<=maxMo);
+  if(minDem>0) rows=rows.filter(r=>r.eff_dem>=minDem);
+  if(toggles.reorder) rows=rows.filter(r=>getReorderQty(r)>0);
+  if(toggles.nodem) rows=rows.filter(r=>r.eff_dem>0);
+  if(toggles.adjusted) rows=rows.filter(r=>!!overrides[r.id]);
+  if(toggles.onorder) rows=rows.filter(r=>r.onOrder>0);
+  // Combined SKUs = edible flavor rows; Individual SKUs = all other rows + non-edible
+  if(!toggles.combined)   rows=rows.filter(r=>!r.isEdibleFlavor);
+  if(!toggles.individual) rows=rows.filter(r=>r.isEdibleFlavor||r.cat!=='Edibles');
+  if(sort==='urgency') rows.sort((a,b)=>a.months-b.months);
+  else if(sort==='demand') rows.sort((a,b)=>b.eff_dem-a.eff_dem);
+  else if(sort==='onhand_desc') rows.sort((a,b)=>b.onHand-a.onHand);
+  else if(sort==='onhand_asc') rows.sort((a,b)=>a.onHand-b.onHand);
+  else rows.sort((a,b)=>a.id.localeCompare(b.id));
+  const total=RAW_DATA.length-removedIds.size;
+  const cs=rows.length+' of '+total+' items';
+  document.getElementById('showing-count').textContent=cs;
+  const leg=document.getElementById('showing-count-legend'); if(leg) leg.textContent=cs;
+  const list=document.getElementById('items-list');
+  const empty=document.getElementById('empty-state');
+  if(!rows.length){list.innerHTML='';if(empty) empty.style.display='block';return;}
+  if(empty) empty.style.display='none';
+  list.innerHTML=rows.map((item,idx)=>{
+    const st=statusConfig(item.status);
+    const catBadge=CAT_BADGE[item.cat]||'badge-gray';
+    const subBadge=SUBCAT_COLORS[item.subcat]||'badge-gray';
+    const ov=overrides[item.id];
+    const rp=(ov&&ov.rp!=null)?ov.rp:CATEGORY_THRESHOLDS[item.cat];
+    const ss=getSafetyStock(item);
+    const rqty=getReorderQty(item);
+    const isSel=selectedIds.has(item.id);
+    const max=Math.max(rp*2.5,item.months*1.1,6);
+    const fp=Math.min((item.months/max)*100,100).toFixed(1);
+    const ssp=Math.min((ss/max)*100,100).toFixed(1);
+    const rpp=Math.min((rp/max)*100,100).toFixed(1);
+    const vc=item.months<ss?'color:var(--red)':item.months<rp?'color:var(--orange)':'color:var(--text)';
+    const sid=item.id.replace(/'/g,"\'");
+
+    // Supply months: on-hand only, on-order only, total (on-hand + on-order)
+    const moOnHand  = item.dem>0 ? item.remaining/item.dem : 0;
+    const moOnOrder = item.dem>0 ? item.onOrder/item.dem : 0;
+    const moTotal   = item.dem>0 ? (item.remaining+item.onOrder)/item.dem : 0;
+    const vcOH  = moOnHand<ss?'color:var(--red)':moOnHand<rp?'color:var(--orange)':'color:var(--text)';
+    const vcTot = moTotal<ss?'color:var(--red)':moTotal<rp?'color:var(--orange)':'color:var(--green)';
+
+    // Edible flavor rows: show pieces label and flavor name
+    const displayId   = item.isEdibleFlavor ? '🍬 '+item.flavorName : item.id;
+    const displayDesc = item.isEdibleFlavor ? 'All SKUs combined · individual pieces · demand from sales data' : (item.desc||'—');
+    const unitLabel   = item.isEdibleFlavor ? 'pc' : 'mo';
+
+    return `<div class="item-row" id="row-${CSS.escape(item.id)}" style="animation-delay:${Math.min(idx,20)*.025}s;${isSel?'outline:1.5px solid rgba(232,197,71,0.5)':''}">
+      <div class="item-header">
+        <label style="display:flex;align-items:center;padding:.75rem 0 .75rem .875rem;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation()">
+          <input type="checkbox" id="cb-${CSS.escape(item.id)}" ${isSel?'checked':''} onchange="toggleSelect('${sid}',event)" style="width:13px;height:13px;cursor:pointer;accent-color:var(--accent)"/>
+        </label>
+        <div class="item-left" style="padding:.75rem .875rem .75rem .625rem;cursor:pointer;min-width:0" onclick="toggleRow('${sid}')">
+          <div class="item-meta">
+            <span class="item-id">${displayId}</span>
+            <span class="badge ${catBadge}">${item.cat}</span>
+            <span class="badge ${subBadge}" style="font-size:9px;opacity:.8">${item.subcat}</span>
+            <span class="badge ${st.badge}">${st.label}</span>
+            ${ov?'<span class="badge badge-accent">adjusted</span>':''}
+            ${item.onOrder>0?'<span class="badge badge-gray">PO open</span>':''}
+          </div>
+          <div class="item-desc" title="${displayDesc}">${displayDesc}</div>
+          <div style="display:flex;align-items:center;gap:1rem;margin-top:6px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:1px;min-width:72px">
+              <span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">${item.isEdibleFlavor?'On hand (pcs)':'On hand'}</span>
+              <span style="font-size:15px;font-weight:500;font-family:var(--font-mono);${vcOH}">${item.isEdibleFlavor?fmt(item.onHand):fmtDec(moOnHand)}<span style="font-size:9px;color:var(--text3);margin-left:1px">${item.isEdibleFlavor?'pc':'mo'}</span></span>
+            </div>
+            <div style="width:1px;height:26px;background:var(--border);flex-shrink:0"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;min-width:72px">
+              <span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">${item.isEdibleFlavor?'On order (pcs)':'On order'}</span>
+              <span style="font-size:15px;font-weight:500;font-family:var(--font-mono);color:var(--text2)">${item.isEdibleFlavor?fmt(item.onOrder):fmtDec(moOnOrder)}<span style="font-size:9px;color:var(--text3);margin-left:1px">${item.isEdibleFlavor?'pc':'mo'}</span></span>
+            </div>
+            <div style="width:1px;height:26px;background:var(--border);flex-shrink:0"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;min-width:80px">
+              <span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">${item.isEdibleFlavor?'Total supply (pcs)':'Total supply'}</span>
+              <span style="font-size:15px;font-weight:500;font-family:var(--font-mono);${vcTot}">${item.isEdibleFlavor?fmt(item.totalInv):fmtDec(moTotal)}<span style="font-size:9px;color:var(--text3);margin-left:1px">${item.isEdibleFlavor?'pc':'mo'}</span></span>
+            </div>
+            <div style="flex:1;min-width:80px">
+              <div class="bar-wrap" style="margin-top:6px;position:relative;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
+                <div style="position:absolute;left:0;top:0;height:100%;width:${fp}%;background:${st.barColor};border-radius:3px;z-index:2"></div>
+                ${moOnOrder>0?`<div style="position:absolute;left:${fp}%;top:0;height:100%;width:${Math.min((moOnOrder/max)*100,100-parseFloat(fp)).toFixed(1)}%;background:var(--blue);opacity:0.7;z-index:1"></div>`:''}
+                <div class="bar-tick t-safety" style="left:${ssp}%;z-index:3"></div>
+                <div class="bar-tick t-reorder" style="left:${rpp}%;z-index:3"></div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px;font-size:9px;color:var(--text3)">
+                <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:3px;border-radius:1px;background:${st.barColor};display:inline-block"></span>On hand</span>
+                ${moOnOrder>0?`<span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:3px;border-radius:1px;background:var(--blue);display:inline-block"></span>On order</span>`:''}
+                <span style="display:flex;align-items:center;gap:3px"><span style="width:2px;height:8px;border-radius:1px;background:#e07c3a;display:inline-block"></span>Safety stock (${ss}mo)</span>
+                <span style="display:flex;align-items:center;gap:3px"><span style="width:2px;height:8px;border-radius:1px;background:#e05252;display:inline-block"></span>Reorder point (${rp}mo)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:.75rem .875rem .75rem 0;cursor:pointer;flex-shrink:0;display:flex;align-items:center;align-self:stretch" onclick="toggleRow('${sid}')">
+          <div class="chevron" id="chev-${CSS.escape(item.id)}">▾</div>
+        </div>
+      </div>
+      <div class="item-expand" id="exp-${CSS.escape(item.id)}">
+        <div class="expand-grid">
+          <div class="expand-stat"><div class="expand-label">On hand</div><div class="expand-val">${fmt(item.onHand)}</div></div>
+          <div class="expand-stat"><div class="expand-label">Reserved</div><div class="expand-val">${fmt(item.reserved||0)}</div></div>
+          <div class="expand-stat"><div class="expand-label">On order</div><div class="expand-val">${fmt(item.onOrder)}</div></div>
+          <div class="expand-stat" title="Total units consumed in the last 90 days"><div class="expand-label">90-day consumed</div><div class="expand-val">${fmt(item.consumed90)}</div></div>
+          <div class="expand-stat" title="30-day run rate = consumed over 90 days ÷ 3"><div class="expand-label">30d run rate${item.hasConsumption?' 🔥':''}</div><div class="expand-val">${fmt(item.runRate30)}</div></div>
+          <div class="expand-stat" title="${item.has30Consumption?'From your 30-day consumption file':'Falling back to sales last 30 days — upload 30d consumption file for accuracy'}"><div class="expand-label">Last 30d consumption${item.has30Consumption?' 🔥':' *'}</div><div class="expand-val">${fmt(item.actual30)}</div></div>
+          <div class="expand-stat" title="Last 30d consumption minus the 90-day run rate avg. Positive = consuming faster than average this month.">
+            <div class="expand-label">30d vs run rate</div>
+            ${(()=>{const d=item.actual30-item.runRate30;const cls=d>0?'pos':d<0?'neg':'';return '<div class="expand-val '+cls+'">'+(d>0?'+':'')+fmt(d)+'</div>';})()}
+          </div>
+          <div class="expand-stat"><div class="expand-label">Reorder qty</div><div class="expand-val ${rqty>0?'pos':'neg'}">${rqty>0?'+':''}${fmt(rqty)}</div></div>
+        </div>
+        ${ov&&ov.notes?`<div class="notes-box visible">📋 ${ov.notes}</div>`:''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-accent" onclick="openModal('${sid}')">⚙ Adjust thresholds</button>
+          <button class="btn btn-danger" onclick="removedIds.add('${sid}');selectedIds.delete('${sid}');updateBulkBar();render()">✕ Remove from view</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRow(id){
+  const exp=document.getElementById('exp-'+CSS.escape(id));
+  const chev=document.getElementById('chev-'+CSS.escape(id));
+  if(!exp) return;
+  exp.classList.toggle('open',!exp.classList.contains('open'));
+  if(chev) chev.classList.toggle('open',exp.classList.contains('open'));
+}
+
+// ── Modal ──
+function openModal(id){
+  const item=RAW_DATA.find(r=>r.id===id); if(!item) return;
+  activeModalId=id;
+  const ov=overrides[id]||{};
+  const rp=ov.rp!=null?ov.rp:CATEGORY_THRESHOLDS[item.cat];
+  const ss=getSafetyStock(item);
+  const dem=ov.dem!=null?ov.dem:item.dem;
+  document.getElementById('m-id').textContent=item.id;
+  document.getElementById('m-desc').textContent=item.desc.slice(0,70)+(item.desc.length>70?'…':'');
+  document.getElementById('m-oh').textContent=item.onHand.toLocaleString();
+  document.getElementById('m-months').textContent=fmtDec(item.months);
+  const ssEl=document.getElementById('m-ss');ssEl.value=ss;ssEl.min=.25;ssEl.max=6;ssEl.step=.25;
+  const rpEl=document.getElementById('m-rp');rpEl.value=rp;rpEl.min=.25;rpEl.max=6;rpEl.step=.25;
+  const maxD=Math.max(Math.round((item.dem||1)*5),100);
+  const dEl=document.getElementById('m-dem');dEl.value=dem;dEl.min=Math.max(1,Math.round((item.dem||1)*.1));dEl.max=maxD;dEl.step=Math.max(1,Math.round((item.dem||1)*.05));
+  document.getElementById('m-sys-dem').textContent='System: '+fmt(item.dem)+' / mo';
+  document.getElementById('m-notes').value=ov.notes||'';
+  document.getElementById('m-reset').style.display=overrides[id]?'block':'none';
+  updateModalPreview();
+  document.getElementById('modal-wrap').classList.add('open');
+}
+function updateModalPreview(){
+  const id=activeModalId; const item=RAW_DATA.find(r=>r.id===id); if(!item) return;
+  const ss=parseFloat(document.getElementById('m-ss').value);
+  const rp=parseFloat(document.getElementById('m-rp').value);
+  const dem=parseFloat(document.getElementById('m-dem').value);
+  document.getElementById('m-ss-val').textContent=fmtDec(ss);
+  document.getElementById('m-rp-val').textContent=fmtDec(rp);
+  document.getElementById('m-dem-val').textContent=fmt(dem);
+  const rq_rp = parseFloat(document.getElementById('m-rp').value);
+  const totalMo = item.dem > 0 ? (item.remaining + item.onOrder) / item.dem : 0;
+  const shortfall = rq_rp - totalMo;
+  const rq = shortfall > 0 ? Math.ceil(shortfall * dem) : 0;
+  const el=document.getElementById('m-rqty');
+  el.textContent=(rq>0?'+':'')+fmt(rq);
+  el.style.color=rq>0?'var(--red)':'var(--green)';
+}
+function saveModal(){
+  if(!activeModalId) return;
+  overrides[activeModalId]={ss:parseFloat(document.getElementById('m-ss').value),rp:parseFloat(document.getElementById('m-rp').value),dem:parseFloat(document.getElementById('m-dem').value),notes:document.getElementById('m-notes').value.trim()};
+  closeModal(); render();
+}
+function resetOverride(){if(!activeModalId) return;delete overrides[activeModalId];closeModal();render();}
+function closeModal(){document.getElementById('modal-wrap').classList.remove('open');activeModalId=null;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
+
+// ── Alert filter state ──
+let alertActiveCats    = new Set(['Packaging','Components','Raw Material','WIP','Edibles','Misc','Marketing']);
+let alertActiveSubcats = new Set();
+
+function toggleAlertChip(el, type) {
+  if (type === 'cat') {
+    const val = el.dataset.acat;
+    if (alertActiveCats.has(val)) alertActiveCats.delete(val);
+    else alertActiveCats.add(val);
+    el.classList.toggle('active', alertActiveCats.has(val));
+    renderAlertSubcatChips();
+  } else {
+    const val = el.dataset.asub;
+    if (alertActiveSubcats.has(val)) alertActiveSubcats.delete(val);
+    else alertActiveSubcats.add(val);
+    el.classList.toggle('active', alertActiveSubcats.has(val));
+  }
+  renderAlerts();
+}
+
+function renderAlertSubcatChips() {
+  const container = document.getElementById('alert-subcat-chips');
+  if (!container) return;
+  const relevant = new Set();
+  RAW_DATA.forEach(r => { if (alertActiveCats.has(r.cat)) relevant.add(r.subcat); });
+  const list = [...relevant].sort();
+  // init all as active if not yet set
+  list.forEach(s => alertActiveSubcats.add(s));
+  container.innerHTML = list.map(s => {
+    const cls = SUBCAT_COLORS[s] || 'badge-gray';
+    return `<span class="chip ${cls} ${alertActiveSubcats.has(s)?'active':''}" data-asub="${s}" onclick="toggleAlertChip(this,'sub')" style="font-size:10px;padding:2px 7px">${s}</span>`;
+  }).join('');
+}
+
+// ── Edibles Individual Pieces ──
+function getPiecesPerUnit(pid, desc) {
+  const p = (pid||'').toUpperCase();
+  const d = (desc||'');
+
+  // Step 1: pieces per bag (ct count from description or SKU)
+  let piecesPerBag = 1;
+  const ctMatch = d.match(/(\d+)(?:ct|CT|pc)\b/);
+  if (ctMatch) {
+    piecesPerBag = parseInt(ctMatch[1]);
+  } else if (p.includes('-05-') || /-05$/.test(p)) {
+    piecesPerBag = 5;
+  } else if (p.includes('-20-') || /-20$/.test(p)) {
+    piecesPerBag = 20;
+  } else if (p.includes('-100-') || p.includes('-125-') || p.includes('-150-')) {
+    piecesPerBag = 5;   // 100mg/125mg/150mg = 5ct bag
+  } else if (p.includes('-400-') || p.includes('-500-') || p.includes('-600-')) {
+    piecesPerBag = 20;  // 400mg/500mg/600mg = 20ct bag
+  }
+  // If RAW/DOSED with no ct — single individual piece
+  if (piecesPerBag === 1 && (d.includes('RAW') || d.includes('DOSED') || d.includes('Raw') || d.includes('Dosed'))) {
+    piecesPerBag = 1;
+  }
+
+  // Step 2: bags per unit sold
+  // -8PK = display box of 8 bags; -5PK = display box of 5 bags; -10PK = display box of 10 bags
+  // -01 = single bag (or single piece if RAW/DOSED)
+  let bagsPerUnit = 1;
+  if (p.includes('-8PK'))  bagsPerUnit = 8;
+  else if (p.includes('-5PK'))  bagsPerUnit = 5;
+  else if (p.includes('-10PK')) bagsPerUnit = 10;
+
+  return piecesPerBag * bagsPerUnit;
+}
+
+function getEdibleFlavor(pid, desc) {
+  const d = desc || '';
+  const p = (pid || '').toUpperCase();
+  const patterns = [
+    /Euphoria - ([\w\s]+?) -/,
+    /Froot Jam - ([\w\s]+?)(?:\s*-|\s*$)/,
+    /Cereal Crunchies - ([\w\s]+?)(?:\s*-|\s*$)/,
+    /Microdose[^-]*?- ([\w\s]+?) -/,
+    /Gummy D[89] - ([\w\s]+?) -/,
+    /D[89] - ([\w\s]+?) -/,
+    // Fallback: last meaningful segment before optional size/pack suffix
+    /Crunchies - ([\w\s]+?)(?:\s*-\s*\d|$)/,
+  ];
+  for (const pat of patterns) {
+    const m = d.match(pat);
+    if (m) return m[1].trim();
+  }
+  // Last resort: derive from PID prefix mapping
+  if (p.startsWith('ECC-CB')) return 'Cinnamon Brulee';
+  if (p.startsWith('ECC-CF')) return 'Cocoa Fudge';
+  if (p.startsWith('ECC-DR')) return 'Double Rainbow';
+  if (p.startsWith('EGFJ-AN')) return 'Appleberry Nectar';
+  if (p.startsWith('EGFJ-SD')) return 'Strawberry Dream';
+  if (p.startsWith('EGFJ-TP')) return 'Tropical Passion';
+  if (p.startsWith('EGBD')) return 'Blue Dream';
+  if (p.startsWith('EGKB')) return 'Kiwi Burst';
+  if (p.startsWith('EGMB')) return 'Midnight Berry';
+  if (p.startsWith('EGMCR')) return 'Mango Crush';
+  if (p.startsWith('EGPL')) return 'Pink Lemonade';
+  if (p.startsWith('EGSS')) return 'Strawberry Shortcake';
+  if (p.startsWith('EGBB')) return 'Chillin Gummies';
+  // EGMB-05 and EGMB-20 = Big Brain (microdose); EGMB-125 and EGMB-500 = Midnight Berry
+  if (p.startsWith('EGMB-05') || p.startsWith('EGMB-20')) return 'Big Brain Gummies';
+  if (p.startsWith('EGMB')) return 'Midnight Berry';
+  // EGSS-05 and EGSS-20 = Love Gummies (microdose); EGSS-100 and EGSS-400 = Strawberry Shortcake
+  if (p.startsWith('EGSS-05') || p.startsWith('EGSS-20')) return 'Love Gummies';
+  if (p.startsWith('EGSS')) return 'Strawberry Shortcake';
+  return pid.split('-').slice(0,2).join('-');
+}
+
+function renderEdiblePieces() {
+  if (!SALES_DATA.length) return;
+  const rp = parseFloat(document.getElementById('edible-reorder-mo')?.value || 3);
+  const ss = parseFloat(document.getElementById('edible-ss-mo')?.value || 1);
+
+  const edibleRows = SALES_DATA.filter(r => /^(EG|ECC)/i.test(r.pid));
+  if (!edibleRows.length) return;
+
+  const months = [...new Set(edibleRows.map(r => r.month))].sort();
+
+  // One number: total individual pieces per flavor per month
+  const flavorMap = {};
+  edibleRows.forEach(r => {
+    const flavor = getEdibleFlavor(r.pid, r.desc);
+    const ppu    = getPiecesPerUnit(r.pid, r.desc);
+    const pieces = r.qty * ppu;
+    if (!flavorMap[flavor]) flavorMap[flavor] = {};
+    flavorMap[flavor][r.month] = (flavorMap[flavor][r.month] || 0) + pieces;
+  });
+
+  const flavors = Object.keys(flavorMap).sort((a,b) => {
+    const ta = Object.values(flavorMap[a]).reduce((s,v)=>s+v,0);
+    const tb = Object.values(flavorMap[b]).reduce((s,v)=>s+v,0);
+    return tb - ta;
+  });
+
+  const fmt = v => Math.round(v).toLocaleString();
+
+  // Header
+  document.getElementById('edible-pieces-head').innerHTML = `<tr style="background:var(--bg3)">
+    <th style="padding:.55rem 1rem;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap;position:sticky;left:0;background:var(--bg3);min-width:160px">Flavor</th>
+    ${months.map(m=>`<th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">${m}</th>`).join('')}
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">Total</th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Avg/mo</th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--blue);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">On hand<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--blue);font-weight:500;white-space:nowrap">On order<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--blue);font-weight:500;white-space:nowrap">Total supply<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--text3);font-weight:500;white-space:nowrap">Months<br><span style="font-weight:400;font-size:10px;opacity:.8">supply</span></th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--orange);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">Safety stock<br><span style="font-weight:400;font-size:10px;opacity:.8">${ss}mo</span></th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--red);font-weight:500;white-space:nowrap">Reorder point<br><span style="font-weight:400;font-size:10px;opacity:.8">${rp}mo</span></th>
+    <th style="padding:.55rem 1rem;text-align:right;color:var(--green);font-weight:500;white-space:nowrap">Order qty<br><span style="font-weight:400;font-size:10px;opacity:.8">pieces</span></th>
+  </tr>`;
+
+  let html = '';
+  const grandByMonth = {};
+
+  flavors.forEach(flavor => {
+    const fd = flavorMap[flavor];
+    const total  = Object.values(fd).reduce((s,v)=>s+v,0);
+    if (total === 0) return;
+    const avgMo  = total / months.length;
+    const ssQty  = Math.round(ss * avgMo);
+    const rpQty  = Math.round(rp * avgMo);
+    // Order qty = what you need to produce to get to reorder point worth of stock
+    // Trend: compare last month to average
+    const lastMo = fd[months[months.length-1]] || 0;
+    const trend  = avgMo > 0 ? lastMo / avgMo : 1;
+    const trendCol   = trend > 1.15 ? 'var(--red)' : trend < 0.85 ? 'var(--green)' : 'var(--text3)';
+    const trendLabel = trend > 1.15 ? '\u2191' : trend < 0.85 ? '\u2193' : '\u2192';
+
+    // On-hand in individual pieces from stock sheet
+    const oh = EDIBLE_ONHAND[flavor] || {onHand:0, onOrder:0, reserved:0};
+    const ohPieces    = Math.max(0, oh.onHand - oh.reserved);
+    const ooPieces    = oh.onOrder;
+    const totalSupply = ohPieces + ooPieces;
+    const moSupply    = avgMo > 0 ? totalSupply / avgMo : 0;
+    // Order qty = pieces needed to reach reorder point from current total supply
+    const orderQty    = Math.max(0, Math.round(rpQty - totalSupply));
+    const moCol = moSupply < ss ? 'var(--red)' : moSupply < rp ? 'var(--orange)' : 'var(--green)';
+
+    months.forEach(m => { grandByMonth[m] = (grandByMonth[m]||0) + (fd[m]||0); });
+
+    html += `<tr style="border-bottom:0.5px solid var(--border)">
+      <td style="padding:.55rem 1rem;font-weight:500;color:var(--text);position:sticky;left:0;background:var(--bg2)">
+        ${flavor}
+        <span style="font-size:10px;color:${trendCol};margin-left:4px" title="Last month vs avg">${trendLabel}</span>
+      </td>
+      ${months.map(m => {
+        const v = fd[m]||0;
+        const isLast = m === months[months.length-1];
+        const hi = v > avgMo * 1.15;
+        const lo = v < avgMo * 0.85;
+        const col = hi ? 'var(--red)' : lo ? 'var(--green)' : (isLast ? 'var(--text)' : 'var(--text2)');
+        return `<td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:${col}${hi||lo?';font-weight:600':''}">${fmt(v)}</td>`;
+      }).join('')}
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--text);border-left:1px solid var(--border2)">${fmt(total)}</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--accent)">${fmt(avgMo)}</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--blue);border-left:1px solid var(--border2)">${fmt(ohPieces)}</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--blue)">${fmt(ooPieces)}</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--blue)">${fmt(totalSupply)}</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${moCol}">${moSupply.toFixed(2)}mo</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--orange);border-left:1px solid var(--border2)">${fmt(ssQty)}</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--red)">${fmt(rpQty)}</td>
+      <td style="padding:.55rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:${orderQty>0?'var(--red)':'var(--green)'}">
+        ${orderQty > 0 ? '+'+fmt(orderQty)+' \u26A0' : '\u2713 Covered'}
+      </td>
+    </tr>`;
+  });
+
+  // Grand total
+  const grandTotal = Object.values(grandByMonth).reduce((s,v)=>s+v,0);
+  const grandAvg   = grandTotal / months.length;
+  html += `<tr style="background:var(--bg3);border-top:2px solid var(--border2)">
+    <td style="padding:.6rem 1rem;font-weight:700;color:var(--accent);position:sticky;left:0;background:var(--bg3)">Grand Total</td>
+    ${months.map(m=>`<td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent)">${fmt(grandByMonth[m]||0)}</td>`).join('')}
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent);border-left:1px solid var(--border2)">${fmt(grandTotal)}</td>
+    <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent)">${fmt(grandAvg)}</td>
+    <td colspan="3" style="padding:.6rem 1rem;text-align:center;font-size:11px;color:var(--text3)">Order qty = (reorder − safety stock) × avg/mo</td>
+  </tr>`;
+
+  document.getElementById('edible-pieces-body').innerHTML = html;
+}
+function showView(view) {
+  const isInv    = view === 'inventory';
+  const isSales  = view === 'sales';
+  const isAlerts = view === 'alerts';
+
+  document.getElementById('sales-view').style.display   = isSales   ? 'block' : 'none';
+  document.getElementById('alerts-view').style.display  = isAlerts  ? 'block' : 'none';
+  document.getElementById('upload-panel').style.display = 'none';
+  document.getElementById('items-list').style.display   = isInv     ? 'block' : 'none';
+  document.getElementById('empty-state').style.display  = 'none';
+
+  // Collapse ALL inventory-only chrome when not in inventory view
+  const inventoryOnly = [
+    document.querySelector('.stat-row'),
+    document.querySelector('.legend'),
+    document.getElementById('bulk-bar'),
+  ];
+  inventoryOnly.forEach(el => { if (el) el.style.display = isInv ? '' : 'none'; });
+
+  // Collapse content padding for non-inventory views (removes blank space)
+  const content = document.getElementById('main-content');
+  if (content) content.style.padding = isInv ? '' : '0';
+
+  // Topbar elements
+  const sw = document.getElementById('search')?.closest('.search-wrap');
+  if (sw) sw.style.display = isInv ? '' : 'none';
+  const sortSel = document.getElementById('sortSel');
+  if (sortSel) sortSel.style.display = isInv ? '' : 'none';
+  const fbar = document.querySelector('.filter-bar');
+  if (fbar) fbar.style.display = isInv ? '' : 'none';
+
+  // Sidebar nav highlight
+  ['inventory','sales','alerts'].forEach(v => {
+    const el = document.getElementById('nav-'+v);
+    if (el) el.style.color = v === view ? 'var(--accent)' : '';
+  });
+
+  if (isInv)    render();
+  if (isAlerts) { renderAlertSubcatChips(); renderAlerts(); }
+}
+
+function updateAlertThresholds() {
+  const s = parseInt(document.getElementById('spike-threshold').value);
+  const d = parseInt(document.getElementById('drop-threshold').value);
+  document.getElementById('spike-val').textContent = '+' + s + '%';
+  document.getElementById('drop-val').textContent  = '-' + d + '%';
+  renderAlerts();
+}
+
+function renderAlerts() {
+  const spikePct = parseInt(document.getElementById('spike-threshold')?.value || 15);
+  const dropPct  = parseInt(document.getElementById('drop-threshold')?.value  || 20);
+  const search   = (document.getElementById('alert-search')?.value || '').toLowerCase();
+
+  // Base: items with both consumption files
+  let items = RAW_DATA.filter(r =>
+    r.hasConsumption && r.has30Consumption && r.runRate30 > 0
+  );
+
+  if (!items.length) {
+    ['spikes-body','drops-body'].forEach(id => {
+      document.getElementById(id).innerHTML =
+        `<tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text3)">Upload both consumption files (90d and 30d) to see alerts</td></tr>`;
+    });
+    document.getElementById('spike-count').textContent = '—';
+    document.getElementById('drop-count').textContent  = '—';
+    return;
+  }
+
+  // Apply filters
+  if (alertActiveCats.size)    items = items.filter(r => alertActiveCats.has(r.cat));
+  if (alertActiveSubcats.size) items = items.filter(r => alertActiveSubcats.has(r.subcat));
+  if (search) items = items.filter(r =>
+    r.id.toLowerCase().includes(search) || r.desc.toLowerCase().includes(search)
+  );
+
+  const spikes = [], drops = [];
+  items.forEach(item => {
+    const pct = ((item.actual30 - item.runRate30) / item.runRate30) * 100;
+    if (pct >=  spikePct) spikes.push({...item, pct});
+    if (pct <= -dropPct)  drops.push({...item, pct});
+  });
+
+  spikes.sort((a,b) => b.pct - a.pct);
+  drops.sort((a,b) => a.pct - b.pct);
+
+  const mkRow = (item, isSpike) => {
+    const col    = isSpike ? 'var(--red)' : 'var(--green)';
+    const pctStr = (item.pct > 0 ? '+' : '') + item.pct.toFixed(1) + '%';
+    const barW   = Math.min(Math.abs(item.pct), 200) / 2;
+    const subBadge = SUBCAT_COLORS[item.subcat] || 'badge-gray';
+    return `<tr style="border-bottom:0.5px solid var(--border)">
+      <td style="padding:.45rem .75rem;max-width:200px">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.id}</div>
+        <div style="font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${item.desc}">${item.desc}</div>
+      </td>
+      <td style="padding:.45rem .75rem">
+        <span class="badge ${subBadge}" style="font-size:9px">${item.subcat}</span>
+      </td>
+      <td style="padding:.45rem .75rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text2)">${Math.round(item.runRate30).toLocaleString()}</td>
+      <td style="padding:.45rem .75rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text2)">${Math.round(item.actual30).toLocaleString()}</td>
+      <td style="padding:.45rem .75rem;text-align:right">
+        <div style="display:flex;align-items:center;gap:5px;justify-content:flex-end">
+          <div style="height:4px;border-radius:2px;background:${col};width:${barW}px;opacity:.7;flex-shrink:0"></div>
+          <span style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:${col};white-space:nowrap">${pctStr}</span>
+        </div>
+      </td>
+    </tr>`;
+  };
+
+  document.getElementById('spikes-body').innerHTML = spikes.length
+    ? spikes.map(i => mkRow(i, true)).join('')
+    : `<tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text3)">No spikes above +${spikePct}% with current filters</td></tr>`;
+
+  document.getElementById('drops-body').innerHTML = drops.length
+    ? drops.map(i => mkRow(i, false)).join('')
+    : `<tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text3)">No drops below -${dropPct}% with current filters</td></tr>`;
+
+  document.getElementById('spike-count').textContent = spikes.length + ' item' + (spikes.length !== 1 ? 's' : '');
+  document.getElementById('drop-count').textContent  = drops.length  + ' item' + (drops.length  !== 1 ? 's' : '');
+}
+
+// ── Sales report ──
+let EDIBLE_ONHAND = {}; // flavor → { onHand, onOrder, reserved } in individual pieces
+let SALES_DATA = [];
+
+async function handleSalesReport(event) {
+  const f = event.target.files[0]; if (!f) return;
+  try {
+    const csv = await readFile(f);
+    processSalesReport(csv);
+    renderSalesView();
+  } catch(err) { alert('Error reading sales file: ' + err.message); }
+}
+
+function processSalesReport(csv) {
+  const rows = parseCSV(csv);
+  SALES_DATA = rows.map(r => ({
+    date:     r['Order date'] || '',
+    status:   r['Status'] || '',
+    category: r['Category'] || '',
+    pid:      (r['Product ID'] || '').trim(),
+    desc:     (r['Description'] || '').trim(),
+    qty:      n(r['Quantity']),
+    price:    n(r['Unit price']),
+    subtotal: n(r['Subtotal sum']),
+  })).filter(r => r.date && r.pid);
+
+  // Parse dates
+  SALES_DATA.forEach(r => {
+    const d = new Date(r.date);
+    r.month = isNaN(d) ? r.date.slice(0,7) : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  });
+
+  renderSalesView();
+}
+
+function renderSalesView() {
+  if (!SALES_DATA.length) return;
+  const months = [...new Set(SALES_DATA.map(r => r.month))].sort();
+
+  // Update date range
+  document.getElementById('sales-date-range').textContent =
+    `${months[0]} to ${months[months.length-1]} · ${SALES_DATA.length.toLocaleString()} line items`;
+
+  // Monthly aggregation
+  const byMonth = {};
+  SALES_DATA.forEach(r => {
+    if (!byMonth[r.month]) byMonth[r.month] = {rev:0, units:0, orders:new Set()};
+    byMonth[r.month].rev   += r.subtotal;
+    byMonth[r.month].units += r.qty;
+    byMonth[r.month].orders.add(r.date + r.pid); // approximate unique orders
+  });
+
+  // KPIs
+  const totalRev   = Object.values(byMonth).reduce((s,m) => s+m.rev, 0);
+  const totalUnits = Object.values(byMonth).reduce((s,m) => s+m.units, 0);
+  const avgRev     = totalRev / months.length;
+  const avgUnits   = totalUnits / months.length;
+  document.getElementById('kpi-revenue').textContent    = '$' + totalRev.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('kpi-units').textContent      = totalUnits.toLocaleString();
+  document.getElementById('kpi-avg-rev').textContent    = '$' + avgRev.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('kpi-avg-units').textContent  = Math.round(avgUnits).toLocaleString();
+
+  // Monthly table
+  const tbody = document.getElementById('sales-monthly-body');
+  const monthList = months.map((m, i) => ({m, ...byMonth[m], prev: i > 0 ? byMonth[months[i-1]] : null}));
+  tbody.innerHTML = monthList.map(({m, rev, units, orders, prev}) => {
+    const aov = units > 0 ? rev / units : 0;
+    const vsLabel = m === months[0] ? '—' : (()=>{
+      const diff = rev - (prev ? prev.rev : 0);
+      const pct  = prev && prev.rev > 0 ? (diff/prev.rev*100).toFixed(1) : '0';
+      const col  = diff >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<span style="color:${col}">${diff>=0?'+':''}$${Math.abs(diff).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} (${pct}%)</span>`;
+    })();
+    // Mini bar showing rev as % of max
+    const maxRev = Math.max(...months.map(mo => byMonth[mo].rev));
+    const pct = (rev / maxRev * 100).toFixed(1);
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:.6rem 1rem;color:var(--text);font-weight:500">${m}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono);color:var(--green)">$${rev.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${units.toLocaleString()}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">${orders.size.toLocaleString()}</td>
+      <td style="padding:.6rem 1rem;text-align:right;font-family:var(--font-mono)">$${aov.toFixed(2)}</td>
+      <td style="padding:.6rem 1rem">
+        <div style="display:flex;align-items:center;gap:8px">
+          ${vsLabel}
+          <div style="flex:1;height:4px;background:var(--bg4);border-radius:2px;min-width:60px">
+            <div style="height:100%;width:${pct}%;background:var(--blue);border-radius:2px"></div>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  renderByProductType();
+  renderEdiblePieces();
+}
+
+function getSalesProductType(pid, desc) {
+  const p = (pid||'').trim();
+  const pu = p.toUpperCase();
+  const d = (desc||'').toLowerCase();
+  // ── Prerolls ──
+  if (pu.startsWith('P5D')) {
+    if (['P5D-PD','P5D-MMJ','P5D-TBP','P5D-BLOG','P5D-SKP','P5D-TS'].some(x=>pu.startsWith(x))) return ['Prerolls','Mini Doink 5-Pack THCP'];
+    return ['Prerolls','Mini Doink 5-Pack THCA'];
+  }
+  if (pu.startsWith('PDD')) return ['Prerolls','Double Doink'];
+  if (pu.startsWith('PJH')) {
+    if (['PJH-TBP','PJH-SKP','PJH-MMJ','PJH-TS','PJH-BLOG','PJH-PD'].some(x=>pu.startsWith(x))) return ['Prerolls','Jelly Hole THCP'];
+    return ['Prerolls','Jelly Hole THCA'];
+  }
+  if (pu.startsWith('PIL')) {
+    // "Imperial Total THC Loaded" = THCP; "Imperial Loaded" (no "Total THC") = THCA
+    if (d.includes('total thc')) return ['Prerolls','Imperial Loaded THCP'];
+    return ['Prerolls','Imperial Loaded THCA'];
+  }
+  // ── Vapes ──
+  if (pu.startsWith('VLRSB')) return ['Vapes','Lil Ripper Liquid Diamonds'];
+  if (pu.startsWith('VLR')) {
+    if (['VLR-BD','VLR-MW','VLR-SC'].some(x=>pu.startsWith(x))) return ['Vapes','Lil Ripper HHC'];
+    if (['VLR-CL','VLR-WG','VLR-LAC'].some(x=>pu.startsWith(x))) return ['Vapes','Lil Ripper D8'];
+    return ['Vapes','Lil Ripper THCP'];
+  }
+  if (pu.startsWith('VIC')) return ['Vapes','Imperial 1G Cartridge'];
+  if (pu.startsWith('VIP')) return ['Vapes','Imperial Pod'];
+  if (pu.startsWith('FLD') || p.startsWith('Filled') || p.startsWith('Infused') || p.startsWith('Oil Mixture') || p.startsWith('Mixture') || p.startsWith('Infusion')) return ['Vapes','WIP / Filled'];
+  // ── Edibles ──
+  if (pu.startsWith('EGMB') || pu.startsWith('EGKB') || pu.startsWith('EGBD') || pu.startsWith('EGSS') || pu.startsWith('EGPL') || pu.startsWith('EGMCR')) return ['Edibles','Euphoria Gummies D9'];
+  if (pu.startsWith('EGFJ')) return ['Edibles','Froot Jam'];
+  if (pu.startsWith('EGBB')) return ['Edibles','Functional Microdose'];
+  if (pu.startsWith('ECC')) return ['Edibles','Cereal Crunchies'];
+  if (pu.startsWith('EGHB') || pu.startsWith('EGSW')) return ['Edibles','D8 Edibles'];
+  // ── Flower — Zaza vs Fakies, split by size ──
+  if (pu.startsWith('FIT')) {
+    const isFakies = ['FITDR','FITGUS','FITHZ','FITICC','FITIP','FITJC','FITSFV','FITSSFV','FITTW','FITWC'].some(x=>pu.startsWith(x));
+    const line = isFakies ? 'Fakies' : 'Zaza';
+    if (pu.includes('-3.5-') || pu.includes('-3.5G') || pu.match(/-3\.5$/)) return ['Flower', line + ' 3.5g'];
+    if (pu.includes('-14-') || pu.includes('-14G') || pu.match(/-14$/)) return ['Flower', line + ' 14g'];
+    if (pu.includes('-QP')) return ['Flower', line + ' QP'];
+    if (pu.includes('-450') || pu.includes('1LB')) return ['Flower', line + ' 1lb'];
+    return ['Flower', line + ' Other'];
+  }
+  return ['Other','Other'];
+}
+
+function getPackSize(pid) {
+  const p = (pid||'').trim().toUpperCase();
+  if (p.includes('-10PK')) return 10;
+  if (p.includes('-8PK'))  return 8;
+  if (p.includes('-6PK'))  return 6;
+  if (p.includes('-5PK'))  return 5;
+  if (p.includes('-2PK') || p.endsWith('-2P')) return 2;
+  return 1;
+}
+
+function renderByProductType() {
+  const months = [...new Set(SALES_DATA.map(r => r.month))].sort();
+
+  // Build type -> subtype -> month -> { rev, packs, singles }
+  const tree = {}, typeTotals = {};
+  SALES_DATA.forEach(r => {
+    const [type, subtype] = getSalesProductType(r.pid, r.desc);
+    const isPack = getPackSize(r.pid) > 1;
+    if (!tree[type]) tree[type] = {};
+    if (!tree[type][subtype]) tree[type][subtype] = {};
+    if (!tree[type][subtype][r.month]) tree[type][subtype][r.month] = {rev:0,packs:0,singles:0};
+    tree[type][subtype][r.month].rev += r.subtotal;
+    if (isPack) tree[type][subtype][r.month].packs   += r.qty;
+    else        tree[type][subtype][r.month].singles += r.qty;
+    if (!typeTotals[type]) typeTotals[type] = {rev:0,packs:0,singles:0};
+    typeTotals[type].rev += r.subtotal;
+    if (isPack) typeTotals[type].packs   += r.qty;
+    else        typeTotals[type].singles += r.qty;
+  });
+
+  const $r = v => '$' + v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const $u = v => v > 0 ? v.toLocaleString() : '-';
+  const typeOrder = ['Prerolls','Vapes','Edibles','Flower'];
+  const typeColors = {Prerolls:'var(--green)',Vapes:'var(--blue)',Edibles:'var(--orange)',Flower:'#52c97a',Concentrates:'var(--purple)',Marketing:'var(--text3)',Other:'var(--text3)'};
+
+  const thead = document.getElementById('by-type-head');
+  thead.innerHTML = `<tr style="background:var(--bg3)">
+    <th rowspan="2" style="padding:.5rem 1rem;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap;position:sticky;left:0;background:var(--bg3);z-index:3;vertical-align:bottom;min-width:220px">Product Type / Sub</th>
+    ${months.map(m=>`<th colspan="3" style="padding:.4rem .65rem;text-align:center;color:var(--text3);font-weight:500;white-space:nowrap;border-left:1px solid var(--border2)">${m}</th>`).join('')}
+    <th colspan="3" style="padding:.4rem .65rem;text-align:center;color:var(--text3);font-weight:600;border-left:2px solid var(--border2)">Total</th>
+  </tr>
+  <tr style="background:var(--bg3)">
+    ${months.map(()=>`
+      <th style="padding:.3rem .5rem;text-align:right;color:var(--green);font-weight:400;font-size:10px;border-left:1px solid var(--border2);white-space:nowrap">Revenue</th>
+      <th style="padding:.3rem .5rem;text-align:right;color:var(--blue);font-weight:400;font-size:10px;white-space:nowrap">Packs</th>
+      <th style="padding:.3rem .5rem;text-align:right;color:var(--text3);font-weight:400;font-size:10px;white-space:nowrap">Singles</th>
+    `).join('')}
+    <th style="padding:.3rem .5rem;text-align:right;color:var(--green);font-weight:600;font-size:10px;border-left:2px solid var(--border2);white-space:nowrap">Revenue</th>
+    <th style="padding:.3rem .5rem;text-align:right;color:var(--blue);font-weight:600;font-size:10px;white-space:nowrap">Packs</th>
+    <th style="padding:.3rem .5rem;text-align:right;color:var(--text3);font-weight:600;font-size:10px;white-space:nowrap">Singles</th>
+  </tr>`;
+
+  const tbody = document.getElementById('by-type-body');
+  let html = '';
+  let grandRev = 0, grandPacks = 0, grandSingles = 0;
+  const grandByMonth = {};
+
+  typeOrder.filter(t => tree[t]).forEach(type => {
+    const col = typeColors[type];
+    const {rev:typeRev,packs:typePacks,singles:typeSingles} = typeTotals[type]||{rev:0,packs:0,singles:0};
+    grandRev += typeRev; grandPacks += typePacks; grandSingles += typeSingles;
+    const typeByMonth = {};
+    months.forEach(m => {
+      const rev     = Object.values(tree[type]).reduce((s,sub)=>s+((sub[m]||{}).rev||0),0);
+      const packs   = Object.values(tree[type]).reduce((s,sub)=>s+((sub[m]||{}).packs||0),0);
+      const singles = Object.values(tree[type]).reduce((s,sub)=>s+((sub[m]||{}).singles||0),0);
+      typeByMonth[m] = {rev,packs,singles};
+      if (!grandByMonth[m]) grandByMonth[m] = {rev:0,packs:0,singles:0};
+      grandByMonth[m].rev += rev; grandByMonth[m].packs += packs; grandByMonth[m].singles += singles;
+    });
+    html += `<tr style="background:var(--bg3);border-top:1px solid var(--border2)">
+      <td style="padding:.55rem 1rem;font-weight:600;color:${col};position:sticky;left:0;background:var(--bg3);z-index:2">${type}</td>
+      ${months.map(m=>`
+        <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${col};border-left:1px solid var(--border2)">${$r(typeByMonth[m].rev)}</td>
+        <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--blue)">${$u(typeByMonth[m].packs)}</td>
+        <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--text2)">${$u(typeByMonth[m].singles)}</td>
+      `).join('')}
+      <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:${col};border-left:2px solid var(--border2)">${$r(typeRev)}</td>
+      <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--blue)">${$u(typePacks)}</td>
+      <td style="padding:.5rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--text2)">${$u(typeSingles)}</td>
+    </tr>`;
+    Object.keys(tree[type]).sort().forEach(sub => {
+      const sm = tree[type][sub];
+      const sRev = Object.values(sm).reduce((s,v)=>s+v.rev,0);
+      const sPacks = Object.values(sm).reduce((s,v)=>s+v.packs,0);
+      const sSingles = Object.values(sm).reduce((s,v)=>s+v.singles,0);
+      html += `<tr style="border-bottom:0.5px solid var(--border)">
+        <td style="padding:.4rem 1rem .4rem 1.75rem;color:var(--text2);font-size:11px;position:sticky;left:0;background:var(--bg2);z-index:2">\u2514 ${sub}</td>
+        ${months.map(m=>`
+          <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text2);border-left:1px solid var(--border)">${sm[m]&&sm[m].rev>0?$r(sm[m].rev):'-'}</td>
+          <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--blue)">${sm[m]?$u(sm[m].packs):'-'}</td>
+          <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text3)">${sm[m]?$u(sm[m].singles):'-'}</td>
+        `).join('')}
+        <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text2);border-left:2px solid var(--border)">${$r(sRev)}</td>
+        <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--blue)">${$u(sPacks)}</td>
+        <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text3)">${$u(sSingles)}</td>
+      </tr>`;
+    });
+  });
+
+  html += `<tr style="background:var(--bg3);border-top:2px solid var(--border2)">
+    <td style="padding:.6rem 1rem;font-weight:700;color:var(--accent);position:sticky;left:0;background:var(--bg3);z-index:2">Grand Total</td>
+    ${months.map(m=>`
+      <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent);border-left:1px solid var(--border2)">${$r(grandByMonth[m]?.rev||0)}</td>
+      <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue)">${$u(grandByMonth[m]?.packs||0)}</td>
+      <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--text2)">${$u(grandByMonth[m]?.singles||0)}</td>
+    `).join('')}
+    <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--accent);border-left:2px solid var(--border2)">${$r(grandRev)}</td>
+    <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--blue)">${$u(grandPacks)}</td>
+    <td style="padding:.6rem .5rem;text-align:right;font-family:var(--font-mono);font-weight:700;color:var(--text2)">${$u(grandSingles)}</td>
+  </tr>`;
+
+  tbody.innerHTML = html;
+}
+
+// ── Init ──
+updateRangeLabel();
+</script>
+</body>
+</html>
