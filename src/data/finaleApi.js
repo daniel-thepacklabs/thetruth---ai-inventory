@@ -419,13 +419,14 @@ export async function fetchAll() {
   }
   const active = products.filter(p => p.status === 'Active');
 
+  const isFlower = id => id.startsWith('FIT') || id.startsWith('FLR-') || id.startsWith('Flower - ');
   const stock = toCSV(active.map(p => ({
     'Location': 'SFS-HQ',
     'Product ID': p.productId,
     'Description': p.description,
-    'On hand': num(p.sfsOnHand) || 0,
-    'On order': num(p.sfsOnOrder) || 0,
-    'Reserved': num(p.sfsReserved) || 0,
+    'On hand': isFlower(p.productId) ? (num(p.stockAvailableToPromiseUnits) || 0) : (num(p.sfsOnHand) || 0),
+    'On order': isFlower(p.productId) ? (num(p.stockOnOrderUnits) || 0) : (num(p.sfsOnOrder) || 0),
+    'Reserved': isFlower(p.productId) ? (num(p.stockReservationsUnits) || 0) : (num(p.sfsReserved) || 0),
   })));
 
   const salesHistory = buildSalesCSV(products);
@@ -433,6 +434,7 @@ export async function fetchAll() {
   const consume = buildConsumeCSV(90, active);
   const consume30 = buildConsumeCSV(30, active);
 
+  window.__lastProducts = products;
   const withStock = active.filter(p => num(p.sfsOnHand) > 0).length;
   const withSales = active.filter(p => num(p.salesLast30Days) > 0 || num(p.salesLastMonth) > 0).length;
   console.log(`Live: ${active.length} active products, ${withStock} with stock, ${withSales} with sales`);
