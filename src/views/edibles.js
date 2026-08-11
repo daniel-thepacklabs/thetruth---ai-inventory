@@ -14,6 +14,9 @@ const LINE_COLOR = { 'Euphoria': '#e05252', 'Froot Jam': '#52c97a', 'Microdose':
 
 const PACK_ORDER = ['Single', '2-Pack', '3-Pack', '5PK Display', '8PK Display', '10PK Display', 'RAW'];
 
+// Persist user on-order inputs across re-renders
+if (!window.__edibleOnOrder) window.__edibleOnOrder = {};
+
 function slug(s) { return s.replace(/[^a-zA-Z0-9]/g, '-'); }
 
 function mosColor(v) {
@@ -29,6 +32,8 @@ function mosBg(v) {
   if (v < 3) return 'rgba(155,127,238,0.10)';
   return 'rgba(82,201,122,0.08)';
 }
+
+const inputStyle = 'width:60px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);text-align:right;font-size:11px;font-family:Arial,sans-serif;';
 
 function buildEuphoriaTable(edibles) {
   const cs = 'padding:8px 12px;text-align:right;font-size:12px;white-space:nowrap;';
@@ -46,7 +51,6 @@ function buildEuphoriaTable(edibles) {
     if (!byFlavor[r.flavor][ctKey]) byFlavor[r.flavor][ctKey] = { ct, onHand: 0, onOrder: 0, sales: 0, skus: [] };
     const g = byFlavor[r.flavor][ctKey];
     const packMult = getPackMultiplier(r.id);
-    // Convert to single-unit equivalents: 1 unit of 5PK = 5 singles
     const avail = r.onHand - (r.reserved || 0);
     const singlesOnHand = avail * packMult;
     const singlesOnOrder = r.onOrder * packMult;
@@ -66,14 +70,12 @@ function buildEuphoriaTable(edibles) {
     rawByFlavor[r.flavor].onOrder += r.onOrder;
   });
 
-  // Determine which ct sizes exist across all Euphoria flavors
   const ctSizes = [...new Set(euphoriaItems.map(r => getPiecesPerBag(r.id, r.desc)))].sort((a, b) => a - b);
-
   const flavors = Object.keys(byFlavor).sort();
 
   let html = `<div style="margin-bottom:24px">`;
   html += `<div style="font-size:14px;font-weight:600;color:#e05252;margin-bottom:8px">Euphoria</div>`;
-  html += `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">All quantities shown as single-unit equivalents (packs broken down into singles)</div>`;
+  html += `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">All quantities shown as single-unit equivalents (packs broken down into singles). Enter additional on-order qty to see projected Total MOS.</div>`;
   html += `<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:var(--bg2)">`;
   html += `<table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif">`;
 
@@ -81,7 +83,7 @@ function buildEuphoriaTable(edibles) {
   html += '<thead><tr style="background:rgba(255,255,255,0.03)">';
   html += `<th style="${hs}text-align:left;min-width:140px" rowspan="2">Flavor</th>`;
   ctSizes.forEach(ct => {
-    html += `<th style="${hs}text-align:center;border-left:2px solid var(--border)" colspan="4">${ct}ct</th>`;
+    html += `<th style="${hs}text-align:center;border-left:2px solid var(--border)" colspan="6">${ct}ct</th>`;
   });
   html += `<th style="${hs}text-align:center;border-left:2px solid var(--border)" colspan="2">RAW</th>`;
   html += '</tr><tr style="background:rgba(255,255,255,0.03)">';
@@ -90,6 +92,8 @@ function buildEuphoriaTable(edibles) {
     html += `<th style="${hs}">Total Supply</th>`;
     html += `<th style="${hs}"><span style="color:var(--yellow)">Monthly Sales</span></th>`;
     html += `<th style="${hs}"><span style="color:var(--orange)">MOS</span></th>`;
+    html += `<th style="${hs}"><span style="color:var(--blue)">Add'l Order</span></th>`;
+    html += `<th style="${hs}"><span style="color:var(--cyan, #4dd0e1)">Total MOS</span></th>`;
   });
   html += `<th style="${hs}border-left:2px solid var(--border)"><span style="color:var(--green)">Available</span></th>`;
   html += `<th style="${hs}"><span style="color:var(--blue)">On Order</span></th>`;
@@ -116,14 +120,21 @@ function buildEuphoriaTable(edibles) {
         totals[ct].onHand += g.onHand;
         totals[ct].onOrder += g.onOrder;
         totals[ct].sales += g.sales;
+        const inputId = `eo-euph-${fid}-${ct}`;
+        const savedVal = window.__edibleOnOrder[inputId] || 0;
+        const totalMos = g.sales > 0 ? (totalSupply + savedVal) / g.sales : 0;
         html += `<td style="${cs}border-left:2px solid var(--border);color:var(--green)">${fmt(g.onHand)}</td>`;
         html += `<td style="${cs}color:var(--text2)">${fmt(totalSupply)}</td>`;
         html += `<td style="${cs}color:var(--yellow)">${fmt(g.sales)}</td>`;
         html += `<td style="${cs}font-weight:600;color:${mosColor(mos)};background:${mosBg(mos)}">${mos.toFixed(1)}</td>`;
+        html += `<td style="${cs}" onclick="event.stopPropagation()"><input type="number" id="${inputId}" style="${inputStyle}" value="${savedVal || ''}" min="0" placeholder="0" onchange="window.__edibleOrderChange('${inputId}',this.value)" oninput="window.__edibleOrderChange('${inputId}',this.value)"></td>`;
+        html += `<td style="${cs}font-weight:600;color:${mosColor(totalMos)};background:${mosBg(totalMos)}" id="${inputId}-mos" data-base-supply="${totalSupply}" data-sales="${g.sales}">${totalMos.toFixed(1)}</td>`;
       } else {
         html += `<td style="${cs}border-left:2px solid var(--border);color:var(--text3)">—</td>`;
         html += `<td style="${cs}color:var(--text3)">—</td>`;
         html += `<td style="${cs}color:var(--text3)">—</td>`;
+        html += `<td style="${cs}color:var(--text3)">—</td>`;
+        html += `<td style="${cs}">—</td>`;
         html += `<td style="${cs}color:var(--text3)">—</td>`;
       }
     });
@@ -152,17 +163,21 @@ function buildEuphoriaTable(edibles) {
       g.skus.forEach(sku => {
         const skuTotalSupply = sku.singlesOnHand + sku.singlesOnOrder;
         const skuMos = sku.singlesSales > 0 ? skuTotalSupply / sku.singlesSales : 0;
+        const skuInputId = `eo-euph-sku-${slug(sku.id)}`;
+        const skuSaved = window.__edibleOnOrder[skuInputId] || 0;
+        const skuTotalMos = sku.singlesSales > 0 ? (skuTotalSupply + skuSaved) / sku.singlesSales : 0;
         html += `<tr class="edetail-euphoria-${fid}" style="display:none;background:rgba(255,255,255,0.015);border-bottom:1px solid rgba(255,255,255,0.04)">`;
         html += `<td style="${fs}padding-left:36px;font-weight:400;font-size:11px;color:var(--text2)">${sku.packType}${sku.packMult > 1 ? ` <span style="color:var(--text3);font-size:9px">(${sku.onHand} packs → ${fmt(sku.singlesOnHand)} singles)</span>` : ''}</td>`;
-        // Fill cells — put values under the matching ct columns
         ctSizes.forEach(colCt => {
           if (colCt === ct) {
             html += `<td style="${cs}border-left:2px solid var(--border);font-size:11px;color:var(--green)">${fmt(sku.singlesOnHand)}</td>`;
             html += `<td style="${cs}font-size:11px;color:var(--text2)">${fmt(skuTotalSupply)}</td>`;
             html += `<td style="${cs}font-size:11px;color:var(--yellow)">${fmt(sku.singlesSales)}</td>`;
             html += `<td style="${cs}font-size:11px;font-weight:600;color:${mosColor(skuMos)};background:${mosBg(skuMos)}">${skuMos.toFixed(1)}</td>`;
+            html += `<td style="${cs}font-size:11px" onclick="event.stopPropagation()"><input type="number" id="${skuInputId}" style="${inputStyle}font-size:10px;width:50px;" value="${skuSaved || ''}" min="0" placeholder="0" onchange="window.__edibleOrderChange('${skuInputId}',this.value)" oninput="window.__edibleOrderChange('${skuInputId}',this.value)"></td>`;
+            html += `<td style="${cs}font-size:11px;font-weight:600;color:${mosColor(skuTotalMos)};background:${mosBg(skuTotalMos)}" id="${skuInputId}-mos" data-base-supply="${skuTotalSupply}" data-sales="${sku.singlesSales}">${skuTotalMos.toFixed(1)}</td>`;
           } else {
-            html += `<td style="${cs}border-left:2px solid var(--border)"></td><td style="${cs}"></td><td style="${cs}"></td><td style="${cs}"></td>`;
+            html += `<td style="${cs}border-left:2px solid var(--border)"></td><td style="${cs}"></td><td style="${cs}"></td><td style="${cs}"></td><td style="${cs}"></td><td style="${cs}"></td>`;
           }
         });
         html += `<td style="${cs}border-left:2px solid var(--border)"></td><td style="${cs}"></td>`;
@@ -179,10 +194,16 @@ function buildEuphoriaTable(edibles) {
     const t = totals[ct];
     const totalSupply = t.onHand + t.onOrder;
     const mos = t.sales > 0 ? totalSupply / t.sales : 0;
+    // Sum all additional on-order inputs for this ct size
+    const addlKeys = Object.keys(window.__edibleOnOrder).filter(k => k.startsWith('eo-euph-') && k.endsWith(`-${ct}`) && !k.includes('-sku-'));
+    const addlTotal = addlKeys.reduce((s, k) => s + (window.__edibleOnOrder[k] || 0), 0);
+    const totalMos = t.sales > 0 ? (totalSupply + addlTotal) / t.sales : 0;
     html += `<td style="${cs}border-left:2px solid var(--border);font-weight:700;color:var(--green)">${fmt(t.onHand)}</td>`;
     html += `<td style="${cs}font-weight:700;color:var(--text2)">${fmt(totalSupply)}</td>`;
     html += `<td style="${cs}font-weight:700;color:var(--yellow)">${fmt(t.sales)}</td>`;
     html += `<td style="${cs}font-weight:700;color:${mosColor(mos)};background:${mosBg(mos)}">${mos.toFixed(1)}</td>`;
+    html += `<td style="${cs}font-weight:700;color:var(--blue)">${fmt(addlTotal)}</td>`;
+    html += `<td style="${cs}font-weight:700;color:${mosColor(totalMos)};background:${mosBg(totalMos)}" id="eo-euph-total-${ct}-mos">${totalMos.toFixed(1)}</td>`;
   });
   html += `<td style="${cs}border-left:2px solid var(--border);font-weight:700;color:var(--green)">${fmt(totalRawOnHand)}</td>`;
   html += `<td style="${cs}font-weight:700;color:var(--blue)">${fmt(totalRawOnOrder)}</td>`;
@@ -250,7 +271,9 @@ function buildOtherLinesTable(edibles) {
   html += `<th style="${hs}"><span style="color:var(--blue)">On Order</span></th>`;
   html += `<th style="${hs}">Total Supply</th>`;
   html += `<th style="${hs}"><span style="color:var(--yellow)">Monthly Sales</span></th>`;
-  html += `<th style="${hs}"><span style="color:var(--orange)">Months of Supply</span></th>`;
+  html += `<th style="${hs}"><span style="color:var(--orange)">MOS</span></th>`;
+  html += `<th style="${hs}"><span style="color:var(--blue)">Add'l Order</span></th>`;
+  html += `<th style="${hs}"><span style="color:var(--cyan, #4dd0e1)">Total MOS</span></th>`;
   html += `<th style="${hs}"><span style="color:var(--green)">RAW On Hand</span></th>`;
   html += `<th style="${hs}"><span style="color:var(--blue)">RAW On Order</span></th>`;
   html += '</tr></thead>';
@@ -261,6 +284,9 @@ function buildOtherLinesTable(edibles) {
     const line = FLAVOR_LINE[r.flavor] || '—';
     const lc = LINE_COLOR[line] || 'var(--text3)';
     const fid = slug(r.flavor);
+    const inputId = `eo-other-${fid}`;
+    const savedVal = window.__edibleOnOrder[inputId] || 0;
+    const totalMosVal = r.sales > 0 ? (r.totalInv + savedVal) / r.sales : 0;
 
     html += `<tr style="${stripe}border-bottom:1px solid var(--border);cursor:pointer" onclick="window.__toggleEdibleDetail('${r.flavor.replace(/'/g, "\\'")}')" id="erow-${fid}">`;
     html += `<td style="${fs}"><span id="echev-${fid}" style="display:inline-block;transition:transform .15s;transform:rotate(0deg);margin-right:6px;font-size:10px;color:var(--text3)">▶</span>${r.flavor}</td>`;
@@ -270,6 +296,8 @@ function buildOtherLinesTable(edibles) {
     html += `<td style="${cs}color:var(--text2)">${fmt(r.totalInv)}</td>`;
     html += `<td style="${cs}color:var(--yellow)">${fmt(r.sales)}</td>`;
     html += `<td style="${cs}font-weight:600;color:${mosColor(r.mos)};background:${mosBg(r.mos)}">${r.mos.toFixed(1)}</td>`;
+    html += `<td style="${cs}" onclick="event.stopPropagation()"><input type="number" id="${inputId}" style="${inputStyle}" value="${savedVal || ''}" min="0" placeholder="0" onchange="window.__edibleOrderChange('${inputId}',this.value)" oninput="window.__edibleOrderChange('${inputId}',this.value)"></td>`;
+    html += `<td style="${cs}font-weight:600;color:${mosColor(totalMosVal)};background:${mosBg(totalMosVal)}" id="${inputId}-mos" data-base-supply="${r.totalInv}" data-sales="${r.sales}">${totalMosVal.toFixed(1)}</td>`;
     html += `<td style="${cs}color:var(--green)">${fmt(r.rawOnHand)}</td>`;
     html += `<td style="${cs}color:var(--blue)">${fmt(r.rawOnOrder)}</td>`;
     html += '</tr>';
@@ -277,6 +305,9 @@ function buildOtherLinesTable(edibles) {
     r.skus.forEach(sku => {
       const skuMos = sku.unitSales > 0 ? (sku.unitOnHand + sku.unitOnOrder) / sku.unitSales : 0;
       const isRaw = sku.packType === 'RAW';
+      const skuInputId = `eo-other-sku-${slug(sku.id)}`;
+      const skuSaved = window.__edibleOnOrder[skuInputId] || 0;
+      const skuTotalMos = sku.unitSales > 0 ? (sku.unitOnHand + sku.unitOnOrder + skuSaved) / sku.unitSales : 0;
       html += `<tr class="edetail-${fid}" style="display:none;background:rgba(255,255,255,0.015);border-bottom:1px solid rgba(255,255,255,0.04)">`;
       html += `<td style="${fs}padding-left:36px;font-weight:400;font-size:11px;color:var(--text2)">${sku.id}</td>`;
       html += `<td style="${cs}font-size:11px;color:var(--text3)">${sku.packType}</td>`;
@@ -285,12 +316,19 @@ function buildOtherLinesTable(edibles) {
       html += `<td style="${cs}font-size:11px;color:var(--text2)">${fmt(sku.unitOnHand + sku.unitOnOrder)}</td>`;
       html += `<td style="${cs}font-size:11px;color:var(--yellow)">${fmt(sku.sales)}${!isRaw && sku.sales !== sku.unitSales ? ` <span style="color:var(--text3);font-size:9px">(${fmt(sku.unitSales)} pcs)</span>` : ''}</td>`;
       html += `<td style="${cs}font-size:11px;font-weight:600;color:${mosColor(skuMos)};background:${mosBg(skuMos)}">${skuMos.toFixed(1)}</td>`;
+      html += `<td style="${cs}font-size:11px" onclick="event.stopPropagation()"><input type="number" id="${skuInputId}" style="${inputStyle}font-size:10px;width:50px;" value="${skuSaved || ''}" min="0" placeholder="0" onchange="window.__edibleOrderChange('${skuInputId}',this.value)" oninput="window.__edibleOrderChange('${skuInputId}',this.value)"></td>`;
+      html += `<td style="${cs}font-size:11px;font-weight:600;color:${mosColor(skuTotalMos)};background:${mosBg(skuTotalMos)}" id="${skuInputId}-mos" data-base-supply="${sku.unitOnHand + sku.unitOnOrder}" data-sales="${sku.unitSales}">${skuTotalMos.toFixed(1)}</td>`;
       html += `<td style="${cs}font-size:11px"></td>`;
       html += `<td style="${cs}font-size:11px"></td>`;
       html += '</tr>';
     });
   });
   html += '</tbody>';
+
+  // Footer totals
+  const addlOtherKeys = Object.keys(window.__edibleOnOrder).filter(k => k.startsWith('eo-other-') && !k.includes('-sku-'));
+  const addlOtherTotal = addlOtherKeys.reduce((s, k) => s + (window.__edibleOnOrder[k] || 0), 0);
+  const otherTotalMos = totals.sales > 0 ? (totals.totalSupply + addlOtherTotal) / totals.sales : 0;
 
   html += '<tfoot><tr style="border-top:2px solid var(--border);background:rgba(255,255,255,0.04)">';
   html += `<td style="${fs}font-weight:700">TOTAL</td>`;
@@ -300,6 +338,8 @@ function buildOtherLinesTable(edibles) {
   html += `<td style="${cs}font-weight:700;color:var(--text2)">${fmt(totals.totalSupply)}</td>`;
   html += `<td style="${cs}font-weight:700;color:var(--yellow)">${fmt(totals.sales)}</td>`;
   html += `<td style="${cs}font-weight:700;color:${mosColor(totalMos)};background:${mosBg(totalMos)}">${totalMos.toFixed(1)}</td>`;
+  html += `<td style="${cs}font-weight:700;color:var(--blue)">${fmt(addlOtherTotal)}</td>`;
+  html += `<td style="${cs}font-weight:700;color:${mosColor(otherTotalMos)};background:${mosBg(otherTotalMos)}" id="eo-other-total-mos">${otherTotalMos.toFixed(1)}</td>`;
   html += `<td style="${cs}font-weight:700;color:var(--green)">${fmt(totals.rawOnHand)}</td>`;
   html += `<td style="${cs}font-weight:700;color:var(--blue)">${fmt(totals.rawOnOrder)}</td>`;
   html += '</tr></tfoot>';
@@ -322,6 +362,23 @@ export function renderEdiblesView() {
 
   container.innerHTML = html;
 }
+
+// Handle on-order input changes — update Total MOS cell inline (no re-render)
+window.__edibleOrderChange = (inputId, value) => {
+  const val = Math.max(0, parseInt(value) || 0);
+  window.__edibleOnOrder[inputId] = val;
+
+  const mosCell = document.getElementById(inputId + '-mos');
+  if (!mosCell) return;
+
+  const baseSupply = parseFloat(mosCell.dataset.baseSupply) || 0;
+  const sales = parseFloat(mosCell.dataset.sales) || 0;
+  const newMos = sales > 0 ? (baseSupply + val) / sales : 0;
+
+  mosCell.textContent = newMos.toFixed(1);
+  mosCell.style.color = mosColor(newMos);
+  mosCell.style.background = mosBg(newMos);
+};
 
 window.__toggleEdibleDetail = (key) => {
   const rows = document.querySelectorAll(`.edetail-${slug(key)}`);

@@ -206,6 +206,7 @@ export function getSalesProductType(pid, desc) {
     if (['VLR-CL','VLR-WG','VLR-LAC'].some(x => pu.startsWith(x))) return ['Vapes','Lil Ripper D8'];
     return ['Vapes','Lil Ripper THCP'];
   }
+  if (pu.startsWith('VIT')) return ['Vapes','Imperial Live Resin'];
   if (pu.startsWith('VIC')) return ['Vapes','Imperial 1G Cartridge'];
   if (pu.startsWith('VIP')) return ['Vapes','Imperial Pod'];
   if (pu.startsWith('FLD') || p.startsWith('Filled') || p.startsWith('Infused') || p.startsWith('Oil Mixture') || p.startsWith('Mixture') || p.startsWith('Infusion')) return ['Vapes','WIP / Filled'];
@@ -251,6 +252,7 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
     stockMap[pid].onOrder  += n(r['On order']);
     stockMap[pid].reserved += n(r['Reserved']);
     if (!stockMap[pid].desc) stockMap[pid].desc = (r['Description'] || '').trim();
+    if (pid === 'DBX-DD-BLOG') console.log('[DEBUG] DBX-DD-BLOG stock:', JSON.stringify(stockMap[pid]), 'raw On hand:', r['On hand']);
   });
 
   const salesMap = {};
