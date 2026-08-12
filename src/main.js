@@ -149,7 +149,9 @@ window.syncFromFinale = async function syncFromFinale() {
     d.renderSubcatChips();
     d.renderEdibleFilters();
     d.render();
-    if (salesOrder || monthlyTotals || productSalesData) d.renderSalesView();
+    d.renderSalesView();
+    // Also re-render sales if user switches to sales tab later
+    window.__salesDataReady = true;
     d._viewRendered.zeroprice = false;
     if (document.getElementById('zeroprice-view')?.style.display !== 'none') { d._viewRendered.zeroprice = true; d.renderZeroPriceView(); }
     if (document.getElementById('calculator-view')?.style.display !== 'none') d.renderCalculatorView();

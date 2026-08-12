@@ -252,7 +252,6 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
     stockMap[pid].onOrder  += n(r['On order']);
     stockMap[pid].reserved += n(r['Reserved']);
     if (!stockMap[pid].desc) stockMap[pid].desc = (r['Description'] || '').trim();
-    if (pid === 'DBX-DD-BLOG') console.log('[DEBUG] DBX-DD-BLOG stock:', JSON.stringify(stockMap[pid]), 'raw On hand:', r['On hand']);
   });
 
   const salesMap = {};

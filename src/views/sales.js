@@ -105,7 +105,14 @@ function renderCurrentMonthSummary(byMonth) {
 
 export function renderSalesView() {
   const hasMonthly = state.MONTHLY_TOTALS && state.MONTHLY_TOTALS.length > 0;
-  if (!hasMonthly && !state.SALES_DATA.length) return;
+  if (!hasMonthly && !state.SALES_DATA.length) {
+    // Show loading message if sync is in progress
+    if (window.__syncRunning) {
+      const el = document.getElementById('sales-date-range');
+      if (el) el.textContent = 'Syncing data from Finale…';
+    }
+    return;
+  }
 
   const allMonthlyData = hasMonthly ? state.MONTHLY_TOTALS : [];
   const allMonths = allMonthlyData.map(m => m.period);
