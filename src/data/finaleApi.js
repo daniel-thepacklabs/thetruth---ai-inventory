@@ -66,7 +66,6 @@ async function fetchLiveProducts() {
             stockRemainingAfterReservationsUnits
             sfsOnHand: stockColumnQuantityOnHandUnitsDeltamunchiesapifacility100857
             sfsReserved: stockColumnReservationsUnitsDeltamunchiesapifacility100857
-            sfsOnOrder: stockColumnOnOrderUnitsDeltamunchiesapifacility100857
             salesLast7Days
             salesLast30Days
             salesLast60Days
@@ -360,19 +359,20 @@ function getCurrentPeriod() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function getPrevPeriod() {
+function getRecentPeriods(count) {
+  const periods = [];
   const now = new Date();
-  return now.getMonth() === 0
-    ? `${now.getFullYear() - 1}-12`
-    : `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
+  for (let i = 0; i < count; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    periods.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return periods.reverse();
 }
 
 async function fetchLiveMonthlyData(products) {
   const staticMonths = monthlyData.months || [];
   const staticItems = orderItemData.data || [];
-  const curPeriod = getCurrentPeriod();
-  const prevPeriod = getPrevPeriod();
-  const livePeriods = [prevPeriod, curPeriod];
+  const livePeriods = getRecentPeriods(3);
 
   const months = staticMonths.filter(m => !livePeriods.includes(m.period));
   const salesItems = staticItems.filter(r => !livePeriods.includes(r.month));
@@ -382,21 +382,42 @@ async function fetchLiveMonthlyData(products) {
   for (const period of livePeriods) {
     const [y, m] = period.split('-').map(Number);
     console.log(`  Fetching live revenue + returns for ${period}...`);
-    const [rev, ret] = await Promise.all([fetchMonthRevenue(y, m), fetchMonthReturns(y, m)]);
-    months.push({ period, revenue: rev.revenue, units: rev.units, orders: rev.orders, returns: ret });
+    try {
+      // Small delay between months to avoid API rate limiting
+      if (livePeriods.indexOf(period) > 0) await new Promise(r => setTimeout(r, 1000));
+      const [rev, ret] = await Promise.all([fetchMonthRevenue(y, m), fetchMonthReturns(y, m)]);
+      months.push({ period, revenue: rev.revenue, units: rev.units, orders: rev.orders, returns: ret });
 
-    const liveItems = buildLiveSalesItems(products, period, priceMap);
-    // Scale per-product estimated revenue to match actual order totals
-    const estimatedTotal = liveItems.reduce((s, it) => s + it.subtotal, 0);
-    if (estimatedTotal > 0 && rev.revenue > 0) {
-      const scale = rev.revenue / estimatedTotal;
-      liveItems.forEach(it => {
-        it.subtotal = Math.round(it.subtotal * scale * 100) / 100;
-        it.price = Math.round(it.price * scale * 100) / 100;
-      });
+      const liveItems = buildLiveSalesItems(products, period, priceMap);
+      const estimatedTotal = liveItems.reduce((s, it) => s + it.subtotal, 0);
+      if (estimatedTotal > 0 && rev.revenue > 0) {
+        const scale = rev.revenue / estimatedTotal;
+        liveItems.forEach(it => {
+          it.subtotal = Math.round(it.subtotal * scale * 100) / 100;
+          it.price = Math.round(it.price * scale * 100) / 100;
+        });
+      }
+      salesItems.push(...liveItems);
+      console.log(`  ${period}: $${rev.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} revenue, ${liveItems.length} products (scale: ${estimatedTotal > 0 ? (rev.revenue / estimatedTotal).toFixed(3) : 'n/a'})`);
+    } catch (err) {
+      // Don't let one month's failure kill all monthly data — use static fallback for this month if available
+      console.error(`  ${period}: FAILED — ${err.message}`);
+      const staticMonth = staticMonths.find(sm => sm.period === period);
+      if (staticMonth) {
+        months.push(staticMonth);
+        const staticItems2 = (orderItemData.data || []).filter(r => r.month === period);
+        salesItems.push(...staticItems2);
+        console.log(`  ${period}: fell back to static data`);
+      } else {
+        // No static data for this month — estimate from product-level salesThisMonth/salesLastMonth
+        const liveItems = buildLiveSalesItems(products, period, priceMap);
+        const estRev = liveItems.reduce((s, it) => s + it.subtotal, 0);
+        const estUnits = liveItems.reduce((s, it) => s + it.qty, 0);
+        months.push({ period, revenue: estRev, units: estUnits, orders: 0, returns: 0 });
+        salesItems.push(...liveItems);
+        console.log(`  ${period}: estimated from product data — $${estRev.toLocaleString('en-US', { minimumFractionDigits: 2 })} revenue, ${liveItems.length} products`);
+      }
     }
-    salesItems.push(...liveItems);
-    console.log(`  ${period}: $${rev.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} revenue, ${liveItems.length} products (scale: ${estimatedTotal > 0 ? (rev.revenue / estimatedTotal).toFixed(3) : 'n/a'})`);
   }
 
   months.sort((a, b) => a.period.localeCompare(b.period));
@@ -425,7 +446,7 @@ export async function fetchAll() {
     'Product ID': p.productId,
     'Description': p.description,
     'On hand': isFlower(p.productId) ? (num(p.stockAvailableToPromiseUnits) || 0) : (num(p.sfsOnHand) || 0),
-    'On order': isFlower(p.productId) ? (num(p.stockOnOrderUnits) || 0) : (num(p.sfsOnOrder) || 0),
+    'On order': num(p.stockOnOrderUnits) || 0,
     'Reserved': isFlower(p.productId) ? (num(p.stockReservationsUnits) || 0) : (num(p.sfsReserved) || 0),
   })));
 
@@ -439,26 +460,65 @@ export async function fetchAll() {
   const withSales = active.filter(p => num(p.salesLast30Days) > 0 || num(p.salesLastMonth) > 0).length;
   console.log(`Live: ${active.length} active products, ${withStock} with stock, ${withSales} with sales`);
 
-  console.log('Fetching live monthly order data...');
-  let monthlyTotals, productSalesData;
+  // Build monthly data: start with static, then ALWAYS add recent months from product data.
+  // Then TRY to upgrade recent months with accurate API totals (but never fail if API is down).
+  console.log('Building monthly data...');
+  const livePeriods = getRecentPeriods(3);
+  const staticMonths = monthlyData.months || [];
+  const staticItems = orderItemData.data || [];
+
+  // Start with static months that aren't in the live period range
+  const monthlyTotals = staticMonths.filter(m => !livePeriods.includes(m.period));
+  const productSalesData = staticItems.filter(r => !livePeriods.includes(r.month)).map(r => ({
+    ...r, date: r.date || (r.month + '-01'), status: 'Completed', category: '',
+  }));
+
+  // ALWAYS build recent months from product-level data (guaranteed to work — no API calls needed)
+  const priceMap = buildAvgPriceMap();
+  for (const period of livePeriods) {
+    const liveItems = buildLiveSalesItems(products, period, priceMap);
+    const estRev = liveItems.reduce((s, it) => s + it.subtotal, 0);
+    const estUnits = liveItems.reduce((s, it) => s + it.qty, 0);
+    monthlyTotals.push({ period, revenue: estRev, units: estUnits, orders: 0, returns: 0 });
+    productSalesData.push(...liveItems.map(r => ({
+      ...r, date: r.date || (r.month + '-01'), status: 'Completed', category: '',
+    })));
+    console.log(`  ${period}: estimated $${estRev.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${liveItems.length} products`);
+  }
+  monthlyTotals.sort((a, b) => a.period.localeCompare(b.period));
+  console.log(`  Base monthly data: ${monthlyTotals.length} months built`);
+
+  // NOW try to upgrade with accurate API totals (revenue, returns, order counts)
   try {
-    const liveData = await fetchLiveMonthlyData(products);
-    monthlyTotals = liveData.months;
-    productSalesData = liveData.salesItems.map(r => ({
-      ...r,
-      date: r.date || (r.month + '-01'),
-      status: 'Completed',
-      category: '',
-    }));
+    await new Promise(r => setTimeout(r, 2000)); // rate limit pause
+    for (const period of livePeriods) {
+      const [y, m] = period.split('-').map(Number);
+      try {
+        if (livePeriods.indexOf(period) > 0) await new Promise(r => setTimeout(r, 1000));
+        console.log(`  Upgrading ${period} with API totals...`);
+        const [rev, ret] = await Promise.all([fetchMonthRevenue(y, m), fetchMonthReturns(y, m)]);
+        // Replace the estimated entry with accurate API data
+        const idx = monthlyTotals.findIndex(mt => mt.period === period);
+        if (idx >= 0) {
+          monthlyTotals[idx] = { period, revenue: rev.revenue, units: rev.units, orders: rev.orders, returns: ret };
+          // Re-scale product items to match actual revenue
+          const periodItems = productSalesData.filter(r => r.month === period);
+          const estTotal = periodItems.reduce((s, it) => s + it.subtotal, 0);
+          if (estTotal > 0 && rev.revenue > 0) {
+            const scale = rev.revenue / estTotal;
+            periodItems.forEach(it => {
+              it.subtotal = Math.round(it.subtotal * scale * 100) / 100;
+              it.price = Math.round(it.price * scale * 100) / 100;
+            });
+          }
+          console.log(`  ${period}: upgraded to $${rev.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} (API)`);
+        }
+      } catch (err) {
+        console.warn(`  ${period}: API upgrade failed (${err.message}) — keeping estimate`);
+      }
+    }
   } catch (err) {
-    console.warn('Live monthly data failed, using static:', err.message);
-    monthlyTotals = monthlyData.months || [];
-    productSalesData = (orderItemData.data || []).map(r => ({
-      ...r,
-      date: r.date || (r.month + '-01'),
-      status: 'Completed',
-      category: '',
-    }));
+    console.warn('Monthly API upgrade failed entirely:', err.message, '— keeping estimates');
   }
 
   const costMap = {};
@@ -467,7 +527,6 @@ export async function fetchAll() {
     if (cost > 0) costMap[p.productId] = cost;
   });
 
-  const priceMap = buildAvgPriceMap();
   const shopifyPriceMap = priceMapsData.shopify || {};
   const wholesalePriceMap = priceMapsData.wholesale || {};
 

@@ -104,9 +104,45 @@ function renderCurrentMonthSummary(byMonth) {
 }
 
 export function renderSalesView() {
+  // === DATA RECOVERY: 3 layers of fallback ===
+  // Layer 1: state (window.__appState singleton — survives HMR)
+  // Layer 2: window.__syncBackup (survives module re-execution)
+  // Layer 3: localStorage (survives page reload, any JS state loss)
+
+  if ((!state.MONTHLY_TOTALS || !state.MONTHLY_TOTALS.length) ||
+      (!state.SALES_DATA || !state.SALES_DATA.length)) {
+    // Try window backup first
+    if (window.__syncBackup) {
+      if (!state.MONTHLY_TOTALS?.length && window.__syncBackup.monthlyTotals?.length)
+        state.MONTHLY_TOTALS = window.__syncBackup.monthlyTotals;
+      if (!state.SALES_DATA?.length && window.__syncBackup.salesData?.length)
+        state.SALES_DATA = window.__syncBackup.salesData;
+      if (!state.SALES_BY_STATE || !Object.keys(state.SALES_BY_STATE).length)
+        state.SALES_BY_STATE = window.__syncBackup.salesByState || {};
+    }
+    // Try localStorage as last resort
+    if (!state.MONTHLY_TOTALS?.length) {
+      try {
+        const saved = localStorage.getItem('__syncMonthly');
+        if (saved) state.MONTHLY_TOTALS = JSON.parse(saved);
+      } catch (e) { /* corrupt data — skip */ }
+    }
+    if (!state.SALES_DATA?.length) {
+      try {
+        const saved = localStorage.getItem('__syncSalesData');
+        if (saved) state.SALES_DATA = JSON.parse(saved);
+      } catch (e) { /* corrupt data — skip */ }
+    }
+    if (!state.SALES_BY_STATE || !Object.keys(state.SALES_BY_STATE).length) {
+      try {
+        const saved = localStorage.getItem('__syncSalesByState');
+        if (saved) state.SALES_BY_STATE = JSON.parse(saved);
+      } catch (e) { /* corrupt data — skip */ }
+    }
+  }
+
   const hasMonthly = state.MONTHLY_TOTALS && state.MONTHLY_TOTALS.length > 0;
   if (!hasMonthly && !state.SALES_DATA.length) {
-    // Show loading message if sync is in progress
     if (window.__syncRunning) {
       const el = document.getElementById('sales-date-range');
       if (el) el.textContent = 'Syncing data from Finale…';

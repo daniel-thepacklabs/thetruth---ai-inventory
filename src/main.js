@@ -134,29 +134,46 @@ window.syncFromFinale = async function syncFromFinale() {
       return;
     }
 
-    d.processData(stock, salesHistory, consume, consume30);
-    if (salesOrder) d.processSalesReport(salesOrder);
-    if (monthlyTotals) d.state.MONTHLY_TOTALS = monthlyTotals;
-    if (productSalesData && productSalesData.length) d.state.SALES_DATA = productSalesData;
-    if (costMap) d.state.COST_MAP = costMap;
-    if (priceMap) d.state.PRICE_MAP = priceMap;
-    if (shopifyPriceMap) d.state.SHOPIFY_PRICE_MAP = shopifyPriceMap;
-    if (wholesalePriceMap) d.state.WHOLESALE_PRICE_MAP = wholesalePriceMap;
-    if (salesByState) d.state.SALES_BY_STATE = salesByState;
+    // Re-read deps AFTER the long fetch — HMR may have replaced modules during the ~2 min wait.
+    // State is now a window singleton so d.state always points to the same object,
+    // but re-read to get the latest render functions.
+    const r = window.__syncDeps;
 
-    d.buildSubcatIndex();
-    d.updateRangeLabel();
-    d.renderSubcatChips();
-    d.renderEdibleFilters();
-    d.render();
-    d.renderSalesView();
-    // Also re-render sales if user switches to sales tab later
+    r.processData(stock, salesHistory, consume, consume30);
+    if (salesOrder) r.processSalesReport(salesOrder);
+    // Monthly data now always includes recent months (built from product data, upgraded by API)
+    if (monthlyTotals && monthlyTotals.length) r.state.MONTHLY_TOTALS = monthlyTotals;
+    if (productSalesData && productSalesData.length) r.state.SALES_DATA = productSalesData;
+    if (costMap) r.state.COST_MAP = costMap;
+    if (priceMap) r.state.PRICE_MAP = priceMap;
+    if (shopifyPriceMap) r.state.SHOPIFY_PRICE_MAP = shopifyPriceMap;
+    if (wholesalePriceMap) r.state.WHOLESALE_PRICE_MAP = wholesalePriceMap;
+    if (salesByState) r.state.SALES_BY_STATE = salesByState;
+
+    // Persist sync results to localStorage — survives page reload, HMR, any JS state loss
+    try {
+      localStorage.setItem('__syncMonthly', JSON.stringify(monthlyTotals || []));
+      localStorage.setItem('__syncSalesData', JSON.stringify(r.state.SALES_DATA || []));
+      localStorage.setItem('__syncSalesByState', JSON.stringify(salesByState || {}));
+      localStorage.setItem('__syncTimestamp', Date.now().toString());
+    } catch (e) { /* localStorage full — non-critical */ }
+
+    r.buildSubcatIndex();
+    r.updateRangeLabel();
+    r.renderSubcatChips();
+    r.renderEdibleFilters();
+    r.render();
+    r.renderSalesView();
     window.__salesDataReady = true;
-    d._viewRendered.zeroprice = false;
-    if (document.getElementById('zeroprice-view')?.style.display !== 'none') { d._viewRendered.zeroprice = true; d.renderZeroPriceView(); }
-    if (document.getElementById('calculator-view')?.style.display !== 'none') d.renderCalculatorView();
-    if (document.getElementById('cogs-view')?.style.display !== 'none') d.renderCogsView();
-    if (document.getElementById('edibles-view')?.style.display !== 'none') d.renderEdiblesView();
+    r._viewRendered.zeroprice = false;
+    if (document.getElementById('zeroprice-view')?.style.display !== 'none') { r._viewRendered.zeroprice = true; r.renderZeroPriceView(); }
+    if (document.getElementById('calculator-view')?.style.display !== 'none') r.renderCalculatorView();
+    if (document.getElementById('cogs-view')?.style.display !== 'none') r.renderCogsView();
+    if (document.getElementById('edibles-view')?.style.display !== 'none') r.renderEdiblesView();
+
+    // Safety net: re-render sales view multiple times after sync
+    setTimeout(() => { window.__syncDeps?.renderSalesView(); }, 500);
+    setTimeout(() => { window.__syncDeps?.renderSalesView(); }, 2000);
 
     console.log('[sync] Complete');
     if (ts) {
