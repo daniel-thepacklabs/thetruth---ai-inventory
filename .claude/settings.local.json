@@ -124,7 +124,8 @@
       "PowerShell(node -e \"console.log\\('node works'\\)\")",
       "PowerShell(Remove-Item \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\build_xlsx.cjs\" -Confirm:$false)",
       "Bash(node -e \"try { require\\('esprima'\\).parseScript\\(require\\('fs'\\).readFileSync\\('src/data/finaleApi.js','utf8'\\),{jsx:true,tolerant:true}\\); console.log\\('OK'\\); } catch\\(e\\) { console.log\\(e.message\\); }\")",
-      "Bash(node -c \"import\\('file:///C:/Users/Daniel Kim/OneDrive/Desktop/thetruth/src/data/finaleApi.js'\\)\")"
+      "Bash(node -c \"import\\('file:///C:/Users/Daniel Kim/OneDrive/Desktop/thetruth/src/data/finaleApi.js'\\)\")",
+      "Bash(git reset *)"
     ]
   }
 }

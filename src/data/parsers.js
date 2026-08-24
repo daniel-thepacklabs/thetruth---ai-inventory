@@ -95,6 +95,7 @@ export function catSubcat(pid) {
   if (p.startsWith('INF-')) return ['WIP','INF'];
   if (p.startsWith('OMX-')) return ['WIP','OMX'];
   if (p.startsWith('RGM-')) return ['WIP','RGM'];
+  if (p.startsWith('S-TNT') || p.startsWith('TNT')) return ['WIP','TNT'];
   if (p.startsWith('VIT-')) return ['WIP','VIT'];
   if (p.startsWith('PIB-')) return ['Marketing','PIB'];
   return ['Misc','Other'];
@@ -296,7 +297,8 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const actual30   = consume30Map[pid] != null ? consume30Map[pid] : sl.s30;
       const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
       const remaining = st.onHand - st.reserved;
-      if (consumed90 === 0 && st.onHand <= 0) return null;
+      // Only hide items with zero demand AND zero total inventory (on hand + on order)
+      if (consumed90 === 0 && st.onHand <= 0 && st.onOrder <= 0) return null;
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
       const isEdible = cat === 'Edibles' && /^(EG|ECC)/i.test(pid);
       const flavor = isEdible ? getEdibleFlavor(pid, st.desc) : null;

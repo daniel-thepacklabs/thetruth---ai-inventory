@@ -64,8 +64,6 @@ async function fetchLiveProducts() {
             stockOnOrderUnits
             stockAvailableToPromiseUnits
             stockRemainingAfterReservationsUnits
-            sfsOnHand: stockColumnQuantityOnHandUnitsDeltamunchiesapifacility100857
-            sfsReserved: stockColumnReservationsUnitsDeltamunchiesapifacility100857
             salesLast7Days
             salesLast30Days
             salesLast60Days
@@ -125,14 +123,32 @@ function buildSalesCSV(products) {
   return toCSV(rows);
 }
 
+// Finished goods use sales as consumption — consumptionQuantity is for raw/WIP/packaging only
+const FINISHED_GOOD_PREFIXES = [
+  'P5D','PDD','PIB','PIL','PJH',  // Prerolls
+  'VIC','VIP','VIT','VLR','VLRSB', // Vapes
+  'EG','ECC',                       // Edibles
+  'FIT','FMX','OMX',                // Flower/other finished
+  'INF','DGM','Diamond','TRP','TPLM', // Other finished goods
+];
+
+function isFinishedGood(pid) {
+  return FINISHED_GOOD_PREFIXES.some(pfx => pid.startsWith(pfx));
+}
+
 function buildConsumeCSV(days, liveProducts) {
   const src = days === 30 ? consumptionData.consume30 : consumptionData.consume90;
   const merged = { ...src };
-  if (liveProducts && days === 90) {
+  if (liveProducts) {
     for (const p of liveProducts) {
-      const qty = num(p.consumptionQuantity);
-      if (qty > 0) {
-        merged[p.productId] = qty;
+      // For finished goods, consumption = sales — use salesLast90/30Days, not consumptionQuantity.
+      // consumptionQuantity tracks WIP/raw material usage which is wrong for packs.
+      if (isFinishedGood(p.productId)) {
+        const sales = num(days === 90 ? p.salesLast90Days : p.salesLast30Days);
+        if (sales > 0) merged[p.productId] = sales;
+      } else if (days === 90) {
+        const qty = num(p.consumptionQuantity);
+        if (qty > 0) merged[p.productId] = qty;
       }
     }
   }
@@ -445,9 +461,9 @@ export async function fetchAll() {
     'Location': 'SFS-HQ',
     'Product ID': p.productId,
     'Description': p.description,
-    'On hand': isFlower(p.productId) ? (num(p.stockAvailableToPromiseUnits) || 0) : (num(p.sfsOnHand) || 0),
+    'On hand': isFlower(p.productId) ? (num(p.stockAvailableToPromiseUnits) || 0) : (num(p.stockQuantityOnHandUnits) || 0),
     'On order': num(p.stockOnOrderUnits) || 0,
-    'Reserved': isFlower(p.productId) ? (num(p.stockReservationsUnits) || 0) : (num(p.sfsReserved) || 0),
+    'Reserved': num(p.stockReservationsUnits) || 0,
   })));
 
   const salesHistory = buildSalesCSV(products);
@@ -456,7 +472,7 @@ export async function fetchAll() {
   const consume30 = buildConsumeCSV(30, active);
 
   window.__lastProducts = products;
-  const withStock = active.filter(p => num(p.sfsOnHand) > 0).length;
+  const withStock = active.filter(p => num(p.stockQuantityOnHandUnits) > 0).length;
   const withSales = active.filter(p => num(p.salesLast30Days) > 0 || num(p.salesLastMonth) > 0).length;
   console.log(`Live: ${active.length} active products, ${withStock} with stock, ${withSales} with sales`);
 
