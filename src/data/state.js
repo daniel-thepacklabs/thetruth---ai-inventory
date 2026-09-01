@@ -7,6 +7,7 @@ if (!window.__appState) {
   window.__appState = {
     RAW_DATA: [],
     SALES_DATA: [],
+    SALES_ORDER_DATA: [],
     MONTHLY_TOTALS: [],
     overrides: {},
     removedIds: new Set(),

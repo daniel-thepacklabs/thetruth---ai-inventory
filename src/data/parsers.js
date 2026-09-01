@@ -521,7 +521,9 @@ function aggregatePackagedFlower() {
 
 export function processSalesReport(csv) {
   const rows = parseCSV(csv);
-  state.SALES_DATA = rows.map(r => ({
+  // Store in SALES_ORDER_DATA — never overwrite SALES_DATA here,
+  // because SALES_DATA is used for monthly analysis and gets set from productSalesData after sync.
+  const parsed = rows.map(r => ({
     date:     r['Order date'] || '',
     status:   r['Status'] || '',
     category: r['Category'] || '',
@@ -532,10 +534,11 @@ export function processSalesReport(csv) {
     subtotal: n(r['Subtotal sum']),
   })).filter(r => r.date && r.pid);
 
-  state.SALES_DATA.forEach(r => {
+  parsed.forEach(r => {
     const d = new Date(r.date);
     r.month = isNaN(d) ? r.date.slice(0, 7) : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   });
+  state.SALES_ORDER_DATA = parsed;
 }
 
 // ── Subcat index — call after processData ──

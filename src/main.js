@@ -141,14 +141,21 @@ window.syncFromFinale = async function syncFromFinale() {
 
     r.processData(stock, salesHistory, consume, consume30);
     if (salesOrder) r.processSalesReport(salesOrder);
-    // Monthly data now always includes recent months (built from product data, upgraded by API)
-    if (monthlyTotals && monthlyTotals.length) r.state.MONTHLY_TOTALS = monthlyTotals;
-    if (productSalesData && productSalesData.length) r.state.SALES_DATA = productSalesData;
-    if (costMap) r.state.COST_MAP = costMap;
-    if (priceMap) r.state.PRICE_MAP = priceMap;
-    if (shopifyPriceMap) r.state.SHOPIFY_PRICE_MAP = shopifyPriceMap;
-    if (wholesalePriceMap) r.state.WHOLESALE_PRICE_MAP = wholesalePriceMap;
-    if (salesByState) r.state.SALES_BY_STATE = salesByState;
+
+    // ALWAYS assign monthly + sales data — never skip, never leave stale data.
+    // processSalesReport now writes to SALES_ORDER_DATA, so SALES_DATA is safe.
+    r.state.MONTHLY_TOTALS = monthlyTotals || [];
+    r.state.SALES_DATA = productSalesData || [];
+    r.state.COST_MAP = costMap || {};
+    r.state.PRICE_MAP = priceMap || {};
+    r.state.SHOPIFY_PRICE_MAP = shopifyPriceMap || {};
+    r.state.WHOLESALE_PRICE_MAP = wholesalePriceMap || {};
+    r.state.SALES_BY_STATE = salesByState || {};
+
+    // Verify monthly data includes recent months
+    const periods = r.state.MONTHLY_TOTALS.map(m => m.period).sort();
+    console.log(`[sync] MONTHLY_TOTALS: ${periods.length} months, range: ${periods[0]} → ${periods[periods.length-1]}`);
+    console.log(`[sync] SALES_DATA: ${r.state.SALES_DATA.length} items`);
 
     // Persist sync results to localStorage — survives page reload, HMR, any JS state loss
     try {
