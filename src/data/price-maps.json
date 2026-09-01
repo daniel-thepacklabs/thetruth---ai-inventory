@@ -287,6 +287,18 @@
     "PDD-PD-5PK": 31.25,
     "PDD-SKP-5PK": 31.25,
     "PDD-TBP-5PK": 31.25,
-    "PDD-TS-5PK": 31.25
+    "PDD-TS-5PK": 31.25,
+    "VIT-AB-01": 6.25,
+    "VIT-GB-01": 6.25,
+    "VIT-LMC-01": 6.25,
+    "VIT-SC-01": 6.25,
+    "VIT-SP-01": 6.25,
+    "VIT-WBR-01": 6.25,
+    "VIT-AB-6PK": 33,
+    "VIT-GB-6PK": 33,
+    "VIT-LMC-6PK": 33,
+    "VIT-SC-6PK": 33,
+    "VIT-SP-6PK": 33,
+    "VIT-WBR-6PK": 33
   }
 }
