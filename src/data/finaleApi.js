@@ -351,10 +351,26 @@ function buildLiveSalesItems(products, period, priceMap) {
   const shopify = priceMapsData.shopify || {};
   const wholesale = priceMapsData.wholesale || {};
   const items = [];
-  const field = period === getCurrentPeriod() ? 'salesThisMonth' : 'salesLastMonth';
+  const curPeriod = getCurrentPeriod();
+  const now = new Date();
+  const lastMonth = `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
+  // Handle December edge case: if current month is January, last month is December of previous year
+  const lmDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthPeriod = `${lmDate.getFullYear()}-${String(lmDate.getMonth() + 1).padStart(2, '0')}`;
+
   for (const p of products) {
     if (p.status !== 'Active') continue;
-    const qty = num(p[field]);
+    let qty;
+    if (period === curPeriod) {
+      qty = num(p.salesThisMonth);
+    } else if (period === lastMonthPeriod) {
+      qty = num(p.salesLastMonth);
+    } else {
+      // Older month: approximate from rolling windows.
+      // salesLast60Days covers ~2 months back, salesLast30Days covers ~1 month back.
+      // Difference gives an estimate for the month before last.
+      qty = Math.max(0, num(p.salesLast60Days) - num(p.salesLast30Days));
+    }
     if (qty <= 0) continue;
     const price = estimatePrice(p.productId, priceMap, shopify, wholesale);
     items.push({
