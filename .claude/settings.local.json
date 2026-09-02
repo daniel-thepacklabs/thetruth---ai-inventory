@@ -125,7 +125,14 @@
       "PowerShell(Remove-Item \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\build_xlsx.cjs\" -Confirm:$false)",
       "Bash(node -e \"try { require\\('esprima'\\).parseScript\\(require\\('fs'\\).readFileSync\\('src/data/finaleApi.js','utf8'\\),{jsx:true,tolerant:true}\\); console.log\\('OK'\\); } catch\\(e\\) { console.log\\(e.message\\); }\")",
       "Bash(node -c \"import\\('file:///C:/Users/Daniel Kim/OneDrive/Desktop/thetruth/src/data/finaleApi.js'\\)\")",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "Bash(git commit -m 'Fix persistent sales data loss after Finale sync *)",
+      "Bash(git commit -m 'Fix July/August showing identical product quantities in sales view *)",
+      "Bash(git commit -m 'Fix remaining broken GraphQL fields, add TNT to WIP, use sales for finished goods consumption *)",
+      "Bash(node -e \"const h = require\\('./src/data/valuation-history.json'\\); console.log\\(Object.keys\\(h\\).sort\\(\\).join\\(', '\\)\\)\")",
+      "Bash(markitdown \"/c/Users/Daniel Kim/Downloads/InventoryValuationByLocationInUnitsWDetail \\(1\\).xlsx\")",
+      "PowerShell(markitdown \"C:\\\\Users\\\\Daniel Kim\\\\Downloads\\\\InventoryValuationByLocationInUnitsWDetail \\(1\\).xlsx\")",
+      "PowerShell(if \\(-not \\(Test-Path \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\scripts\"\\)\\) { New-Item -ItemType Directory -Force \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\scripts\" })"
     ]
   }
 }
