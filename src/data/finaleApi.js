@@ -467,7 +467,7 @@ export async function fetchAll() {
   try {
     products = await fetchLiveProducts();
   } catch (err) {
-    console.warn('Live API unavailable, falling back to static data:', err.message);
+    console.error('[sync] ⚠️ Live product fetch FAILED:', err.message, '— falling back to STATIC data (no recent months!)');
     return fetchAllStatic();
   }
   const active = products.filter(p => p.status === 'Active');

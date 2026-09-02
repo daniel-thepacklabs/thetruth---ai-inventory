@@ -142,25 +142,48 @@ window.syncFromFinale = async function syncFromFinale() {
     r.processData(stock, salesHistory, consume, consume30);
     if (salesOrder) r.processSalesReport(salesOrder);
 
-    // ALWAYS assign monthly + sales data — never skip, never leave stale data.
-    // processSalesReport now writes to SALES_ORDER_DATA, so SALES_DATA is safe.
-    r.state.MONTHLY_TOTALS = monthlyTotals || [];
-    r.state.SALES_DATA = productSalesData || [];
+    // Smart assignment: only overwrite monthly/sales data if the new data is at least as recent
+    // as what we already have. This prevents a static-data fallback from wiping good live data.
+    const newPeriods = (monthlyTotals || []).map(m => m.period).sort();
+    const existingPeriods = (r.state.MONTHLY_TOTALS || []).map(m => m.period).sort();
+    const newLatest = newPeriods[newPeriods.length - 1] || '';
+    const existingLatest = existingPeriods[existingPeriods.length - 1] || '';
+
+    if (newLatest >= existingLatest || !existingPeriods.length) {
+      // New data is at least as recent — use it
+      r.state.MONTHLY_TOTALS = monthlyTotals || [];
+      r.state.SALES_DATA = productSalesData || [];
+      console.log(`[sync] MONTHLY_TOTALS updated: ${newPeriods.length} months, range: ${newPeriods[0]} → ${newLatest}`);
+      console.log(`[sync] SALES_DATA updated: ${(productSalesData || []).length} items`);
+    } else {
+      // New data is OLDER (static fallback) — keep existing, restore from localStorage if needed
+      console.warn(`[sync] New monthly data only goes to ${newLatest}, existing goes to ${existingLatest} — keeping existing data`);
+      if (!r.state.MONTHLY_TOTALS?.length) {
+        try {
+          const saved = localStorage.getItem('__syncMonthly');
+          if (saved) { r.state.MONTHLY_TOTALS = JSON.parse(saved); console.log('[sync] Restored MONTHLY_TOTALS from localStorage'); }
+        } catch (e) {}
+      }
+      if (!r.state.SALES_DATA?.length) {
+        try {
+          const saved = localStorage.getItem('__syncSalesData');
+          if (saved) { r.state.SALES_DATA = JSON.parse(saved); console.log('[sync] Restored SALES_DATA from localStorage'); }
+        } catch (e) {}
+      }
+    }
+
     r.state.COST_MAP = costMap || {};
     r.state.PRICE_MAP = priceMap || {};
     r.state.SHOPIFY_PRICE_MAP = shopifyPriceMap || {};
     r.state.WHOLESALE_PRICE_MAP = wholesalePriceMap || {};
     r.state.SALES_BY_STATE = salesByState || {};
 
-    // Verify monthly data includes recent months
-    const periods = r.state.MONTHLY_TOTALS.map(m => m.period).sort();
-    console.log(`[sync] MONTHLY_TOTALS: ${periods.length} months, range: ${periods[0]} → ${periods[periods.length-1]}`);
-    console.log(`[sync] SALES_DATA: ${r.state.SALES_DATA.length} items`);
-
-    // Persist sync results to localStorage — survives page reload, HMR, any JS state loss
+    // Persist sync results to localStorage (only if we have recent data)
     try {
-      localStorage.setItem('__syncMonthly', JSON.stringify(monthlyTotals || []));
-      localStorage.setItem('__syncSalesData', JSON.stringify(r.state.SALES_DATA || []));
+      if (newLatest >= existingLatest) {
+        localStorage.setItem('__syncMonthly', JSON.stringify(r.state.MONTHLY_TOTALS || []));
+        localStorage.setItem('__syncSalesData', JSON.stringify(r.state.SALES_DATA || []));
+      }
       localStorage.setItem('__syncSalesByState', JSON.stringify(salesByState || {}));
       localStorage.setItem('__syncTimestamp', Date.now().toString());
     } catch (e) { /* localStorage full — non-critical */ }
