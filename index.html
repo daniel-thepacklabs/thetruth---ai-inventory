@@ -46,6 +46,9 @@
     <div class="nav-item" onclick="showView('zeroprice')" id="nav-zeroprice">
       <span class="dot" style="background:var(--red)"></span> Zero Price Items
     </div>
+    <div class="nav-item" onclick="showView('datahealth')" id="nav-datahealth">
+      <span class="dot" style="background:var(--text3)"></span> Data Health
+    </div>
 
     <div class="nav-label">Status</div>
     <div class="nav-item active" data-filter="all" onclick="setFilter('all',this)">
@@ -372,6 +375,7 @@
       <div id="cogs-view" style="display:none;padding:1rem"></div>
       <div id="zeroprice-view" style="display:none;padding:1rem"></div>
 
+      <div id="datahealth-view" style="display:none;padding:1rem"></div>
       <div id="calculator-view" style="display:none;padding:1rem">
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem">
           <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">

@@ -404,7 +404,7 @@ function getRecentPeriods(count) {
 async function fetchLiveMonthlyData(products) {
   const staticMonths = monthlyData.months || [];
   const staticItems = orderItemData.data || [];
-  const livePeriods = getRecentPeriods(3);
+  const livePeriods = getRecentPeriods(12);
 
   const months = staticMonths.filter(m => !livePeriods.includes(m.period));
   const salesItems = staticItems.filter(r => !livePeriods.includes(r.month));
@@ -495,7 +495,7 @@ export async function fetchAll() {
   // Build monthly data: start with static, then ALWAYS add recent months from product data.
   // Then TRY to upgrade recent months with accurate API totals (but never fail if API is down).
   console.log('Building monthly data...');
-  const livePeriods = getRecentPeriods(3);
+  const livePeriods = getRecentPeriods(12);
   const staticMonths = monthlyData.months || [];
   const staticItems = orderItemData.data || [];
 
@@ -505,32 +505,55 @@ export async function fetchAll() {
     ...r, date: r.date || (r.month + '-01'), status: 'Completed', category: '',
   }));
 
-  // ALWAYS build recent months from product-level data (guaranteed to work — no API calls needed)
+  // Build recent months from product-level data where possible (last 3 months have good product estimates).
+  // For older live periods, start with static product items if available, or skip product-level data
+  // (the API upgrade step below will still set accurate totals).
   const priceMap = buildAvgPriceMap();
+  const recentPeriods = getRecentPeriods(3); // Only last 3 months have reliable product-level API fields
   for (const period of livePeriods) {
-    const liveItems = buildLiveSalesItems(products, period, priceMap);
-    const estRev = liveItems.reduce((s, it) => s + it.subtotal, 0);
-    const estUnits = liveItems.reduce((s, it) => s + it.qty, 0);
-    monthlyTotals.push({ period, revenue: estRev, units: estUnits, orders: 0, returns: 0 });
-    productSalesData.push(...liveItems.map(r => ({
-      ...r, date: r.date || (r.month + '-01'), status: 'Completed', category: '',
-    })));
-    console.log(`  ${period}: estimated $${estRev.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${liveItems.length} products`);
+    if (recentPeriods.includes(period)) {
+      // Recent month: build from live product data
+      const liveItems = buildLiveSalesItems(products, period, priceMap);
+      const estRev = liveItems.reduce((s, it) => s + it.subtotal, 0);
+      const estUnits = liveItems.reduce((s, it) => s + it.qty, 0);
+      monthlyTotals.push({ period, revenue: estRev, units: estUnits, orders: 0, returns: 0 });
+      productSalesData.push(...liveItems.map(r => ({
+        ...r, date: r.date || (r.month + '-01'), status: 'Completed', category: '',
+      })));
+      console.log(`  ${period}: estimated $${estRev.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${liveItems.length} products`);
+    } else {
+      // Older month: use static product items if available, otherwise placeholder for API totals
+      const items = staticItems.filter(r => r.month === period);
+      if (items.length) {
+        const staticMonth = staticMonths.find(m => m.period === period);
+        monthlyTotals.push(staticMonth || { period, revenue: items.reduce((s, it) => s + (it.subtotal || 0), 0), units: items.reduce((s, it) => s + (it.qty || 0), 0), orders: 0, returns: 0 });
+        productSalesData.push(...items.map(r => ({
+          ...r, date: r.date || (r.month + '-01'), status: 'Completed', category: '',
+        })));
+        console.log(`  ${period}: loaded ${items.length} items from static data (will upgrade with API)`);
+      } else {
+        monthlyTotals.push({ period, revenue: 0, units: 0, orders: 0, returns: 0 });
+        console.log(`  ${period}: no product data available (will upgrade with API totals)`);
+      }
+    }
   }
   monthlyTotals.sort((a, b) => a.period.localeCompare(b.period));
   console.log(`  Base monthly data: ${monthlyTotals.length} months built`);
 
   // NOW try to upgrade with accurate API totals (revenue, returns, order counts)
+  // Track validation data for the health panel
+  const syncValidation = [];
   try {
     await new Promise(r => setTimeout(r, 2000)); // rate limit pause
-    for (const period of livePeriods) {
+    for (let i = 0; i < livePeriods.length; i++) {
+      const period = livePeriods[i];
       const [y, m] = period.split('-').map(Number);
       try {
-        if (livePeriods.indexOf(period) > 0) await new Promise(r => setTimeout(r, 1000));
-        console.log(`  Upgrading ${period} with API totals...`);
+        if (i > 0) await new Promise(r => setTimeout(r, 1500)); // rate limit between months
+        console.log(`  Upgrading ${period} with API totals... (${i + 1}/${livePeriods.length})`);
         const [rev, ret] = await Promise.all([fetchMonthRevenue(y, m), fetchMonthReturns(y, m)]);
-        // Replace the estimated entry with accurate API data
         const idx = monthlyTotals.findIndex(mt => mt.period === period);
+        const oldRev = idx >= 0 ? monthlyTotals[idx].revenue : 0;
         if (idx >= 0) {
           monthlyTotals[idx] = { period, revenue: rev.revenue, units: rev.units, orders: rev.orders, returns: ret };
           // Re-scale product items to match actual revenue
@@ -545,13 +568,23 @@ export async function fetchAll() {
           }
           console.log(`  ${period}: upgraded to $${rev.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} (API)`);
         }
+        syncValidation.push({ period, source: 'api', revenue: rev.revenue, units: rev.units, orders: rev.orders, returns: ret, ok: true });
       } catch (err) {
         console.warn(`  ${period}: API upgrade failed (${err.message}) — keeping estimate`);
+        syncValidation.push({ period, source: 'fallback', error: err.message, ok: false });
       }
     }
   } catch (err) {
     console.warn('Monthly API upgrade failed entirely:', err.message, '— keeping estimates');
   }
+  // Store validation data on window for the health panel
+  window.__syncValidation = {
+    timestamp: new Date().toISOString(),
+    months: syncValidation,
+    totalLiveMonths: livePeriods.length,
+    totalApiSuccess: syncValidation.filter(v => v.ok).length,
+    totalApiFailed: syncValidation.filter(v => !v.ok).length,
+  };
 
   const costMap = {};
   products.forEach(p => {
