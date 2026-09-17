@@ -13,7 +13,7 @@ import { renderEdiblesView } from './views/edibles.js';
 import { renderCalculatorView } from './views/calculator.js';
 import { renderValuationView } from './views/valuation.js';
 import { renderDataHealthView } from './views/dataHealth.js';
-import { renderFinishedGoodsView } from './views/finishedGoods.js';
+import { renderFinishedGoodsView, exportFinishedGoodsExcel } from './views/finishedGoods.js';
 
 // ── Inject render() into modules that need it ──
 setFilterRender(render);
@@ -42,6 +42,8 @@ Object.assign(window, {
   renderZeroPriceView,
   // Alerts
   renderAlerts, renderAlertSubcatChips, toggleAlertChip, updateAlertThresholds,
+  // Finished Goods
+  exportFinishedGoodsExcel,
   // View switching
   showView,
 });

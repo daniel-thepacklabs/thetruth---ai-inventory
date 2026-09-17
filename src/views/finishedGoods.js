@@ -143,6 +143,170 @@ function buildData() {
   return results;
 }
 
+export function exportFinishedGoodsExcel() {
+  const data = buildData();
+  if (!data.length) return;
+
+  const XLSX = window.XLSX;
+  if (!XLSX) {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload = () => exportFinishedGoodsExcel();
+    document.head.appendChild(s);
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const typeOrder = ['Prerolls', 'Vapes', 'Edibles', 'Other'];
+  const groups = {};
+  data.forEach(d => {
+    if (!groups[d.productType]) groups[d.productType] = [];
+    groups[d.productType].push(d);
+  });
+
+  // ── Sheet 1: Executive Summary ──
+  const sumRows = [
+    ['Finished Goods Summary — The Pack Labs'],
+    [`Generated: ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`],
+    [],
+    ['Product Line', 'SKUs', 'Combined Units /30d', 'Combined Units /mo (90d avg)', 'Total FG QOH (equiv units)', 'Avg FG MOS'],
+  ];
+
+  let grandSkus = 0, grandC30 = 0, grandMo = 0, grandQoh = 0;
+  typeOrder.filter(t => groups[t]).forEach(type => {
+    const items = groups[type];
+    const c30 = items.reduce((s, d) => s + d.combined30, 0);
+    const mo = items.reduce((s, d) => s + d.monthlyRate, 0);
+    const qoh = items.reduce((s, d) => s + d.singleQoh + d.packQoh * d.packQty, 0);
+    const mosItems = items.filter(d => d.monthlyRate > 0);
+    const avgMos = mosItems.length ? mosItems.reduce((s, d) => s + (d.singleQoh + d.packQoh * d.packQty) / d.monthlyRate, 0) / mosItems.length : 0;
+    sumRows.push([type, items.length, Math.round(c30), Math.round(mo), Math.round(qoh), Math.round(avgMos * 10) / 10]);
+    grandSkus += items.length; grandC30 += c30; grandMo += mo; grandQoh += qoh;
+  });
+  sumRows.push(['TOTAL', grandSkus, Math.round(grandC30), Math.round(grandMo), Math.round(grandQoh), '']);
+  sumRows.push([]);
+  sumRows.push(['Critical Materials (< 1 MOS)']);
+  const critMats = {};
+  data.forEach(d => d.materials.forEach(m => {
+    if (m.monthlyNeed > 0 && m.mos > 0 && m.mos < 1 && !critMats[m.matId]) {
+      critMats[m.matId] = m;
+    }
+  }));
+  if (Object.keys(critMats).length) {
+    sumRows.push(['Material', 'Type', 'QOH', 'Available', 'Need /mo (this SKU)', 'MOS']);
+    Object.values(critMats).sort((a, b) => a.mos - b.mos).forEach(m => {
+      sumRows.push([m.matId, m.type === 'pkg' ? 'Packaging' : 'Component', m.qoh, m.available, Math.round(m.monthlyNeed), m.mos]);
+    });
+  } else {
+    sumRows.push(['None — all materials above 1 month of supply']);
+  }
+
+  const wsSummary = XLSX.utils.aoa_to_sheet(sumRows);
+  wsSummary['!cols'] = [{wch:18},{wch:8},{wch:20},{wch:24},{wch:24},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+  // ── Sheet 2: All SKUs ──
+  const allHeaders = ['SKU', 'Description', 'Product Line', 'Pack SKU', 'Pack Qty',
+    'Single 30d', 'Pack 30d', 'Combined 30d (equiv)', 'Monthly Rate (90d avg)',
+    'Single QOH', 'Pack QOH', 'FG QOH (equiv)', 'FG MOS'];
+  const allRows = [allHeaders];
+  data.forEach(d => {
+    const fgQoh = d.singleQoh + d.packQoh * d.packQty;
+    const fgMos = d.monthlyRate > 0 ? Math.round(fgQoh / d.monthlyRate * 10) / 10 : 0;
+    allRows.push([d.sku, d.desc, d.productType, d.packSku || '', d.packQty,
+      d.singleS30, d.packS30, Math.round(d.combined30), Math.round(d.monthlyRate),
+      d.singleQoh, d.packQoh, fgQoh, fgMos]);
+  });
+  const wsAll = XLSX.utils.aoa_to_sheet(allRows);
+  wsAll['!cols'] = [{wch:18},{wch:50},{wch:12},{wch:18},{wch:8},{wch:10},{wch:10},{wch:18},{wch:18},{wch:10},{wch:10},{wch:14},{wch:8}];
+  XLSX.utils.book_append_sheet(wb, wsAll, 'All SKUs');
+
+  // ── Per product line: Packaging & Component breakdown ──
+  typeOrder.filter(t => groups[t]).forEach(type => {
+    const items = groups[type];
+    items.sort((a, b) => a.sku.localeCompare(b.sku));
+
+    // Aggregate material needs across all SKUs in this product line
+    const matTotals = {};
+    items.forEach(d => {
+      d.materials.forEach(m => {
+        if (!matTotals[m.matId]) {
+          matTotals[m.matId] = { matId: m.matId, type: m.type, desc: m.desc, totalNeed: 0, qoh: m.qoh, available: m.available, onOrder: m.onOrder };
+        }
+        matTotals[m.matId].totalNeed += m.monthlyNeed;
+      });
+    });
+
+    const sheetData = [];
+    sheetData.push([`${type} — Finished Goods Breakdown`]);
+    sheetData.push([`${items.length} SKUs`]);
+    sheetData.push([]);
+
+    // SKU table
+    sheetData.push(['SKU', 'Description', 'Single 30d', 'Pack 30d', 'Combined /mo', 'FG QOH (equiv)', 'FG MOS']);
+    items.forEach(d => {
+      const fgQoh = d.singleQoh + d.packQoh * d.packQty;
+      const fgMos = d.monthlyRate > 0 ? Math.round(fgQoh / d.monthlyRate * 10) / 10 : 0;
+      sheetData.push([d.sku, d.desc, d.singleS30, d.packS30, Math.round(d.monthlyRate), fgQoh, fgMos]);
+    });
+
+    sheetData.push([]);
+    sheetData.push([]);
+
+    // Packaging summary
+    sheetData.push([`${type} — Packaging Requirements`]);
+    sheetData.push(['Material', 'Description', 'Total Need /mo', 'QOH', 'Available', 'On Order', 'MOS']);
+    const pkgMats = Object.values(matTotals).filter(m => m.type === 'pkg').sort((a, b) => {
+      const mosA = a.totalNeed > 0 ? a.available / a.totalNeed : 999;
+      const mosB = b.totalNeed > 0 ? b.available / b.totalNeed : 999;
+      return mosA - mosB;
+    });
+    pkgMats.forEach(m => {
+      const mos = m.totalNeed > 0 ? Math.round(m.available / m.totalNeed * 10) / 10 : 0;
+      sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, mos]);
+    });
+
+    sheetData.push([]);
+    sheetData.push([]);
+
+    // Component summary
+    sheetData.push([`${type} — Component Requirements`]);
+    sheetData.push(['Material', 'Description', 'Total Need /mo', 'QOH', 'Available', 'On Order', 'MOS']);
+    const compMats = Object.values(matTotals).filter(m => m.type === 'comp').sort((a, b) => {
+      const mosA = a.totalNeed > 0 ? a.available / a.totalNeed : 999;
+      const mosB = b.totalNeed > 0 ? b.available / b.totalNeed : 999;
+      return mosA - mosB;
+    });
+    if (compMats.length) {
+      compMats.forEach(m => {
+        const mos = m.totalNeed > 0 ? Math.round(m.available / m.totalNeed * 10) / 10 : 0;
+        sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, mos]);
+      });
+    } else {
+      sheetData.push(['(No components for this product line)']);
+    }
+
+    sheetData.push([]);
+    sheetData.push([]);
+
+    // Per-SKU material detail
+    sheetData.push([`${type} — Per-SKU Material Detail`]);
+    sheetData.push(['SKU', 'Material', 'Type', 'Need /mo', 'QOH', 'Available', 'MOS']);
+    items.forEach(d => {
+      d.materials.forEach(m => {
+        sheetData.push([d.sku, m.matId + (m.packOnly ? ' (pack only)' : ''), m.type === 'pkg' ? 'Packaging' : 'Component',
+          Math.round(m.monthlyNeed), m.qoh, m.available, m.mos]);
+      });
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    ws['!cols'] = [{wch:18},{wch:50},{wch:16},{wch:14},{wch:12},{wch:12},{wch:8}];
+    XLSX.utils.book_append_sheet(wb, ws, type.substring(0, 31));
+  });
+
+  XLSX.writeFile(wb, `Finished_Goods_Summary_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
 function statusColor(mos) {
   if (mos <= 0) return 'var(--text3)';
   if (mos < 1) return 'var(--red)';
@@ -191,6 +355,7 @@ export function renderFinishedGoodsView() {
         <span style="font-size:11px;color:var(--text3);background:var(--bg4);padding:2px 8px;border-radius:4px">${totalSkus} SKUs</span>
       </div>
       <div style="font-size:11px;color:var(--text3)">Combined sell-through (single + pack → equivalent units), packaging & component run rates</div>
+      <button onclick="window.__fgExport()" style="margin-top:6px;padding:4px 12px;font-size:11px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer">Export Excel</button>
     </div>
 
     <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap">
@@ -338,6 +503,9 @@ window.__fgToggleType = function(type, el) {
     g.style.display = el.classList.contains('active') ? '' : 'none';
   });
 };
+
+// Export
+window.__fgExport = exportFinishedGoodsExcel;
 
 // Toggle detail row
 window.__fgToggleDetail = function(sku) {
