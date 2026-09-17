@@ -39,8 +39,9 @@ function buildData() {
     const packQty = bom.packQty || 1;
 
     // Combined sell-through in equivalent single units
-    const combined30 = singleS30 + (packS30 / packQty);
-    const combined90 = singleS90 + (packS90 / packQty);
+    // Each pack sold = packQty single units (e.g., 838 ten-packs = 8,380 singles)
+    const combined30 = singleS30 + (packS30 * packQty);
+    const combined90 = singleS90 + (packS90 * packQty);
     const monthlyRate = combined90 / 3;
 
     const innerMult = getInnerMult(singleSku);
