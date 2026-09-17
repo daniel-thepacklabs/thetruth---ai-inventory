@@ -240,7 +240,7 @@ export function renderFinishedGoodsView() {
     `;
 
     items.forEach((item, idx) => {
-      const fgAvail = item.singleQoh + item.packQoh;
+      const fgAvail = item.singleQoh + (item.packQoh * item.packQty);
       const fgMos = item.monthlyRate > 0 ? fgAvail / item.monthlyRate : 0;
       const fgMosRound = Math.round(fgMos * 10) / 10;
       const rowBg = idx % 2 === 0 ? '' : 'background:var(--bg3);';
