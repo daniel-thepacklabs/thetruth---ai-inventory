@@ -86,6 +86,7 @@ function buildData() {
       const reserved = matRow ? matRow.reserved : 0;
       const available = qoh - reserved;
       const desc = matRow ? matRow.desc : '';
+      const unitCost = state.COST_MAP[m.matId] || 0;
 
       let monthlyNeed;
       if (m.packOnly) {
@@ -116,6 +117,8 @@ function buildData() {
         qoh,
         available,
         onOrder,
+        unitCost,
+        totalCost: Math.round((qoh + onOrder) * unitCost * 100) / 100,
         mos: Math.round(mos * 10) / 10,
       };
     });
@@ -221,7 +224,12 @@ export function exportFinishedGoodsExcel() {
   wsAll['!cols'] = [{wch:18},{wch:50},{wch:12},{wch:18},{wch:8},{wch:10},{wch:10},{wch:18},{wch:18},{wch:10},{wch:10},{wch:14},{wch:8}];
   XLSX.utils.book_append_sheet(wb, wsAll, 'All SKUs');
 
-  // ── Per product line: Packaging & Component breakdown ──
+  // ── Per product line: organized by material type ──
+  function getMatPrefix(matId) {
+    const m = matId.match(/^([A-Z]+)-/);
+    return m ? m[1] : matId;
+  }
+
   typeOrder.filter(t => groups[t]).forEach(type => {
     const items = groups[type];
     items.sort((a, b) => a.sku.localeCompare(b.sku));
@@ -231,76 +239,93 @@ export function exportFinishedGoodsExcel() {
     items.forEach(d => {
       d.materials.forEach(m => {
         if (!matTotals[m.matId]) {
-          matTotals[m.matId] = { matId: m.matId, type: m.type, desc: m.desc, totalNeed: 0, qoh: m.qoh, available: m.available, onOrder: m.onOrder };
+          matTotals[m.matId] = { matId: m.matId, type: m.type, desc: m.desc, totalNeed: 0, qoh: m.qoh, available: m.available, onOrder: m.onOrder, unitCost: m.unitCost, totalCost: m.totalCost };
         }
         matTotals[m.matId].totalNeed += m.monthlyNeed;
       });
     });
 
     const sheetData = [];
-    sheetData.push([`${type} — Finished Goods Breakdown`]);
+    sheetData.push([`${type} — Finished Goods Summary`]);
+    sheetData.push([`Generated: ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`]);
     sheetData.push([`${items.length} SKUs`]);
     sheetData.push([]);
 
-    // SKU table
+    // Product line SKU overview
+    sheetData.push(['PRODUCT LINE OVERVIEW']);
     sheetData.push(['SKU', 'Description', 'Single 30d', 'Pack 30d', 'Combined /mo', 'FG QOH (equiv)', 'FG MOS']);
+    let totalCombMo = 0, totalFgQoh = 0;
     items.forEach(d => {
       const fgQoh = d.singleQoh + d.packQoh * d.packQty;
       const fgMos = d.monthlyRate > 0 ? Math.round(fgQoh / d.monthlyRate * 10) / 10 : 0;
       sheetData.push([d.sku, d.desc, d.singleS30, d.packS30, Math.round(d.monthlyRate), fgQoh, fgMos]);
+      totalCombMo += d.monthlyRate;
+      totalFgQoh += fgQoh;
     });
+    sheetData.push(['TOTAL', '', '', '', Math.round(totalCombMo), totalFgQoh, '']);
 
     sheetData.push([]);
     sheetData.push([]);
 
-    // Packaging summary
-    sheetData.push([`${type} — Packaging Requirements`]);
-    sheetData.push(['Material', 'Description', 'Total Need /mo', 'QOH', 'Available', 'On Order', 'MOS']);
-    const pkgMats = Object.values(matTotals).filter(m => m.type === 'pkg').sort((a, b) => {
-      const mosA = a.totalNeed > 0 ? a.available / a.totalNeed : 999;
-      const mosB = b.totalNeed > 0 ? b.available / b.totalNeed : 999;
-      return mosA - mosB;
-    });
+    // ── Packaging grouped by type prefix ──
+    sheetData.push(['PACKAGING REQUIREMENTS BY TYPE']);
+    sheetData.push([]);
+    const pkgMats = Object.values(matTotals).filter(m => m.type === 'pkg');
+    const pkgByPrefix = {};
     pkgMats.forEach(m => {
-      const mos = m.totalNeed > 0 ? Math.round(m.available / m.totalNeed * 10) / 10 : 0;
-      sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, mos]);
+      const prefix = getMatPrefix(m.matId);
+      if (!pkgByPrefix[prefix]) pkgByPrefix[prefix] = [];
+      pkgByPrefix[prefix].push(m);
     });
-
-    sheetData.push([]);
-    sheetData.push([]);
-
-    // Component summary
-    sheetData.push([`${type} — Component Requirements`]);
-    sheetData.push(['Material', 'Description', 'Total Need /mo', 'QOH', 'Available', 'On Order', 'MOS']);
-    const compMats = Object.values(matTotals).filter(m => m.type === 'comp').sort((a, b) => {
-      const mosA = a.totalNeed > 0 ? a.available / a.totalNeed : 999;
-      const mosB = b.totalNeed > 0 ? b.available / b.totalNeed : 999;
-      return mosA - mosB;
-    });
-    if (compMats.length) {
-      compMats.forEach(m => {
-        const mos = m.totalNeed > 0 ? Math.round(m.available / m.totalNeed * 10) / 10 : 0;
-        sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, mos]);
+    // Sort prefixes alphabetically
+    const pkgPrefixes = Object.keys(pkgByPrefix).sort();
+    pkgPrefixes.forEach(prefix => {
+      const mats = pkgByPrefix[prefix].sort((a, b) => a.matId.localeCompare(b.matId));
+      sheetData.push([`${prefix} (${mats.length} items)`]);
+      sheetData.push(['Material', 'Description', 'Total Need /mo', 'QOH', 'Available', 'On Order', 'Unit Cost', 'Total Cost (QOH+OO)', 'MOS (incl OO)']);
+      let prefixNeed = 0, prefixQoh = 0, prefixAvail = 0, prefixOO = 0, prefixTotalCost = 0;
+      mats.forEach(m => {
+        const mos = m.totalNeed > 0 ? Math.round((m.available + m.onOrder) / m.totalNeed * 10) / 10 : 0;
+        sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, m.unitCost ? `$${m.unitCost.toFixed(2)}` : '', m.totalCost ? `$${m.totalCost.toFixed(2)}` : '', mos]);
+        prefixNeed += m.totalNeed; prefixQoh += m.qoh; prefixAvail += m.available; prefixOO += m.onOrder; prefixTotalCost += m.totalCost || 0;
       });
-    } else {
-      sheetData.push(['(No components for this product line)']);
+      const prefixMos = prefixNeed > 0 ? Math.round((prefixAvail + prefixOO) / prefixNeed * 10) / 10 : 0;
+      sheetData.push([`${prefix} Total`, '', Math.round(prefixNeed), prefixQoh, prefixAvail, prefixOO, '', `$${prefixTotalCost.toFixed(2)}`, prefixMos]);
+      sheetData.push([]);
+    });
+
+    sheetData.push([]);
+
+    // ── Components grouped by type prefix ──
+    const compMats = Object.values(matTotals).filter(m => m.type === 'comp');
+    if (compMats.length) {
+      sheetData.push(['COMPONENT REQUIREMENTS BY TYPE']);
+      sheetData.push([]);
+      const compByPrefix = {};
+      compMats.forEach(m => {
+        const prefix = getMatPrefix(m.matId);
+        if (!compByPrefix[prefix]) compByPrefix[prefix] = [];
+        compByPrefix[prefix].push(m);
+      });
+      const compPrefixes = Object.keys(compByPrefix).sort();
+      compPrefixes.forEach(prefix => {
+        const mats = compByPrefix[prefix].sort((a, b) => a.matId.localeCompare(b.matId));
+        sheetData.push([`${prefix} (${mats.length} items)`]);
+        sheetData.push(['Material', 'Description', 'Total Need /mo', 'QOH', 'Available', 'On Order', 'Unit Cost', 'Total Cost (QOH+OO)', 'MOS (incl OO)']);
+        let prefixNeed = 0, prefixQoh = 0, prefixAvail = 0, prefixOO = 0, prefixTotalCost = 0;
+        mats.forEach(m => {
+          const mos = m.totalNeed > 0 ? Math.round((m.available + m.onOrder) / m.totalNeed * 10) / 10 : 0;
+          sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, m.unitCost ? `$${m.unitCost.toFixed(2)}` : '', m.totalCost ? `$${m.totalCost.toFixed(2)}` : '', mos]);
+          prefixNeed += m.totalNeed; prefixQoh += m.qoh; prefixAvail += m.available; prefixOO += m.onOrder; prefixTotalCost += m.totalCost || 0;
+        });
+        const prefixMos = prefixNeed > 0 ? Math.round((prefixAvail + prefixOO) / prefixNeed * 10) / 10 : 0;
+        sheetData.push([`${prefix} Total`, '', Math.round(prefixNeed), prefixQoh, prefixAvail, prefixOO, '', `$${prefixTotalCost.toFixed(2)}`, prefixMos]);
+        sheetData.push([]);
+      });
     }
 
-    sheetData.push([]);
-    sheetData.push([]);
-
-    // Per-SKU material detail
-    sheetData.push([`${type} — Per-SKU Material Detail`]);
-    sheetData.push(['SKU', 'Material', 'Type', 'Need /mo', 'QOH', 'Available', 'MOS']);
-    items.forEach(d => {
-      d.materials.forEach(m => {
-        sheetData.push([d.sku, m.matId + (m.packOnly ? ' (pack only)' : ''), m.type === 'pkg' ? 'Packaging' : 'Component',
-          Math.round(m.monthlyNeed), m.qoh, m.available, m.mos]);
-      });
-    });
-
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
-    ws['!cols'] = [{wch:18},{wch:50},{wch:16},{wch:14},{wch:12},{wch:12},{wch:8}];
+    ws['!cols'] = [{wch:18},{wch:50},{wch:16},{wch:14},{wch:12},{wch:12},{wch:12},{wch:16},{wch:14}];
     XLSX.utils.book_append_sheet(wb, ws, type.substring(0, 31));
   });
 
@@ -417,7 +442,7 @@ export function renderFinishedGoodsView() {
           <td style="padding:5px 8px;font-family:var(--font-mono);color:var(--text);white-space:nowrap;font-size:10px">${item.sku}</td>
           <td style="padding:5px 8px;color:var(--text2);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.desc}</td>
           <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(item.singleS30)}</td>
-          <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(item.packS30)}</td>
+          <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(item.packS30)} <span style="color:var(--text3);font-size:11px">(${item.packQty}pk)</span></td>
           <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text);font-weight:500">${fmt(Math.round(item.monthlyRate))}</td>
           <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(fgAvail)}</td>
           <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);font-weight:500;color:${statusColor(fgMosRound)}">${mosLabel(fgMosRound)}</td>
