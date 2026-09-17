@@ -132,7 +132,12 @@
       "Bash(node -e \"const h = require\\('./src/data/valuation-history.json'\\); console.log\\(Object.keys\\(h\\).sort\\(\\).join\\(', '\\)\\)\")",
       "Bash(markitdown \"/c/Users/Daniel Kim/Downloads/InventoryValuationByLocationInUnitsWDetail \\(1\\).xlsx\")",
       "PowerShell(markitdown \"C:\\\\Users\\\\Daniel Kim\\\\Downloads\\\\InventoryValuationByLocationInUnitsWDetail \\(1\\).xlsx\")",
-      "PowerShell(if \\(-not \\(Test-Path \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\scripts\"\\)\\) { New-Item -ItemType Directory -Force \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\scripts\" })"
+      "PowerShell(if \\(-not \\(Test-Path \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\scripts\"\\)\\) { New-Item -ItemType Directory -Force \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\\\\thetruth\\\\scripts\" })",
+      "PowerShell(python \"C:\\\\Users\\\\DANIEL~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Daniel-Kim-OneDrive-Desktop-thetruth\\\\3f9877a0-a3fd-4ba6-8e24-896f9c2f1777\\\\scratchpad\\\\build-excel.py\")",
+      "PowerShell(try { \\(Get-Command python3 -ErrorAction Stop\\).Source } catch {}; try { \\(Get-Command py -ErrorAction Stop\\).Source } catch {}; try { \\(Get-Command python -ErrorAction Stop\\).Source } catch { \"no python found\" })",
+      "Bash(cd \"C:\\\\Users\\\\Daniel Kim\\\\OneDrive\\\\Desktop\" && ls -la \"Inventory Summary by SKU.xls\")",
+      "Read(//tmp/**)",
+      "Bash(wc -c)"
     ]
   }
 }

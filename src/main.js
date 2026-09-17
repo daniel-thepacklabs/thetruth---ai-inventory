@@ -13,6 +13,7 @@ import { renderEdiblesView } from './views/edibles.js';
 import { renderCalculatorView } from './views/calculator.js';
 import { renderValuationView } from './views/valuation.js';
 import { renderDataHealthView } from './views/dataHealth.js';
+import { renderFinishedGoodsView } from './views/finishedGoods.js';
 
 // ── Inject render() into modules that need it ──
 setFilterRender(render);
@@ -57,6 +58,7 @@ function showView(view) {
   const isZeroPrice = view === 'zeroprice';
   const isValuation = view === 'valuation';
   const isDataHealth = view === 'datahealth';
+  const isFinishedGoods = view === 'finishedgoods';
 
   document.getElementById('sales-view').style.display  = isSales   ? 'block' : 'none';
   document.getElementById('alerts-view').style.display = isAlerts  ? 'block' : 'none';
@@ -65,6 +67,7 @@ function showView(view) {
   document.getElementById('cogs-view').style.display = isCogs ? 'block' : 'none';
   document.getElementById('zeroprice-view').style.display = isZeroPrice ? 'block' : 'none';
   document.getElementById('valuation-view').style.display = isValuation ? 'block' : 'none';
+  document.getElementById('finishedgoods-view').style.display = isFinishedGoods ? 'block' : 'none';
   document.getElementById('datahealth-view').style.display = isDataHealth ? 'block' : 'none';
   document.getElementById('items-list').style.display  = isInv     ? '' : 'none';
   document.getElementById('empty-state').style.display = 'none';
@@ -86,7 +89,7 @@ function showView(view) {
   const fbar = document.querySelector('.filter-bar');
   if (fbar) fbar.style.display = (isInv || isEdibles) ? '' : 'none';
 
-  ['inventory','sales','alerts','calculator','edibles','cogs','zeroprice','valuation','datahealth'].forEach(v => {
+  ['inventory','sales','alerts','calculator','edibles','cogs','zeroprice','valuation','finishedgoods','datahealth'].forEach(v => {
     const el = document.getElementById('nav-' + v);
     if (el) el.style.color = v === view ? 'var(--accent)' : '';
   });
@@ -99,6 +102,7 @@ function showView(view) {
   if (isCogs)    renderCogsView();
   if (isValuation) renderValuationView();
   if (isZeroPrice && !_viewRendered.zeroprice) { _viewRendered.zeroprice = true; renderZeroPriceView(); }
+  if (isFinishedGoods) renderFinishedGoodsView();
   if (isDataHealth) renderDataHealthView();
 }
 
