@@ -329,6 +329,113 @@ export function exportFinishedGoodsExcel() {
     XLSX.utils.book_append_sheet(wb, ws, type.substring(0, 31));
   });
 
+  // ── Production Runway sheet (per product line) ──
+  // Shared = generic materials used by 5+ SKUs (cones, trays, devices, inserts)
+  // SKU-specific = sleeves, display boxes, flavor-specific packaging
+  const SHARED_THRESHOLD = 5;
+  const matSkuCount = {};
+  data.forEach(d => {
+    d.materials.forEach(m => {
+      if (!matSkuCount[m.matId]) matSkuCount[m.matId] = new Set();
+      matSkuCount[m.matId].add(d.sku);
+    });
+  });
+
+  typeOrder.filter(t => groups[t]).forEach(type => {
+    const items = groups[type];
+    items.sort((a, b) => a.sku.localeCompare(b.sku));
+
+    const isShared = matId => matSkuCount[matId] && matSkuCount[matId].size >= SHARED_THRESHOLD;
+
+    const sheetData = [];
+    sheetData.push([`${type} — Production Runway`]);
+    sheetData.push([`Generated: ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`]);
+    sheetData.push([]);
+
+    // ── Section 1: Per-SKU with SKU-specific materials ──
+    sheetData.push(['PER-SKU INVENTORY & RUNWAY']);
+    sheetData.push([]);
+    sheetData.push(['SKU', 'Description', 'FG QOH', 'Monthly Rate', 'FG MOS', 'Bottleneck', 'Bottleneck MOS']);
+
+    items.forEach(d => {
+      const fgQoh = d.singleQoh + d.packQoh * d.packQty;
+      const fgMos = d.monthlyRate > 0 ? Math.round(fgQoh / d.monthlyRate * 10) / 10 : 0;
+
+      // SKU-specific materials (not shared infrastructure)
+      const skuMats = d.materials.filter(m => !isShared(m.matId));
+      let bottleneckMat = '';
+      let bottleneckMos = 999;
+      skuMats.forEach(m => {
+        const mos = m.monthlyNeed > 0 ? (m.available + m.onOrder) / m.monthlyNeed : 999;
+        if (mos < bottleneckMos) {
+          bottleneckMos = mos;
+          bottleneckMat = m.matId;
+        }
+      });
+      bottleneckMos = bottleneckMos === 999 ? 0 : Math.round(bottleneckMos * 10) / 10;
+
+      sheetData.push([d.sku, d.desc, fgQoh, Math.round(d.monthlyRate), fgMos, bottleneckMat, bottleneckMos]);
+
+      // Material detail rows
+      skuMats.sort((a, b) => a.matId.localeCompare(b.matId)).forEach(m => {
+        const mos = m.monthlyNeed > 0 ? Math.round((m.available + m.onOrder) / m.monthlyNeed * 10) / 10 : 0;
+        sheetData.push(['', m.matId, m.desc, `Need/mo: ${Math.round(m.monthlyNeed)}`, `QOH: ${m.qoh}`, `OO: ${m.onOrder}`,
+          m.unitCost ? `Cost: $${m.unitCost.toFixed(2)}` : '', `Inv Value: $${((m.qoh + m.onOrder) * (m.unitCost || 0)).toFixed(2)}`, `MOS: ${mos}`]);
+      });
+    });
+
+    sheetData.push([]);
+    sheetData.push([]);
+
+    // ── Section 2: Shared materials (cones, trays, devices, hardware, inserts) ──
+    sheetData.push(['SHARED MATERIALS (Used across product line)']);
+    sheetData.push(['These materials are consumed by multiple SKUs — supply is shared']);
+    sheetData.push([]);
+
+    const sharedMatTotals = {};
+    items.forEach(d => {
+      d.materials.forEach(m => {
+        if (!isShared(m.matId)) return;
+        if (!sharedMatTotals[m.matId]) {
+          sharedMatTotals[m.matId] = { matId: m.matId, type: m.type, desc: m.desc, totalNeed: 0, qoh: m.qoh, available: m.available, onOrder: m.onOrder, unitCost: m.unitCost, totalCost: m.totalCost, skuCount: matSkuCount[m.matId].size };
+        }
+        sharedMatTotals[m.matId].totalNeed += m.monthlyNeed;
+      });
+    });
+
+    const sharedMats = Object.values(sharedMatTotals);
+    if (sharedMats.length) {
+      const byPrefix = {};
+      sharedMats.forEach(m => {
+        const prefix = getMatPrefix(m.matId);
+        if (!byPrefix[prefix]) byPrefix[prefix] = [];
+        byPrefix[prefix].push(m);
+      });
+
+      Object.keys(byPrefix).sort().forEach(prefix => {
+        const mats = byPrefix[prefix].sort((a, b) => a.matId.localeCompare(b.matId));
+        sheetData.push([`${prefix} (${mats.length} items)`]);
+        sheetData.push(['Material', 'Description', 'Total Need /mo', 'QOH', 'Available', 'On Order', 'Unit Cost', 'Inv Value (QOH+OO)', 'MOS (incl OO)', '# SKUs']);
+        let prefixTotalCost = 0;
+        mats.forEach(m => {
+          const mos = m.totalNeed > 0 ? Math.round((m.available + m.onOrder) / m.totalNeed * 10) / 10 : 0;
+          const invValue = (m.qoh + m.onOrder) * (m.unitCost || 0);
+          prefixTotalCost += invValue;
+          sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder,
+            m.unitCost ? `$${m.unitCost.toFixed(2)}` : '', invValue ? `$${invValue.toFixed(2)}` : '', mos, m.skuCount]);
+        });
+        sheetData.push([`${prefix} Total`, '', '', '', '', '', '', prefixTotalCost ? `$${prefixTotalCost.toFixed(2)}` : '', '', '']);
+        sheetData.push([]);
+      });
+    } else {
+      sheetData.push(['No shared materials in this product line']);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    ws['!cols'] = [{wch:18},{wch:45},{wch:16},{wch:14},{wch:12},{wch:14},{wch:14},{wch:18},{wch:14},{wch:8}];
+    XLSX.utils.book_append_sheet(wb, ws, `${type.substring(0, 25)} Runway`);
+  });
+
   XLSX.writeFile(wb, `Finished_Goods_Summary_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 

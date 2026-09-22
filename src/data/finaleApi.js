@@ -472,12 +472,11 @@ export async function fetchAll() {
   }
   const active = products.filter(p => p.status === 'Active');
 
-  const isFlower = id => id.startsWith('FIT') || id.startsWith('FLR-') || id.startsWith('Flower - ');
   const stock = toCSV(active.map(p => ({
     'Location': 'SFS-HQ',
     'Product ID': p.productId,
     'Description': p.description,
-    'On hand': isFlower(p.productId) ? (num(p.stockAvailableToPromiseUnits) || 0) : (num(p.stockQuantityOnHandUnits) || 0),
+    'On hand': num(p.stockQuantityOnHandUnits) || 0,
     'On order': num(p.stockOnOrderUnits) || 0,
     'Reserved': num(p.stockReservationsUnits) || 0,
   })));
