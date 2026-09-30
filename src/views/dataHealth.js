@@ -138,7 +138,7 @@ export function renderDataHealthView() {
   html += checkRow('Product-level sales data', `${recentSalesMonths.length} months with product data`, recentSalesMonths.length >= curMonth - 1);
 
   // Check 4: Inventory data loaded
-  const invWithStock = rawData.filter(r => r['On hand'] > 0).length;
+  const invWithStock = rawData.filter(r => r.onHand > 0).length;
   html += checkRow('Inventory items with stock', `${invWithStock.toLocaleString()} items`, invWithStock > 100);
 
   // Check 5: Price data available
@@ -152,7 +152,7 @@ export function renderDataHealthView() {
   html += checkRow('API month verification', validation ? `${apiOk} verified, ${apiFail} failed` : 'Not yet synced', validation ? apiFail === 0 : false);
 
   // Check 7: Consumption data
-  html += checkRow('Consumption data', rawData.some(r => r.c90 > 0) ? 'Loaded' : 'Missing', rawData.some(r => r.c90 > 0));
+  html += checkRow('Consumption data', rawData.some(r => r.consumed90 > 0) ? 'Loaded' : 'Missing', rawData.some(r => r.consumed90 > 0));
 
   // Check 8: Sales by state
   const stateCount = Object.keys(state.SALES_BY_STATE || {}).length;
