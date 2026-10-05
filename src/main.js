@@ -3,7 +3,7 @@ import { state } from './data/state.js';
 import { fetchAll, fetchOrderItems } from './data/finaleApi.js';
 import { updateRangeLabel, renderSubcatChips, renderEdibleFilters, initEdibleFilterGlobals, setRenderFn as setFilterRender, toggleChip, togglePill, resetFilters, selectAllChips, clearAllChips, toggleSubcat, selectAllSubcats, clearAllSubcats, quickFilter, quickStatusFilter, setFilter, activateReorderOnly } from './ui/filters.js';
 import { openModal, closeModal, saveModal, resetOverride, updateModalPreview, setRenderFn as setModalRender } from './ui/modal.js';
-import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView, discontinueProduct, restoreProduct } from './views/inventory.js';
+import { render, toggleRow, toggleSelect, selectAllVisible, clearSelection, updateBulkBar, removeSelected, exportSelected, removeFromView, discontinueProduct, restoreProduct, loadMoreItems } from './views/inventory.js';
 import { renderSalesView } from './views/sales.js';
 import { exportForecastCSV, exportForecastPDF, exportMonthlyCSV, exportMonthlyPDF, exportByTypeCSV, exportByTypePDF, exportAllCSV } from './export.js';
 import { renderCogsView, exportCogsIngCSV, exportCogsIngPDF, exportCogsProductCSV, exportCogsProductPDF } from './views/cogs.js';
@@ -24,7 +24,7 @@ Object.assign(window, {
   // Inventory
   render, toggleRow, toggleSelect, selectAllVisible, clearSelection,
   removeSelected, exportSelected, removeFromView, updateBulkBar,
-  discontinueProduct, restoreProduct,
+  discontinueProduct, restoreProduct, loadMoreItems,
   // Modal
   openModal, closeModal, saveModal, resetOverride, updateModalPreview,
   // Filters
