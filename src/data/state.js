@@ -23,6 +23,7 @@ if (!window.__appState) {
     alertActiveCats: new Set(ALL_CATEGORIES),
     alertActiveSubcats: new Set(),
     COST_MAP: {},
+    VALUATION_MAP: {},
     PRICE_MAP: {},
     SHOPIFY_PRICE_MAP: {},
     WHOLESALE_PRICE_MAP: {},

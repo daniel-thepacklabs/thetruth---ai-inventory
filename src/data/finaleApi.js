@@ -73,6 +73,8 @@ async function fetchLiveProducts() {
             salesThisMonth
             consumptionQuantity
             lastPurchaseLandedCostPerUnit
+            averageCost
+            valuation
           }
         }
       }
@@ -586,9 +588,14 @@ export async function fetchAll() {
   };
 
   const costMap = {};
+  const valuationMap = {};
   products.forEach(p => {
-    const cost = num(p.lastPurchaseLandedCostPerUnit);
+    const avgCost = num(p.averageCost);
+    const landedCost = num(p.lastPurchaseLandedCostPerUnit);
+    const cost = avgCost || landedCost;
     if (cost > 0) costMap[p.productId] = cost;
+    const val = num(p.valuation);
+    if (val > 0) valuationMap[p.productId] = val;
   });
 
   const shopifyPriceMap = priceMapsData.shopify || {};
@@ -610,7 +617,7 @@ export async function fetchAll() {
     console.warn('State sales fetch failed:', err.message);
   }
 
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState };
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, valuationMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState };
 }
 
 async function fetchAllStatic() {
@@ -640,10 +647,15 @@ async function fetchAllStatic() {
   }));
 
   const costMap = {};
-  stockData.forEach(p => { if (p.cost > 0) costMap[p.sku] = p.cost; });
+  const valuationMap = {};
+  stockData.forEach(p => {
+    const cost = p.avgCost || p.cost;
+    if (cost > 0) costMap[p.sku] = cost;
+    if (p.valuation > 0) valuationMap[p.sku] = p.valuation;
+  });
   const priceMap = buildAvgPriceMap();
   const shopifyPriceMap = priceMapsData.shopify || {};
   const wholesalePriceMap = priceMapsData.wholesale || {};
 
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData, costMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState: {} };
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals: monthlyData.months || [], productSalesData, costMap, valuationMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState: {} };
 }

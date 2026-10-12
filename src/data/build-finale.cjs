@@ -91,6 +91,8 @@ async function fetchAllProducts() {
             salesThisMonth
             consumptionQuantity
             lastPurchaseLandedCostPerUnit
+            averageCost
+            valuation
           }
         }
       }
@@ -316,6 +318,8 @@ async function fetchOrderItems() {
       available: num(p.stockAvailableToPromiseUnits) || 0,
       remaining: num(p.stockRemainingAfterReservationsUnits) || 0,
       cost: num(p.lastPurchaseLandedCostPerUnit) || 0,
+      avgCost: num(p.averageCost) || 0,
+      valuation: num(p.valuation) || 0,
     }));
 
   // Build sales history JSON
