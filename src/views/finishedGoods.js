@@ -146,6 +146,18 @@ function buildData() {
   return results;
 }
 
+function fmtCurrencyCols(ws, cols) {
+  const XL = window.XLSX;
+  const range = XL.utils.decode_range(ws['!ref'] || 'A1');
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    for (const C of cols) {
+      const addr = XL.utils.encode_cell({ r: R, c: C });
+      const cell = ws[addr];
+      if (cell && typeof cell.v === 'number') cell.z = '$#,##0.00';
+    }
+  }
+}
+
 export function exportFinishedGoodsExcel() {
   const data = buildData();
   if (!data.length) return;
@@ -286,11 +298,11 @@ export function exportFinishedGoodsExcel() {
       let prefixNeed = 0, prefixQoh = 0, prefixAvail = 0, prefixOO = 0, prefixTotalCost = 0;
       mats.forEach(m => {
         const mos = m.totalNeed > 0 ? Math.round((m.available + m.onOrder) / m.totalNeed * 10) / 10 : 0;
-        sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, m.unitCost ? `$${m.unitCost.toFixed(2)}` : '', m.totalCost ? `$${m.totalCost.toFixed(2)}` : '', mos]);
+        sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, m.unitCost || '', m.totalCost || '', mos]);
         prefixNeed += m.totalNeed; prefixQoh += m.qoh; prefixAvail += m.available; prefixOO += m.onOrder; prefixTotalCost += m.totalCost || 0;
       });
       const prefixMos = prefixNeed > 0 ? Math.round((prefixAvail + prefixOO) / prefixNeed * 10) / 10 : 0;
-      sheetData.push([`${prefix} Total`, '', Math.round(prefixNeed), prefixQoh, prefixAvail, prefixOO, '', `$${prefixTotalCost.toFixed(2)}`, prefixMos]);
+      sheetData.push([`${prefix} Total`, '', Math.round(prefixNeed), prefixQoh, prefixAvail, prefixOO, '', prefixTotalCost, prefixMos]);
       sheetData.push([]);
     });
 
@@ -315,17 +327,18 @@ export function exportFinishedGoodsExcel() {
         let prefixNeed = 0, prefixQoh = 0, prefixAvail = 0, prefixOO = 0, prefixTotalCost = 0;
         mats.forEach(m => {
           const mos = m.totalNeed > 0 ? Math.round((m.available + m.onOrder) / m.totalNeed * 10) / 10 : 0;
-          sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, m.unitCost ? `$${m.unitCost.toFixed(2)}` : '', m.totalCost ? `$${m.totalCost.toFixed(2)}` : '', mos]);
+          sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder, m.unitCost || '', m.totalCost || '', mos]);
           prefixNeed += m.totalNeed; prefixQoh += m.qoh; prefixAvail += m.available; prefixOO += m.onOrder; prefixTotalCost += m.totalCost || 0;
         });
         const prefixMos = prefixNeed > 0 ? Math.round((prefixAvail + prefixOO) / prefixNeed * 10) / 10 : 0;
-        sheetData.push([`${prefix} Total`, '', Math.round(prefixNeed), prefixQoh, prefixAvail, prefixOO, '', `$${prefixTotalCost.toFixed(2)}`, prefixMos]);
+        sheetData.push([`${prefix} Total`, '', Math.round(prefixNeed), prefixQoh, prefixAvail, prefixOO, '', prefixTotalCost, prefixMos]);
         sheetData.push([]);
       });
     }
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
     ws['!cols'] = [{wch:18},{wch:50},{wch:16},{wch:14},{wch:12},{wch:12},{wch:12},{wch:16},{wch:14}];
+    fmtCurrencyCols(ws, [6, 7]);
     XLSX.utils.book_append_sheet(wb, ws, type.substring(0, 31));
   });
 
@@ -380,7 +393,7 @@ export function exportFinishedGoodsExcel() {
       skuMats.sort((a, b) => a.matId.localeCompare(b.matId)).forEach(m => {
         const mos = m.monthlyNeed > 0 ? Math.round((m.available + m.onOrder) / m.monthlyNeed * 10) / 10 : 0;
         sheetData.push(['', m.matId, m.desc, `Need/mo: ${Math.round(m.monthlyNeed)}`, `QOH: ${m.qoh}`, `OO: ${m.onOrder}`,
-          m.unitCost ? `Cost: $${m.unitCost.toFixed(2)}` : '', `Inv Value: $${((m.qoh + m.onOrder) * (m.unitCost || 0)).toFixed(2)}`, `MOS: ${mos}`]);
+          m.unitCost || '', (m.qoh + m.onOrder) * (m.unitCost || 0), mos]);
       });
     });
 
@@ -422,9 +435,9 @@ export function exportFinishedGoodsExcel() {
           const invValue = (m.qoh + m.onOrder) * (m.unitCost || 0);
           prefixTotalCost += invValue;
           sheetData.push([m.matId, m.desc, Math.round(m.totalNeed), m.qoh, m.available, m.onOrder,
-            m.unitCost ? `$${m.unitCost.toFixed(2)}` : '', invValue ? `$${invValue.toFixed(2)}` : '', mos, m.skuCount]);
+            m.unitCost || '', invValue || '', mos, m.skuCount]);
         });
-        sheetData.push([`${prefix} Total`, '', '', '', '', '', '', prefixTotalCost ? `$${prefixTotalCost.toFixed(2)}` : '', '', '']);
+        sheetData.push([`${prefix} Total`, '', '', '', '', '', '', prefixTotalCost || '', '', '']);
         sheetData.push([]);
       });
     } else {
@@ -433,6 +446,7 @@ export function exportFinishedGoodsExcel() {
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
     ws['!cols'] = [{wch:18},{wch:45},{wch:16},{wch:14},{wch:12},{wch:14},{wch:14},{wch:18},{wch:14},{wch:8}];
+    fmtCurrencyCols(ws, [6, 7]);
     XLSX.utils.book_append_sheet(wb, ws, `${type.substring(0, 25)} Runway`);
   });
 

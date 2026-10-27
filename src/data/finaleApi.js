@@ -254,44 +254,38 @@ async function fetchMonthReturns(year, month) {
   return Math.round(returns * 100) / 100;
 }
 
-async function fetchShipmentsByState(beginDate, endDate) {
-  let cursor = null;
+async function fetchSalesByState(beginDate, endDate) {
   const byStateMonth = {};
-  let shipCount = 0;
+
+  let cursor = null;
+  let totalScanned = 0;
+  let totalSales = 0;
+  console.log('  Scanning orders for state + revenue...');
   while (true) {
     const afterClause = cursor ? `, after: "${cursor}"` : '';
-    const q = `{ shipmentViewConnection(first: 1000${afterClause}, shipDate: { begin: "${beginDate}", end: "${endDate}" }) { pageInfo { hasNextPage endCursor } edges { node { type status shipDate subtotal totalUnits product { productId } shipTo { stateRegion } order { orderId } } } } }`;
+    const q = `{ orderViewConnection(first: 1000${afterClause}, orderDate: { begin: "${beginDate}", end: "${endDate}" }) { pageInfo { hasNextPage endCursor } edges { node { orderId orderDate type status subtotal totalUnits shipTo { stateRegion } } } } }`;
     const data = await gql(q);
-    const conn = data.shipmentViewConnection;
-    shipCount += conn.edges.length;
-    console.log(`  State shipments: ${shipCount} fetched...`);
-    conn.edges.forEach(e => {
-      const n = e.node;
-      if (n.type !== 'Sale' || n.status !== 'Shipped') return;
-      const st = (n.shipTo && n.shipTo.stateRegion) || 'Unknown';
-      const d = new Date(n.shipDate);
-      const period = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const amt = parseFloat((n.subtotal || '0').replace(/,/g, ''));
-      const units = parseInt(n.totalUnits || 0);
-      const pid = n.product ? n.product.productId : 'Unknown';
-      const orderId = n.order?.orderId || '';
+    const conn = data.orderViewConnection;
+    totalScanned += conn.edges.length;
+    for (const edge of conn.edges) {
+      const o = edge.node;
+      if (o.type !== 'Sale' || (o.status !== 'Completed' && o.status !== 'Committed')) continue;
+      const st = (o.shipTo && o.shipTo.stateRegion) || 'Unknown';
+      const parts = o.orderDate.split('/');
+      const period = parts[2] + '-' + parts[0].padStart(2, '0');
       const key = `${st}|${period}`;
-      if (!byStateMonth[key]) byStateMonth[key] = { state: st, period, revenue: 0, units: 0, shipments: 0, products: {}, orderIds: new Set() };
-      byStateMonth[key].revenue += amt;
-      byStateMonth[key].units += units;
+      if (!byStateMonth[key]) byStateMonth[key] = { state: st, period, revenue: 0, units: 0, shipments: 0, products: {} };
+      const rev = num(o.subtotal);
+      byStateMonth[key].revenue += rev;
+      byStateMonth[key].units += parseInt(o.totalUnits || 0);
       byStateMonth[key].shipments++;
-      if (orderId) byStateMonth[key].orderIds.add(orderId);
-      if (pid !== 'Multiple products') {
-        if (!byStateMonth[key].products[pid]) byStateMonth[key].products[pid] = { revenue: 0, units: 0 };
-        byStateMonth[key].products[pid].revenue += amt;
-        byStateMonth[key].products[pid].units += units;
-      }
-    });
-    if (!conn.pageInfo.hasNextPage) break;
+      totalSales++;
+    }
+    console.log(`  ${totalScanned} scanned, ${totalSales} sales...`);
+    if (!conn.pageInfo.hasNextPage || !conn.pageInfo.endCursor) break;
     cursor = conn.pageInfo.endCursor;
   }
-  // Convert Sets to arrays for JSON serialization
-  Object.values(byStateMonth).forEach(v => { v.orderIds = [...v.orderIds]; });
+  console.log(`  Complete: ${totalSales} sale orders, $${Math.round(Object.values(byStateMonth).reduce((s, d) => s + d.revenue, 0)).toLocaleString()} revenue`);
   return byStateMonth;
 }
 
@@ -610,7 +604,7 @@ export async function fetchAll() {
     const [fy, fm] = firstPeriod.split('-').map(Number);
     const [ly, lm] = lastPeriod.split('-').map(Number);
     const lastDays = new Date(ly, lm, 0).getDate();
-    salesByState = await fetchShipmentsByState(`${fm}/1/${fy}`, `${lm}/${lastDays}/${ly}`);
+    salesByState = await fetchSalesByState(`${fm}/1/${fy}`, `${lm}/${lastDays}/${ly}`);
     const totalStateRev = Object.values(salesByState).reduce((s, d) => s + d.revenue, 0);
     console.log(`  ${Object.keys(salesByState).length} states, $${Math.round(totalStateRev).toLocaleString()} total shipped revenue`);
   } catch (err) {

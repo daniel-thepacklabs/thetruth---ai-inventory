@@ -9,10 +9,11 @@ const FLAVOR_LINE = {
   'Appleberry Nectar': 'Froot Jam', 'Strawberry Dream': 'Froot Jam', 'Tropical Passion': 'Froot Jam',
   'Big Brain Gummies': 'Microdose', 'Love Gummies': 'Microdose', 'Chillin Gummies': 'Microdose',
   'Cinnamon Brulee': 'Crunchies', 'Cocoa Fudge': 'Crunchies', 'Double Rainbow': 'Crunchies', 'Rainbow': 'Crunchies',
+  'Blue Razz': 'Mix-a-Lot', 'Flavorless': 'Mix-a-Lot', 'Fruit Punch': 'Mix-a-Lot', 'Grape Gushers': 'Mix-a-Lot', 'Variety Pack': 'Mix-a-Lot',
 };
-const LINE_COLOR = { 'Euphoria': '#e05252', 'Froot Jam': '#52c97a', 'Microdose': '#9b7fee', 'Crunchies': '#e8c547' };
+const LINE_COLOR = { 'Euphoria': '#e05252', 'Froot Jam': '#52c97a', 'Microdose': '#9b7fee', 'Crunchies': '#e8c547', 'Mix-a-Lot': '#52b8d9' };
 
-const PACK_ORDER = ['Single', '2-Pack', '3-Pack', '5PK Display', '8PK Display', '10PK Display', 'RAW'];
+const PACK_ORDER = ['Single', '2-Pack', '3-Pack', '5PK Display', '8PK Display', '10PK Display', '40PK Variety', 'RAW'];
 
 // Persist user on-order inputs across re-renders
 if (!window.__edibleOnOrder) window.__edibleOnOrder = {};
@@ -213,12 +214,160 @@ function buildEuphoriaTable(edibles) {
   return html;
 }
 
+function buildMixALotTable(edibles) {
+  const cs = 'padding:8px 12px;text-align:right;font-size:12px;white-space:nowrap;';
+  const hs = 'padding:8px 12px;text-align:right;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;border-bottom:2px solid var(--border);';
+  const fs = 'padding:8px 12px;text-align:left;font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;';
+
+  const malItems = edibles.filter(r => FLAVOR_LINE[r.flavor] === 'Mix-a-Lot');
+
+  const byFlavor = {};
+  malItems.forEach(r => {
+    if (!byFlavor[r.flavor]) byFlavor[r.flavor] = {};
+    const ct = getPiecesPerBag(r.id, r.desc);
+    const ctKey = ct + 'ct';
+    if (!byFlavor[r.flavor][ctKey]) byFlavor[r.flavor][ctKey] = { ct, onHand: 0, onOrder: 0, sales: 0, skus: [] };
+    const g = byFlavor[r.flavor][ctKey];
+    const packMult = getPackMultiplier(r.id);
+    const avail = r.onHand - (r.reserved || 0);
+    const singlesOnHand = avail * packMult;
+    const singlesOnOrder = r.onOrder * packMult;
+    const monthlySales = (r.s90 || 0) / 3;
+    const singlesSales = monthlySales * packMult;
+    g.onHand += singlesOnHand;
+    g.onOrder += singlesOnOrder;
+    g.sales += singlesSales;
+    g.skus.push({ id: r.id, packType: r.packType || '—', packMult, onHand: avail, singlesOnHand, onOrder: r.onOrder, singlesOnOrder, sales: monthlySales, singlesSales });
+  });
+
+  const ctSizes = [...new Set(malItems.map(r => getPiecesPerBag(r.id, r.desc)))].sort((a, b) => a - b);
+  const flavors = Object.keys(byFlavor).filter(f => f !== 'Variety Pack').sort();
+  if (byFlavor['Variety Pack']) flavors.push('Variety Pack');
+
+  let html = `<div style="margin-bottom:24px">`;
+  html += `<div style="font-size:14px;font-weight:600;color:#52b8d9;margin-bottom:8px">Mix-a-Lot</div>`;
+  html += `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">1ct = raw sachets · 10ct = finished goods · 40ct = variety pack (10 of each flavor). Enter additional on-order qty to see projected Total MOS.</div>`;
+  html += `<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:var(--bg2)">`;
+  html += `<table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif">`;
+
+  html += '<thead><tr style="background:rgba(255,255,255,0.03)">';
+  html += `<th style="${hs}text-align:left;min-width:140px" rowspan="2">Flavor</th>`;
+  ctSizes.forEach(ct => {
+    html += `<th style="${hs}text-align:center;border-left:2px solid var(--border)" colspan="6">${ct}ct</th>`;
+  });
+  html += '</tr><tr style="background:rgba(255,255,255,0.03)">';
+  ctSizes.forEach(() => {
+    html += `<th style="${hs}border-left:2px solid var(--border)"><span style="color:var(--green)">Available</span></th>`;
+    html += `<th style="${hs}">Total Supply</th>`;
+    html += `<th style="${hs}"><span style="color:var(--yellow)">Monthly Sales</span></th>`;
+    html += `<th style="${hs}"><span style="color:var(--orange)">MOS</span></th>`;
+    html += `<th style="${hs}"><span style="color:var(--blue)">Add'l Order</span></th>`;
+    html += `<th style="${hs}"><span style="color:var(--cyan, #4dd0e1)">Total MOS</span></th>`;
+  });
+  html += '</tr></thead>';
+
+  html += '<tbody>';
+  const totals = {};
+  ctSizes.forEach(ct => { totals[ct] = { onHand: 0, onOrder: 0, sales: 0 }; });
+
+  flavors.forEach((flavor, i) => {
+    const stripe = i % 2 === 0 ? '' : 'background:rgba(255,255,255,0.02);';
+    const fid = slug(flavor);
+    html += `<tr style="${stripe}border-bottom:1px solid var(--border);cursor:pointer" onclick="window.__toggleEdibleDetail('mal-${fid}')" id="erow-mal-${fid}">`;
+    html += `<td style="${fs}"><span id="echev-mal-${fid}" style="display:inline-block;transition:transform .15s;transform:rotate(0deg);margin-right:6px;font-size:10px;color:var(--text3)">▶</span>${flavor}</td>`;
+
+    ctSizes.forEach(ct => {
+      const ctKey = ct + 'ct';
+      const g = byFlavor[flavor]?.[ctKey];
+      if (g) {
+        const totalSupply = g.onHand + g.onOrder;
+        const mos = g.sales > 0 ? totalSupply / g.sales : 0;
+        totals[ct].onHand += g.onHand;
+        totals[ct].onOrder += g.onOrder;
+        totals[ct].sales += g.sales;
+        const inputId = `eo-mal-${fid}-${ct}`;
+        const savedVal = window.__edibleOnOrder[inputId] || 0;
+        const totalMos = g.sales > 0 ? (totalSupply + savedVal) / g.sales : 0;
+        html += `<td style="${cs}border-left:2px solid var(--border);color:var(--green)">${fmt(g.onHand)}</td>`;
+        html += `<td style="${cs}color:var(--text2)">${fmt(totalSupply)}</td>`;
+        html += `<td style="${cs}color:var(--yellow)">${fmt(g.sales)}</td>`;
+        html += `<td style="${cs}font-weight:600;color:${mosColor(mos)};background:${mosBg(mos)}">${mos.toFixed(1)}</td>`;
+        html += `<td style="${cs}" onclick="event.stopPropagation()"><input type="number" id="${inputId}" style="${inputStyle}" value="${savedVal || ''}" min="0" placeholder="0" onchange="window.__edibleOrderChange('${inputId}',this.value)" oninput="window.__edibleOrderChange('${inputId}',this.value)"></td>`;
+        html += `<td style="${cs}font-weight:600;color:${mosColor(totalMos)};background:${mosBg(totalMos)}" id="${inputId}-mos" data-base-supply="${totalSupply}" data-sales="${g.sales}">${totalMos.toFixed(1)}</td>`;
+      } else {
+        html += `<td style="${cs}border-left:2px solid var(--border);color:var(--text3)">—</td>`;
+        html += `<td style="${cs}color:var(--text3)">—</td>`;
+        html += `<td style="${cs}color:var(--text3)">—</td>`;
+        html += `<td style="${cs}color:var(--text3)">—</td>`;
+        html += `<td style="${cs}">—</td>`;
+        html += `<td style="${cs}color:var(--text3)">—</td>`;
+      }
+    });
+    html += '</tr>';
+
+    // Detail rows
+    ctSizes.forEach(ct => {
+      const ctKey = ct + 'ct';
+      const g = byFlavor[flavor]?.[ctKey];
+      if (!g) return;
+      g.skus.sort((a, b) => {
+        const ai = PACK_ORDER.indexOf(a.packType), bi = PACK_ORDER.indexOf(b.packType);
+        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+      });
+      g.skus.forEach(sku => {
+        const skuTotalSupply = sku.singlesOnHand + sku.singlesOnOrder;
+        const skuMos = sku.singlesSales > 0 ? skuTotalSupply / sku.singlesSales : 0;
+        const skuInputId = `eo-mal-sku-${slug(sku.id)}`;
+        const skuSaved = window.__edibleOnOrder[skuInputId] || 0;
+        const skuTotalMos = sku.singlesSales > 0 ? (skuTotalSupply + skuSaved) / sku.singlesSales : 0;
+        html += `<tr class="edetail-mal-${fid}" style="display:none;background:rgba(255,255,255,0.015);border-bottom:1px solid rgba(255,255,255,0.04)">`;
+        html += `<td style="${fs}padding-left:36px;font-weight:400;font-size:11px;color:var(--text2)">${sku.id} <span style="color:var(--text3);font-size:9px">(${sku.packType})</span></td>`;
+        ctSizes.forEach(colCt => {
+          if (colCt === ct) {
+            html += `<td style="${cs}border-left:2px solid var(--border);font-size:11px;color:var(--green)">${fmt(sku.singlesOnHand)}</td>`;
+            html += `<td style="${cs}font-size:11px;color:var(--text2)">${fmt(skuTotalSupply)}</td>`;
+            html += `<td style="${cs}font-size:11px;color:var(--yellow)">${fmt(sku.singlesSales)}</td>`;
+            html += `<td style="${cs}font-size:11px;font-weight:600;color:${mosColor(skuMos)};background:${mosBg(skuMos)}">${skuMos.toFixed(1)}</td>`;
+            html += `<td style="${cs}font-size:11px" onclick="event.stopPropagation()"><input type="number" id="${skuInputId}" style="${inputStyle}font-size:10px;width:50px;" value="${skuSaved || ''}" min="0" placeholder="0" onchange="window.__edibleOrderChange('${skuInputId}',this.value)" oninput="window.__edibleOrderChange('${skuInputId}',this.value)"></td>`;
+            html += `<td style="${cs}font-size:11px;font-weight:600;color:${mosColor(skuTotalMos)};background:${mosBg(skuTotalMos)}" id="${skuInputId}-mos" data-base-supply="${skuTotalSupply}" data-sales="${sku.singlesSales}">${skuTotalMos.toFixed(1)}</td>`;
+          } else {
+            html += `<td style="${cs}border-left:2px solid var(--border)"></td><td style="${cs}"></td><td style="${cs}"></td><td style="${cs}"></td><td style="${cs}"></td><td style="${cs}"></td>`;
+          }
+        });
+        html += '</tr>';
+      });
+    });
+  });
+  html += '</tbody>';
+
+  html += '<tfoot><tr style="border-top:2px solid var(--border);background:rgba(255,255,255,0.04)">';
+  html += `<td style="${fs}font-weight:700">TOTAL</td>`;
+  ctSizes.forEach(ct => {
+    const t = totals[ct];
+    const totalSupply = t.onHand + t.onOrder;
+    const mos = t.sales > 0 ? totalSupply / t.sales : 0;
+    const addlKeys = Object.keys(window.__edibleOnOrder).filter(k => k.startsWith('eo-mal-') && k.endsWith(`-${ct}`) && !k.includes('-sku-'));
+    const addlTotal = addlKeys.reduce((s, k) => s + (window.__edibleOnOrder[k] || 0), 0);
+    const totalMos = t.sales > 0 ? (totalSupply + addlTotal) / t.sales : 0;
+    html += `<td style="${cs}border-left:2px solid var(--border);font-weight:700;color:var(--green)">${fmt(t.onHand)}</td>`;
+    html += `<td style="${cs}font-weight:700;color:var(--text2)">${fmt(totalSupply)}</td>`;
+    html += `<td style="${cs}font-weight:700;color:var(--yellow)">${fmt(t.sales)}</td>`;
+    html += `<td style="${cs}font-weight:700;color:${mosColor(mos)};background:${mosBg(mos)}">${mos.toFixed(1)}</td>`;
+    html += `<td style="${cs}font-weight:700;color:var(--blue)">${fmt(addlTotal)}</td>`;
+    html += `<td style="${cs}font-weight:700;color:${mosColor(totalMos)};background:${mosBg(totalMos)}" id="eo-mal-total-${ct}-mos">${totalMos.toFixed(1)}</td>`;
+  });
+  html += '</tr></tfoot>';
+
+  html += '</table></div></div>';
+  return html;
+}
+
 function buildOtherLinesTable(edibles) {
   const cs = 'padding:8px 12px;text-align:right;font-size:12px;white-space:nowrap;';
   const hs = 'padding:8px 12px;text-align:right;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;border-bottom:2px solid var(--border);';
   const fs = 'padding:8px 12px;text-align:left;font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;';
 
-  const items = edibles.filter(r => FLAVOR_LINE[r.flavor] !== 'Euphoria');
+  const items = edibles.filter(r => FLAVOR_LINE[r.flavor] !== 'Euphoria' && FLAVOR_LINE[r.flavor] !== 'Mix-a-Lot');
 
   const byFlavor = {};
   items.forEach(r => {
@@ -240,7 +389,7 @@ function buildOtherLinesTable(edibles) {
     f.skus.push({ id: r.id, packType: r.packType || '—', onHand: avail, onOrder: r.onOrder, sales: monthlySales, unitOnHand: avail * mult, unitOnOrder: r.onOrder * mult, unitSales: monthlySales * mult });
   });
 
-  const lineOrder = ['Froot Jam', 'Microdose', 'Crunchies', ''];
+  const lineOrder = ['Froot Jam', 'Microdose', 'Crunchies', 'Mix-a-Lot', ''];
   const flavors = Object.keys(byFlavor).sort((a, b) => {
     const la = lineOrder.indexOf(FLAVOR_LINE[a] || ''), lb = lineOrder.indexOf(FLAVOR_LINE[b] || '');
     return la !== lb ? la - lb : a.localeCompare(b);
@@ -355,6 +504,7 @@ export function renderEdiblesView() {
   const edibles = state.RAW_DATA.filter(r => r.cat === 'Edibles' && r.flavor && !state.removedIds.has(r.id));
 
   let html = buildEuphoriaTable(edibles);
+  html += buildMixALotTable(edibles);
   html += `<div style="margin-top:24px">`;
   html += `<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px">Froot Jam · Microdose · Crunchies</div>`;
   html += buildOtherLinesTable(edibles);

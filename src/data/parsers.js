@@ -47,6 +47,7 @@ export function catSubcat(pid) {
   if (p.startsWith('Film - ')) return ['Misc','Film'];
   if (p.startsWith('Pack - Boveda')) return ['Components','Pack'];
   if (p.startsWith('Pack - ')) return ['Misc','Pack'];
+  if (p.startsWith('EMAL-')) return ['Edibles','EMAL'];
   if (p.startsWith('ECC-')) return ['Edibles','ECC'];
   if (p.startsWith('EGBD-')) return ['Edibles','EGBD'];
   if (p.startsWith('EGFJ-')) return ['Edibles','EGFJ'];
@@ -104,6 +105,8 @@ export function catSubcat(pid) {
 // ── Edible helpers ──
 export function getEdiblePackType(pid) {
   const p = (pid || '').toUpperCase();
+  if (p.startsWith('EMAL-VP')) return '40PK Variety';
+  if (p.startsWith('EMAL-') && !p.endsWith('-01')) return 'RAW';
   if (p.includes('-8PK')) return '8PK Display';
   if (p.includes('-5PK')) return '5PK Display';
   if (p.includes('-10PK')) return '10PK Display';
@@ -118,6 +121,9 @@ export function getPiecesPerBag(pid, desc) {
   const p = (pid || '').toUpperCase();
   const d = (desc || '');
   if (p.startsWith('EGFJ-')) return 10;
+  if (p.startsWith('EMAL-VP')) return 40;
+  if (p.startsWith('EMAL-') && p.endsWith('-01')) return 10;
+  if (p.startsWith('EMAL-')) return 1;
   const ctMatch = d.match(/(\d+)(?:ct|CT|pc)\b/);
   if (ctMatch) return parseInt(ctMatch[1]);
   if (p.includes('-05-') || /-05$/.test(p)) return 5;
@@ -145,6 +151,7 @@ export function getEdibleFlavor(pid, desc) {
   const d = desc || '';
   const p = (pid || '').toUpperCase();
   const patterns = [
+    /Mix-a-Lot - ([\w\s]+?) -/,
     /Euphoria - ([\w\s]+?) -/,
     /Froot Jam - ([\w\s]+?)(?:\s*-|\s*$)/,
     /Cereal Crunchies - ([\w\s]+?)(?:\s*-|\s*$)/,
@@ -172,6 +179,11 @@ export function getEdibleFlavor(pid, desc) {
   if (p.startsWith('EGSS-05') || p.startsWith('EGSS-20')) return 'Love Gummies';
   if (p.startsWith('EGSS')) return 'Strawberry Shortcake';
   if (p.startsWith('EGBB')) return 'Chillin Gummies';
+  if (p.startsWith('EMAL-BR')) return 'Blue Razz';
+  if (p.startsWith('EMAL-FL')) return 'Flavorless';
+  if (p.startsWith('EMAL-FP')) return 'Fruit Punch';
+  if (p.startsWith('EMAL-GG')) return 'Grape Gushers';
+  if (p.startsWith('EMAL-VP')) return 'Variety Pack';
   return pid.split('-').slice(0, 2).join('-');
 }
 
@@ -211,6 +223,7 @@ export function getSalesProductType(pid, desc) {
   if (pu.startsWith('VIC')) return ['Vapes','Imperial 1G Cartridge'];
   if (pu.startsWith('VIP')) return ['Vapes','Imperial Pod'];
   if (pu.startsWith('FLD') || p.startsWith('Filled') || p.startsWith('Infused') || p.startsWith('Oil Mixture') || p.startsWith('Mixture') || p.startsWith('Infusion')) return ['Vapes','WIP / Filled'];
+  if (pu.startsWith('EMAL')) return ['Edibles','Mix-a-Lot Powder'];
   if (pu.startsWith('EGMB') || pu.startsWith('EGKB') || pu.startsWith('EGBD') || pu.startsWith('EGSS') || pu.startsWith('EGPL') || pu.startsWith('EGMCR')) return ['Edibles','Euphoria Gummies D9'];
   if (pu.startsWith('EGFJ')) return ['Edibles','Froot Jam'];
   if (pu.startsWith('EGBB')) return ['Edibles','Functional Microdose'];
@@ -298,9 +311,9 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
       const remaining = st.onHand - st.reserved;
       // Only hide items with zero demand AND zero total inventory (on hand + on order)
-      if (consumed90 === 0 && st.onHand <= 0 && st.onOrder <= 0) return null;
+      const isEdible = cat === 'Edibles' && /^(EG|ECC|EMAL)/i.test(pid);
+      if (consumed90 === 0 && st.onHand <= 0 && st.onOrder <= 0 && !isEdible) return null;
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
-      const isEdible = cat === 'Edibles' && /^(EG|ECC)/i.test(pid);
       const flavor = isEdible ? getEdibleFlavor(pid, st.desc) : null;
       const packType = isEdible ? getEdiblePackType(pid) : null;
       return {

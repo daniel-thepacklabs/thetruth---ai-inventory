@@ -5,7 +5,7 @@ import { catSubcat } from '../data/parsers.js';
 const $f = v => '$' + (v || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const nf = v => (v || 0).toLocaleString('en-US');
 const LIVE_CAT_ORDER = ['Raw Material', 'Packaging', 'Components', 'WIP', 'Edibles', 'Marketing', 'Misc'];
-const HIST_CAT_ORDER = ['RAW MATERIALS', 'FINISHED GOODS', 'WIP', 'MARKETING', 'NON-INVENTORY'];
+const HIST_CAT_ORDER = ['Raw Material', 'Packaging', 'Components', 'WIP', 'Edibles', 'Marketing', 'Misc'];
 
 function buildLiveValuation() {
   const raw = state.RAW_DATA || [];
