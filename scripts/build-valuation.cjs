@@ -36,7 +36,12 @@ try {
 
 const wb = XLSX.readFile(xlsxPath);
 const ws = wb.Sheets[wb.SheetNames[0]];
-const rows = XLSX.utils.sheet_to_json(ws);
+const rawRows = XLSX.utils.sheet_to_json(ws);
+const rows = rawRows.map(r => {
+  const out = {};
+  for (const [k, v] of Object.entries(r)) out[k.trim()] = v;
+  return out;
+});
 
 // Column names from Finale export
 const COL_PRODUCT = 'Product ID';

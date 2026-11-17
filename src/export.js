@@ -2,18 +2,40 @@
 const $f = v => '$' + (v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function tableToRows(tableEl) {
-  const rows = [];
-  tableEl.querySelectorAll('tr').forEach(tr => {
-    const cells = [];
+  const trs = Array.from(tableEl.querySelectorAll('tr'));
+  const grid = [];
+  const rowspans = {};
+  trs.forEach((tr, ri) => {
+    grid[ri] = grid[ri] || [];
+    let ci = 0;
+    // Fill cells carried over by rowspan from previous rows
+    while (rowspans[ci] && rowspans[ci].remaining > 0) {
+      grid[ri][ci] = rowspans[ci].text;
+      rowspans[ci].remaining--;
+      if (rowspans[ci].remaining === 0) delete rowspans[ci];
+      ci++;
+    }
     tr.querySelectorAll('th, td').forEach(td => {
+      // Skip past columns occupied by rowspans
+      while (rowspans[ci] && rowspans[ci].remaining > 0) {
+        grid[ri][ci] = rowspans[ci].text;
+        rowspans[ci].remaining--;
+        if (rowspans[ci].remaining === 0) delete rowspans[ci];
+        ci++;
+      }
       const text = td.innerText.replace(/\n/g, ' ').trim();
       const colspan = parseInt(td.getAttribute('colspan') || '1');
-      cells.push(text);
-      for (let i = 1; i < colspan; i++) cells.push('');
+      const rowspan = parseInt(td.getAttribute('rowspan') || '1');
+      for (let c = 0; c < colspan; c++) {
+        grid[ri][ci] = c === 0 ? text : '';
+        if (rowspan > 1) {
+          rowspans[ci] = { text: '', remaining: rowspan - 1 };
+        }
+        ci++;
+      }
     });
-    if (cells.some(c => c)) rows.push(cells);
   });
-  return rows;
+  return grid.filter(r => r && r.some(c => c));
 }
 
 function rowsToCSV(rows) {

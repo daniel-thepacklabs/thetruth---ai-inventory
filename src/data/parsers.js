@@ -224,7 +224,11 @@ export function getSalesProductType(pid, desc) {
   if (pu.startsWith('VIP')) return ['Vapes','Imperial Pod'];
   if (pu.startsWith('FLD') || p.startsWith('Filled') || p.startsWith('Infused') || p.startsWith('Oil Mixture') || p.startsWith('Mixture') || p.startsWith('Infusion')) return ['Vapes','WIP / Filled'];
   if (pu.startsWith('EMAL')) return ['Edibles','Mix-a-Lot Powder'];
-  if (pu.startsWith('EGMB') || pu.startsWith('EGKB') || pu.startsWith('EGBD') || pu.startsWith('EGSS') || pu.startsWith('EGPL') || pu.startsWith('EGMCR')) return ['Edibles','Euphoria Gummies D9'];
+  if (pu.startsWith('EGMB') || pu.startsWith('EGKB') || pu.startsWith('EGBD') || pu.startsWith('EGSS') || pu.startsWith('EGPL') || pu.startsWith('EGMCR')) {
+    const mgMatch = pu.match(/-(\d+)-/);
+    const mg = mgMatch ? parseInt(mgMatch[1], 10) : 0;
+    return ['Edibles', mg > 150 ? 'Euphoria Gummies D9 20ct' : 'Euphoria Gummies D9 5ct'];
+  }
   if (pu.startsWith('EGFJ')) return ['Edibles','Froot Jam'];
   if (pu.startsWith('EGBB')) return ['Edibles','Functional Microdose'];
   if (pu.startsWith('ECC')) return ['Edibles','Cereal Crunchies'];
@@ -244,11 +248,9 @@ export function getSalesProductType(pid, desc) {
 
 export function getPackSize(pid) {
   const p = (pid || '').trim().toUpperCase();
-  if (p.includes('-10PK')) return 10;
-  if (p.includes('-8PK'))  return 8;
-  if (p.includes('-6PK'))  return 6;
-  if (p.includes('-5PK'))  return 5;
-  if (p.includes('-2PK') || p.endsWith('-2P')) return 2;
+  const m = p.match(/-(\d+)PK/);
+  if (m) return parseInt(m[1], 10);
+  if (p.endsWith('-2P')) return 2;
   return 1;
 }
 
@@ -310,9 +312,7 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const actual30   = consume30Map[pid] != null ? consume30Map[pid] : sl.s30;
       const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
       const remaining = st.onHand - st.reserved;
-      // Only hide items with zero demand AND zero total inventory (on hand + on order)
       const isEdible = cat === 'Edibles' && /^(EG|ECC|EMAL)/i.test(pid);
-      if (consumed90 === 0 && st.onHand <= 0 && st.onOrder <= 0 && !isEdible) return null;
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
       const flavor = isEdible ? getEdibleFlavor(pid, st.desc) : null;
       const packType = isEdible ? getEdiblePackType(pid) : null;

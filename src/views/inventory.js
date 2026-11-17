@@ -162,7 +162,6 @@ export function render() {
   else if (sort === 'onhand_asc')  rows.sort((a, b) => a.onHand - b.onHand);
   else rows.sort((a, b) => a.id.localeCompare(b.id));
 
-  const PAGE_SIZE = 100;
   const total = state.RAW_DATA.length - state.removedIds.size;
   const cs    = rows.length + ' of ' + total + ' items';
   document.getElementById('showing-count').textContent = cs;
@@ -173,11 +172,11 @@ export function render() {
   if (!rows.length) { list.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
   if (empty) empty.style.display = 'none';
 
+  const PAGE_SIZE = 500;
   state._filteredRows = rows;
   if (!state._loadingMore) state._renderedCount = PAGE_SIZE;
   state._loadingMore = false;
   const showCount = Math.min(state._renderedCount, rows.length);
-
   const renderRows = rows.slice(0, showCount);
   const moreCount = rows.length - showCount;
   list.innerHTML = renderRows.map((item, idx) => {
@@ -284,7 +283,7 @@ export function render() {
 }
 
 export function loadMoreItems() {
-  state._renderedCount = (state._renderedCount || 100) + 100;
+  state._renderedCount = (state._renderedCount || 500) + 500;
   state._loadingMore = true;
   render();
 }
