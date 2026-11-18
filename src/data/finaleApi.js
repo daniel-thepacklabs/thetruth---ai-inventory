@@ -475,6 +475,7 @@ export async function fetchAll() {
     'On hand': num(p.stockQuantityOnHandUnits) || 0,
     'On order': num(p.stockOnOrderUnits) || 0,
     'Reserved': num(p.stockReservationsUnits) || 0,
+    'Available': num(p.stockRemainingAfterReservationsUnits) || 0,
   })));
 
   const salesHistory = buildSalesCSV(products);

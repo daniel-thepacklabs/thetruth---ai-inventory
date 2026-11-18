@@ -263,10 +263,11 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
   stockRows.forEach(r => {
     if ((r['Location'] || '').trim() !== 'SFS-HQ') return;
     const pid = (r['Product ID'] || '').trim(); if (!pid) return;
-    if (!stockMap[pid]) stockMap[pid] = { onHand:0, onOrder:0, reserved:0, desc:'' };
+    if (!stockMap[pid]) stockMap[pid] = { onHand:0, onOrder:0, reserved:0, available:0, desc:'' };
     stockMap[pid].onHand   += n(r['On hand']);
     stockMap[pid].onOrder  += n(r['On order']);
     stockMap[pid].reserved += n(r['Reserved']);
+    stockMap[pid].available += n(r['Available']);
     if (!stockMap[pid].desc) stockMap[pid].desc = (r['Description'] || '').trim();
   });
 
@@ -311,7 +312,7 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
       const consumed90 = consumeMap[pid] != null ? consumeMap[pid] : sl.s90;
       const actual30   = consume30Map[pid] != null ? consume30Map[pid] : sl.s30;
       const runRate30  = parseFloat((consumed90 / 3).toFixed(2));
-      const remaining = st.onHand - st.reserved;
+      const remaining = st.available > 0 ? st.available : (st.onHand - st.reserved);
       const isEdible = cat === 'Edibles' && /^(EG|ECC|EMAL)/i.test(pid);
       const months = runRate30 > 0 ? parseFloat((remaining / runRate30).toFixed(4)) : 0;
       const flavor = isEdible ? getEdibleFlavor(pid, st.desc) : null;
@@ -320,7 +321,7 @@ export function processData(stockCSV, salesCSV, consumeCSV, consume30CSV) {
         id: pid, desc: st.desc, cat, subcat,
         consumed90, runRate30, actual30, dem: runRate30,
         s90: sl.s90, s30: sl.s30, slm: sl.slm,
-        onHand: st.onHand, onOrder: st.onOrder, reserved: st.reserved,
+        onHand: st.onHand, onOrder: st.onOrder, reserved: st.reserved, available: remaining,
         remaining, totalInv: st.onHand + st.onOrder, months, ss: 1.75,
         hasConsumption: consumeMap[pid] != null,
         has30Consumption: consume30Map[pid] != null,

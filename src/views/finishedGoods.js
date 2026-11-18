@@ -137,8 +137,8 @@ function buildData() {
       combined30: Math.round(combined30 * 100) / 100,
       combined90: Math.round(combined90 * 100) / 100,
       monthlyRate: Math.round(monthlyRate * 100) / 100,
-      singleQoh: single ? single.onHand : 0,
-      packQoh: pack ? pack.onHand : 0,
+      singleQoh: single ? (single.available != null ? single.available : single.onHand - (single.reserved || 0)) : 0,
+      packQoh: pack ? (pack.available != null ? pack.available : pack.onHand - (pack.reserved || 0)) : 0,
       materials: matDetails,
     });
   }
@@ -184,7 +184,7 @@ export function exportFinishedGoodsExcel() {
     ['Finished Goods Summary — The Pack Labs'],
     [`Generated: ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`],
     [],
-    ['Product Line', 'SKUs', 'Combined Units /30d', 'Combined Units /mo (90d avg)', 'Total FG QOH (equiv units)', 'Avg FG MOS'],
+    ['Product Line', 'SKUs', 'Combined Units /30d', 'Combined Units /mo (90d avg)', 'Total FG Avail (equiv units)', 'Avg FG WOS'],
   ];
 
   let grandSkus = 0, grandC30 = 0, grandMo = 0, grandQoh = 0;
@@ -192,10 +192,10 @@ export function exportFinishedGoodsExcel() {
     const items = groups[type];
     const c30 = items.reduce((s, d) => s + d.combined30, 0);
     const mo = items.reduce((s, d) => s + d.monthlyRate, 0);
-    const qoh = items.reduce((s, d) => s + d.singleQoh + d.packQoh, 0);
+    const qoh = items.reduce((s, d) => s + d.singleQoh + d.packQoh * d.packQty, 0);
     const mosItems = items.filter(d => d.monthlyRate > 0);
-    const avgMos = mosItems.length ? mosItems.reduce((s, d) => s + (d.singleQoh + d.packQoh * d.packQty) / d.monthlyRate, 0) / mosItems.length : 0;
-    sumRows.push([type, items.length, Math.round(c30), Math.round(mo), Math.round(qoh), Math.round(avgMos * 10) / 10]);
+    const avgWos = mosItems.length ? mosItems.reduce((s, d) => s + (d.singleQoh + d.packQoh * d.packQty) / (d.monthlyRate / 4.333), 0) / mosItems.length : 0;
+    sumRows.push([type, items.length, Math.round(c30), Math.round(mo), Math.round(qoh), Math.round(avgWos * 10) / 10]);
     grandSkus += items.length; grandC30 += c30; grandMo += mo; grandQoh += qoh;
   });
   sumRows.push(['TOTAL', grandSkus, Math.round(grandC30), Math.round(grandMo), Math.round(grandQoh), '']);
@@ -223,15 +223,15 @@ export function exportFinishedGoodsExcel() {
   // ── Sheet 2: All SKUs ──
   const allHeaders = ['SKU', 'Description', 'Product Line', 'Pack SKU', 'Pack Qty',
     'Single 30d', 'Pack 30d', 'Combined 30d (equiv)', 'Monthly Rate (90d avg)',
-    'Single QOH', 'Pack QOH', 'FG QOH', 'FG MOS'];
+    'Single Avail', 'Pack Avail', 'FG Avail (equiv)', 'FG WOS'];
   const allRows = [allHeaders];
   data.forEach(d => {
-    const fgQoh = d.singleQoh + d.packQoh;
     const fgEquiv = d.singleQoh + d.packQoh * d.packQty;
-    const fgMos = d.monthlyRate > 0 ? Math.round(fgEquiv / d.monthlyRate * 10) / 10 : 0;
+    const wkRate = d.monthlyRate / 4.333;
+    const fgWos = wkRate > 0 ? Math.round(fgEquiv / wkRate * 10) / 10 : 0;
     allRows.push([d.sku, d.desc, d.productType, d.packSku || '', d.packQty,
       d.singleS30, d.packS30, Math.round(d.combined30), Math.round(d.monthlyRate),
-      d.singleQoh, d.packQoh, fgQoh, fgMos]);
+      d.singleQoh, d.packQoh, fgEquiv, fgWos]);
   });
   const wsAll = XLSX.utils.aoa_to_sheet(allRows);
   wsAll['!cols'] = [{wch:18},{wch:50},{wch:12},{wch:18},{wch:8},{wch:10},{wch:10},{wch:18},{wch:18},{wch:10},{wch:10},{wch:14},{wch:8}];
@@ -266,17 +266,17 @@ export function exportFinishedGoodsExcel() {
 
     // Product line SKU overview
     sheetData.push(['PRODUCT LINE OVERVIEW']);
-    sheetData.push(['SKU', 'Description', 'Single 30d', 'Pack 30d', 'Combined /mo', 'FG QOH', 'FG MOS']);
-    let totalCombMo = 0, totalFgQoh = 0;
+    sheetData.push(['SKU', 'Description', 'Single 30d', 'Pack 30d', 'Combined /mo', 'FG Avail (equiv)', 'FG WOS']);
+    let totalCombMo = 0, totalFgEquiv = 0;
     items.forEach(d => {
-      const fgQoh = d.singleQoh + d.packQoh;
       const fgEquiv = d.singleQoh + d.packQoh * d.packQty;
-      const fgMos = d.monthlyRate > 0 ? Math.round(fgEquiv / d.monthlyRate * 10) / 10 : 0;
-      sheetData.push([d.sku, d.desc, d.singleS30, d.packS30, Math.round(d.monthlyRate), fgQoh, fgMos]);
+      const wkRate = d.monthlyRate / 4.333;
+      const fgWos = wkRate > 0 ? Math.round(fgEquiv / wkRate * 10) / 10 : 0;
+      sheetData.push([d.sku, d.desc, d.singleS30, d.packS30, Math.round(d.monthlyRate), fgEquiv, fgWos]);
       totalCombMo += d.monthlyRate;
-      totalFgQoh += fgQoh;
+      totalFgEquiv += fgEquiv;
     });
-    sheetData.push(['TOTAL', '', '', '', Math.round(totalCombMo), totalFgQoh, '']);
+    sheetData.push(['TOTAL', '', '', '', Math.round(totalCombMo), totalFgEquiv, '']);
 
     sheetData.push([]);
     sheetData.push([]);
@@ -370,12 +370,12 @@ export function exportFinishedGoodsExcel() {
     // ── Section 1: Per-SKU with SKU-specific materials ──
     sheetData.push(['PER-SKU INVENTORY & RUNWAY']);
     sheetData.push([]);
-    sheetData.push(['SKU', 'Description', 'FG QOH', 'Monthly Rate', 'FG MOS', 'Bottleneck', 'Bottleneck MOS']);
+    sheetData.push(['SKU', 'Description', 'FG Avail (equiv)', 'Monthly Rate', 'FG WOS', 'Bottleneck', 'Bottleneck MOS']);
 
     items.forEach(d => {
-      const fgQoh = d.singleQoh + d.packQoh;
       const fgEquiv = d.singleQoh + d.packQoh * d.packQty;
-      const fgMos = d.monthlyRate > 0 ? Math.round(fgEquiv / d.monthlyRate * 10) / 10 : 0;
+      const wkRate = d.monthlyRate / 4.333;
+      const fgWos = wkRate > 0 ? Math.round(fgEquiv / wkRate * 10) / 10 : 0;
 
       // SKU-specific materials (not shared infrastructure)
       const skuMats = d.materials.filter(m => !isShared(m.matId));
@@ -390,7 +390,7 @@ export function exportFinishedGoodsExcel() {
       });
       bottleneckMos = bottleneckMos === 999 ? 0 : Math.round(bottleneckMos * 10) / 10;
 
-      sheetData.push([d.sku, d.desc, fgQoh, Math.round(d.monthlyRate), fgMos, bottleneckMat, bottleneckMos]);
+      sheetData.push([d.sku, d.desc, fgEquiv, Math.round(d.monthlyRate), fgWos, bottleneckMat, bottleneckMos]);
 
       // Material detail rows
       skuMats.sort((a, b) => a.matId.localeCompare(b.matId)).forEach(m => {
@@ -470,6 +470,12 @@ function mosLabel(mos) {
   return mos.toFixed(1);
 }
 
+function wosLabel(wos) {
+  if (wos <= 0) return '—';
+  if (wos > 99) return '99+';
+  return wos.toFixed(1);
+}
+
 export function renderFinishedGoodsView() {
   const el = document.getElementById('finishedgoods-view');
   if (!el) return;
@@ -546,7 +552,7 @@ export function renderFinishedGoodsView() {
                 <th style="text-align:right;padding:6px 8px;color:var(--text3);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Pack 30d</th>
                 <th style="text-align:right;padding:6px 8px;color:var(--text3);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Combined /mo</th>
                 <th style="text-align:right;padding:6px 8px;color:var(--text3);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">FG QOH</th>
-                <th style="text-align:right;padding:6px 8px;color:var(--text3);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">FG MOS</th>
+                <th style="text-align:right;padding:6px 8px;color:var(--text3);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">FG WOS</th>
                 <th style="text-align:center;padding:6px 8px;color:var(--text3);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.04em"></th>
               </tr>
             </thead>
@@ -554,10 +560,10 @@ export function renderFinishedGoodsView() {
     `;
 
     items.forEach((item, idx) => {
-      const fgQoh = item.singleQoh + item.packQoh;
       const fgEquiv = item.singleQoh + (item.packQoh * item.packQty);
-      const fgMos = item.monthlyRate > 0 ? fgEquiv / item.monthlyRate : 0;
-      const fgMosRound = Math.round(fgMos * 10) / 10;
+      const weeklyRate = item.monthlyRate / 4.333;
+      const fgWos = weeklyRate > 0 ? fgEquiv / weeklyRate : 0;
+      const fgWosRound = Math.round(fgWos * 10) / 10;
       const rowBg = idx % 2 === 0 ? '' : 'background:var(--bg3);';
       const worstMat = item.materials.filter(m => m.monthlyNeed > 0).sort((a, b) => a.mos - b.mos)[0];
       const worstMos = worstMat ? worstMat.mos : 0;
@@ -569,8 +575,8 @@ export function renderFinishedGoodsView() {
           <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(item.singleS30)}</td>
           <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(item.packS30)} <span style="color:var(--text3);font-size:11px">(${item.packQty}pk)</span></td>
           <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text);font-weight:500">${fmt(Math.round(item.monthlyRate))}</td>
-          <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(fgQoh)}</td>
-          <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);font-weight:500;color:${statusColor(fgMosRound)}">${mosLabel(fgMosRound)}</td>
+          <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmt(fgEquiv)}<div style="font-size:8px;color:var(--text3)">${fmt(item.singleQoh)}s + ${fmt(item.packQoh)}pk</div></td>
+          <td style="padding:5px 8px;text-align:right;font-family:var(--font-mono);font-weight:500;color:${statusColor(fgWosRound / 4.333)}">${wosLabel(fgWosRound)}</td>
           <td style="padding:5px 8px;text-align:center">
             ${worstMat && worstMos < 2 ? `<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${worstMos < 1 ? 'rgba(224,82,82,.15)' : 'rgba(224,124,58,.15)'};color:${worstMos < 1 ? 'var(--red)' : 'var(--orange)'}">${worstMat.matId} ${worstMos.toFixed(1)}mo</span>` : ''}
             <span style="font-size:9px;color:var(--text3);margin-left:4px">▼</span>

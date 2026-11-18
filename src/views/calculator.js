@@ -11,10 +11,7 @@ const FORMULATIONS = {
             jointsPerSingle: 5, gramsPerJoint: 1,
             packName: '10 Pack', jointsPerPack: 50,
             ingredients: [
-              { name: 'Hemp Smalls', uom: 'g', wt: 0.72 },
-              { name: 'Terps/Diluent', uom: 'g', wt: 0.018 },
-              { name: 'HHC', uom: 'g', wt: 0.162 },
-              { name: 'THCA ISO', uom: 'g', wt: 0.1 },
+              { name: 'THCA Flower Mixture', uom: 'g', wt: 1 },
             ],
           },
           {
@@ -22,10 +19,7 @@ const FORMULATIONS = {
             jointsPerSingle: 5, gramsPerJoint: 1,
             packName: '10 Pack', jointsPerPack: 50,
             ingredients: [
-              { name: 'Hemp Smalls', uom: 'g', wt: 0.77 },
-              { name: 'THCP', uom: 'g', wt: 0.005 },
-              { name: 'HHC', uom: 'g', wt: 0.2 },
-              { name: 'Terpenes', uom: 'g', wt: 0.026 },
+              { name: 'THCP Flower Mixture', uom: 'g', wt: 1 },
             ],
           },
         ],
@@ -38,11 +32,9 @@ const FORMULATIONS = {
             jointsPerSingle: 2, gramsPerJoint: 1.5,
             packName: '5 Pack', jointsPerPack: 10,
             ingredients: [
-              { name: 'Hemp Smalls', uom: 'g', wt: 0.77 },
-              { name: 'HHC', uom: 'g', wt: 0.28 },
-              { name: 'THCP', uom: 'g', wt: 0.006 },
-              { name: 'Diluent', uom: 'g', wt: 0.28 },
-              { name: 'Terpenes', uom: 'g', wt: 0.0256 },
+              { name: 'THCP Flower Mixture', uom: 'g', wt: 2.6 },
+              { name: 'D8', uom: 'g', wt: 0.392 },
+              { name: 'Diluent', uom: 'g', wt: 0.008 },
             ],
           },
         ],
@@ -55,10 +47,7 @@ const FORMULATIONS = {
             jointsPerSingle: 1, gramsPerJoint: 2,
             packName: '10 Pack', jointsPerPack: 10,
             ingredients: [
-              { name: 'Hemp Smalls', uom: 'g', wt: 0.72 },
-              { name: 'Terps/Diluent', uom: 'g', wt: 0.018 },
-              { name: 'HHC', uom: 'g', wt: 0.162 },
-              { name: 'THCA ISO', uom: 'g', wt: 0.1 },
+              { name: 'THCA Flower Mixture', uom: 'g', wt: 2 },
             ],
           },
           {
@@ -66,10 +55,7 @@ const FORMULATIONS = {
             jointsPerSingle: 1, gramsPerJoint: 2,
             packName: '10 Pack', jointsPerPack: 10,
             ingredients: [
-              { name: 'Hemp Smalls', uom: 'g', wt: 1.54 },
-              { name: 'THCP', uom: 'g', wt: 0.01 },
-              { name: 'HHC', uom: 'g', wt: 0.4 },
-              { name: 'Terpenes', uom: 'g', wt: 0.052 },
+              { name: 'THCP Flower Mixture', uom: 'g', wt: 2 },
             ],
           },
         ],
@@ -82,11 +68,9 @@ const FORMULATIONS = {
             jointsPerSingle: 1, gramsPerJoint: 2,
             packName: '10 Pack', jointsPerPack: 10,
             ingredients: [
-              { name: 'Hemp Smalls', uom: 'g', wt: 0.72 },
-              { name: 'Terps/Diluent', uom: 'g', wt: 0.018 },
-              { name: 'HHC', uom: 'g', wt: 0.162 },
-              { name: 'THCA ISO', uom: 'g', wt: 0.1 },
-              { name: 'Terpenes', uom: 'g', wt: 0.009 },
+              { name: 'THCA Flower Mixture', uom: 'g', wt: 1.8 },
+              { name: 'D8', uom: 'g', wt: 0.192 },
+              { name: 'Terpene', uom: 'g', wt: 0.008 },
             ],
           },
           {
@@ -94,10 +78,9 @@ const FORMULATIONS = {
             jointsPerSingle: 1, gramsPerJoint: 2,
             packName: '10 Pack', jointsPerPack: 10,
             ingredients: [
-              { name: 'Hemp Smalls', uom: 'g', wt: 1.54 },
-              { name: 'THCP', uom: 'g', wt: 0.013 },
-              { name: 'HHC', uom: 'g', wt: 0.55 },
-              { name: 'Terpenes', uom: 'g', wt: 0.052 },
+              { name: 'THCP Flower Mixture', uom: 'g', wt: 1.8 },
+              { name: 'D8', uom: 'g', wt: 0.196 },
+              { name: 'Terpenes', uom: 'g', wt: 0.004 },
             ],
           },
         ],
@@ -112,14 +95,29 @@ const FORMULATIONS = {
         name: 'Imperial 1g Cart',
         variants: [
           {
-            variant: 'THCP',
+            variant: 'Standard',
             unitsPerSingle: 1, gramsPerUnit: 1,
             packName: '6 Pack', unitsPerPack: 6,
             ingredients: [
-              { name: 'HHC', uom: 'g', wt: 0.79 },
-              { name: 'Diluent', uom: 'g', wt: 0.08 },
               { name: 'THCP', uom: 'g', wt: 0.05 },
-              { name: 'Terpenes', uom: 'g', wt: 0.08 },
+              { name: 'D8', uom: 'g', wt: 0.79 },
+              { name: 'Terpene', uom: 'g', wt: 0.08 },
+              { name: 'Diluent', uom: 'g', wt: 0.08 },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Imperial Live Resin',
+        variants: [
+          {
+            variant: 'Standard',
+            unitsPerSingle: 1, gramsPerUnit: 0.5,
+            packName: '6 Pack', unitsPerPack: 6,
+            ingredients: [
+              { name: 'D8', uom: 'g', wt: 0.425 },
+              { name: 'Terpene', uom: 'g', wt: 0.0375 },
+              { name: 'Diluent', uom: 'g', wt: 0.0375 },
             ],
           },
         ],
@@ -128,24 +126,14 @@ const FORMULATIONS = {
         name: 'Lil Ripper',
         variants: [
           {
-            variant: 'HHC',
+            variant: 'THCP',
             unitsPerSingle: 1, gramsPerUnit: 2,
             packName: '10 Pack', unitsPerPack: 10,
             ingredients: [
-              { name: 'HHC', uom: 'g', wt: 1.7 },
-              { name: 'Diluent', uom: 'g', wt: 0.16 },
-              { name: 'Terpenes', uom: 'g', wt: 0.14 },
-            ],
-          },
-          {
-            variant: 'D8',
-            unitsPerSingle: 1, gramsPerUnit: 2,
-            packName: '10 Pack', unitsPerPack: 10,
-            ingredients: [
-              { name: 'KCA D8', uom: 'g', wt: 1.62 },
-              { name: 'Amber D8', uom: 'g', wt: 0.08 },
-              { name: 'Diluent', uom: 'g', wt: 0.16 },
-              { name: 'Terpenes', uom: 'g', wt: 0.14 },
+              { name: 'THCP', uom: 'g', wt: 0.2 },
+              { name: 'D8', uom: 'g', wt: 1.6 },
+              { name: 'Terpene', uom: 'g', wt: 0.15 },
+              { name: 'Diluent', uom: 'g', wt: 0.05 },
             ],
           },
           {
@@ -153,21 +141,10 @@ const FORMULATIONS = {
             unitsPerSingle: 1, gramsPerUnit: 2,
             packName: '10 Pack', unitsPerPack: 10,
             ingredients: [
-              { name: 'THCA ISO', uom: 'g', wt: 0.004 },
-              { name: 'HHC', uom: 'g', wt: 1.7 },
+              { name: 'THCA ISO', uom: 'g', wt: 0.0051 },
+              { name: 'D8', uom: 'g', wt: 1.6949 },
+              { name: 'Terpene', uom: 'g', wt: 0.14 },
               { name: 'Diluent', uom: 'g', wt: 0.16 },
-              { name: 'Terpenes', uom: 'g', wt: 0.14 },
-            ],
-          },
-          {
-            variant: 'THCP',
-            unitsPerSingle: 1, gramsPerUnit: 2,
-            packName: '10 Pack', unitsPerPack: 10,
-            ingredients: [
-              { name: 'THCP', uom: 'g', wt: 0.2 },
-              { name: 'HHC', uom: 'g', wt: 1.6 },
-              { name: 'Diluent', uom: 'g', wt: 0.06 },
-              { name: 'Terpenes', uom: 'g', wt: 0.15 },
             ],
           },
         ],
@@ -305,7 +282,7 @@ const FLOWER_MIXTURES = [
     color: 'var(--blue)',
     ingredients: [
       { name: 'Hemp Smalls', uom: 'g', wt: 0.77 },
-      { name: 'HHC', uom: 'g', wt: 0.2, liquid: true },
+      { name: 'D8', uom: 'g', wt: 0.2, liquid: true },
       { name: 'THCP', uom: 'g', wt: 0.005, liquid: true },
       { name: 'Terpenes', uom: 'g', wt: 0.026, liquid: true },
     ],
@@ -329,11 +306,9 @@ const FLOWER_MIXTURES = [
     label: 'THCA Flower Mixture',
     color: 'var(--green)',
     ingredients: [
-      { name: 'CBG Hemp', uom: 'g', wt: 0 },
-      { name: 'CBD Hemp', uom: 'g', wt: 0.72 },
-      { name: 'HHC', uom: 'g', wt: 0.162, liquid: true },
-      { name: 'Diluent/Terp', uom: 'g', wt: 0.018, liquid: true },
-      { name: 'THCA ISO', uom: 'g', wt: 0.1 },
+      { name: 'Hemp Smalls', uom: 'g', wt: 0.816 },
+      { name: 'Raw THCA Smalls', uom: 'g', wt: 0.0714 },
+      { name: 'THCA ISO', uom: 'g', wt: 0.1326 },
     ],
     flavors: [],
   },
@@ -342,15 +317,11 @@ const FLOWER_MIXTURES = [
 let editingFormulation = null;
 
 const LIQUID_INGREDIENTS = {
-  'HHC': 1.04,
-  'HHC Oil': 1.04,
+  'D8': 1.04,
   'THCP': 1.04,
   'Terpenes': 0.86,
-  'Terps/Diluent': 0.92,
   'Terpene': 0.86,
   'Diluent': 0.95,
-  'KCA D8': 1.04,
-  'Amber D8': 1.04,
   'D9 Oil': 1.04,
 };
 
@@ -386,9 +357,24 @@ function getInputId(catKey, prodIdx, varIdx, type) {
   return `calc-${catKey}-${prodIdx}-${varIdx}-${type}`;
 }
 
+function getStockMap() {
+  const state = window.__appState;
+  const rows = state?.RAW_DATA;
+  if (!rows || !rows.length) return null;
+  const map = {};
+  rows.forEach(r => { if (r.id) map[r.id] = r; });
+  return map;
+}
+
+function getOnHand(stockMap, sku) {
+  if (!stockMap || !stockMap[sku]) return 0;
+  return stockMap[sku].onHand || 0;
+}
+
 function recalculate() {
   const totals = {};
   const flowerMix = {};
+  const mixtureTotals = {};
 
   for (const [catKey, cat] of Object.entries(FORMULATIONS)) {
     cat.products.forEach((prod, pi) => {
@@ -424,11 +410,27 @@ function recalculate() {
 
         v.ingredients.forEach(ing => {
           const needed = totalUnits * ing.wt;
-          if (needed > 0) {
-            const key = ing.name;
-            if (!totals[key]) totals[key] = { grams: 0, sources: [] };
-            totals[key].grams += needed;
-            totals[key].sources.push({
+          if (needed <= 0) return;
+          const fm = FLOWER_MIXTURES.find(f => f.label === ing.name);
+          if (fm) {
+            if (!mixtureTotals[ing.name]) mixtureTotals[ing.name] = { grams: 0, sources: [] };
+            mixtureTotals[ing.name].grams += needed;
+            mixtureTotals[ing.name].sources.push({ product: `${prod.name} ${v.variant}`, qty: needed });
+            fm.ingredients.forEach(sub => {
+              const subNeeded = needed * sub.wt;
+              if (subNeeded > 0) {
+                if (!totals[sub.name]) totals[sub.name] = { grams: 0, sources: [] };
+                totals[sub.name].grams += subNeeded;
+                totals[sub.name].sources.push({
+                  product: `${prod.name} ${v.variant}`,
+                  qty: subNeeded,
+                });
+              }
+            });
+          } else {
+            if (!totals[ing.name]) totals[ing.name] = { grams: 0, sources: [] };
+            totals[ing.name].grams += needed;
+            totals[ing.name].sources.push({
               product: `${prod.name} ${v.variant}`,
               qty: needed,
             });
@@ -445,6 +447,7 @@ function recalculate() {
   renderGummyTotals(gummyPieces);
   renderFlowerMixtureTotals(flowerMixResult);
   renderResults(totals);
+  renderInventoryCheck(totals, mixtureTotals, flowerMixResult);
 }
 
 function recalcGummies() {
@@ -690,6 +693,185 @@ function renderResults(totals) {
       <td style="padding:.5rem 1rem">${breakdown}</td>
     </tr>`;
   });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+const INGREDIENT_SKU_MAP = {
+  'Hemp Smalls':      { skus: ['Flower - CBD Flower'] },
+  'Raw THCA Smalls':  { skus: ['Flower - Raw THCA Smalls'] },
+  'THCA ISO':         { skus: ['ISO - THCA'] },
+  'D8':               { skus: ['Oil - KCA D8'] },
+  'THCP':             { skus: ['Oil - D9THCP'] },
+  'Diluent':          { skus: ['TRP-PEG'] },
+  'Terpene':          { skus: ['TRP-PEG'] },
+  'Terpenes':         { skus: ['TRP-PEG'] },
+};
+
+function renderInventoryCheck(totals, mixtureTotals, flowerMixResult) {
+  const el = document.getElementById('calc-inventory-check');
+  if (!el) return;
+
+  const stockMap = getStockMap();
+  const hasData = Object.keys(totals).length > 0;
+
+  if (!hasData) { el.innerHTML = ''; return; }
+  if (!stockMap) {
+    el.innerHTML = `<div style="text-align:center;padding:1rem;color:var(--text3);font-size:12px">Sync with Finale to see inventory comparison</div>`;
+    return;
+  }
+
+  const rows = [];
+
+  const thcaMixNeeded = mixtureTotals['THCA Flower Mixture']?.grams || 0;
+  if (thcaMixNeeded > 0) {
+    const mixOnHand = getOnHand(stockMap, 'Mixture - Flower Mixture');
+    const mixUsed = Math.min(mixOnHand, thcaMixNeeded);
+    const mixRemaining = mixOnHand - mixUsed;
+    const mixShortfall = thcaMixNeeded - mixUsed;
+
+    rows.push({
+      name: 'THCA Flower Mixture (pre-made)',
+      sku: 'Mixture - Flower Mixture',
+      needed: thcaMixNeeded,
+      onHand: mixOnHand,
+      used: mixUsed,
+      remaining: mixRemaining,
+      shortfall: mixShortfall > 0 ? mixShortfall : 0,
+      color: 'var(--green)',
+      note: mixShortfall > 0 ? `using all ${fmtG(mixOnHand)}, need ${fmtG(mixShortfall)} more from raw` : '',
+    });
+
+    if (mixShortfall > 0) {
+      const thcaFm = FLOWER_MIXTURES.find(f => f.key === 'thca');
+      const rawIngAdjust = {};
+      thcaFm.ingredients.forEach(sub => {
+        rawIngAdjust[sub.name] = mixUsed * sub.wt;
+      });
+
+      const skuDrawn = {};
+      thcaFm.ingredients.forEach(sub => {
+        const totalNeeded = totals[sub.name]?.grams || 0;
+        const adjustedNeeded = totalNeeded - (rawIngAdjust[sub.name] || 0);
+        const mapping = INGREDIENT_SKU_MAP[sub.name];
+        const skuKey = mapping ? mapping.skus.join('+') : sub.name;
+        if (!skuDrawn[skuKey]) skuDrawn[skuKey] = { names: [], needed: 0, skus: mapping?.skus || [], skuLabel: skuKey };
+        skuDrawn[skuKey].names.push(sub.name);
+        skuDrawn[skuKey].needed += adjustedNeeded;
+      });
+
+      Object.values(skuDrawn).forEach(group => {
+        let onHand = 0;
+        group.skus.forEach(s => { onHand += getOnHand(stockMap, s); });
+        const diff = onHand - group.needed;
+        rows.push({
+          name: group.names.join(' + '),
+          sku: group.skuLabel,
+          needed: group.needed,
+          onHand,
+          used: Math.min(onHand, group.needed),
+          remaining: Math.max(0, diff),
+          shortfall: Math.max(0, -diff),
+          color: 'var(--green)',
+          indent: true,
+          subtitle: `(after using ${fmtG(mixUsed)} pre-made mixture)`,
+        });
+      });
+    }
+  }
+
+  const thcpMixNeeded = mixtureTotals['THCP Flower Mixture']?.grams || 0;
+  if (thcpMixNeeded > 0) {
+    let fmxTotal = 0;
+    const fmxBreakdown = [];
+    Object.keys(stockMap).filter(k => k.startsWith('FMX-')).forEach(k => {
+      const qoh = getOnHand(stockMap, k);
+      if (qoh > 0) {
+        fmxTotal += qoh;
+        fmxBreakdown.push({ sku: k, qoh });
+      }
+    });
+
+    const diff = fmxTotal - thcpMixNeeded;
+    rows.push({
+      name: 'THCP Flower Mixture (all FMX)',
+      sku: 'FMX-* combined',
+      needed: thcpMixNeeded,
+      onHand: fmxTotal,
+      used: Math.min(fmxTotal, thcpMixNeeded),
+      remaining: Math.max(0, diff),
+      shortfall: Math.max(0, -diff),
+      color: 'var(--blue)',
+      note: diff < 0 ? `Need ${fmtG(-diff)} more flower mixture` : '',
+    });
+  }
+
+  const skipIngredients = new Set();
+  if (thcaMixNeeded > 0) {
+    const thcaFm = FLOWER_MIXTURES.find(f => f.key === 'thca');
+    thcaFm.ingredients.forEach(sub => skipIngredients.add(sub.name));
+  }
+
+  Object.entries(totals).sort((a, b) => b[1].grams - a[1].grams).forEach(([name, data]) => {
+    if (skipIngredients.has(name)) return;
+    const mapping = INGREDIENT_SKU_MAP[name];
+    if (!mapping) return;
+    let onHand = 0;
+    let skuLabel = name;
+    mapping.skus.forEach(s => { onHand += getOnHand(stockMap, s); });
+    skuLabel = mapping.skus.join(' + ');
+    const diff = onHand - data.grams;
+    rows.push({
+      name,
+      sku: skuLabel,
+      needed: data.grams,
+      onHand,
+      used: Math.min(onHand, data.grams),
+      remaining: Math.max(0, diff),
+      shortfall: Math.max(0, -diff),
+    });
+  });
+
+  if (!rows.length) { el.innerHTML = ''; return; }
+
+  let html = `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-top:.75rem">
+    <div style="padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem">
+      <span style="font-size:13px;font-weight:600;color:var(--text)">Inventory Check</span>
+      <span style="font-size:10px;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:3px">vs. Finale on-hand</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:var(--bg4)">
+        <th style="padding:.5rem 1rem;text-align:left;color:var(--text3);font-weight:500">Ingredient</th>
+        <th style="padding:.5rem .5rem;text-align:left;color:var(--text3);font-weight:500;font-size:10px">Finale SKU</th>
+        <th style="padding:.5rem .5rem;text-align:right;color:var(--text3);font-weight:500">Needed</th>
+        <th style="padding:.5rem .5rem;text-align:right;color:var(--text3);font-weight:500">On Hand</th>
+        <th style="padding:.5rem .5rem;text-align:right;color:var(--text3);font-weight:500">Status</th>
+        <th style="padding:.5rem 1rem;text-align:right;color:var(--text3);font-weight:500">Remaining / Short</th>
+      </tr></thead><tbody>`;
+
+  for (const r of rows) {
+    const ok = r.shortfall <= 0;
+    const statusColor = ok ? 'var(--green)' : 'var(--red)';
+    const statusText = ok ? '✓ Enough' : '✗ Short';
+    const diffVal = ok ? r.remaining : r.shortfall;
+    const diffText = ok
+      ? `<span style="color:var(--green)">${fmtG(diffVal)} left<div style="font-size:9px">${fmtLbs(diffVal)} left</div></span>`
+      : `<span style="color:var(--red)">−${fmtG(diffVal)} short<div style="font-size:9px">−${fmtLbs(diffVal)} short</div></span>`;
+    const indent = r.indent ? 'padding-left:2rem;' : '';
+    const nameColor = r.color || 'var(--text)';
+    const subtitle = r.subtitle ? `<div style="font-size:9px;color:var(--text4)">${r.subtitle}</div>` : '';
+    const noteTag = r.note ? `<span style="font-size:9px;color:var(--text4);margin-left:4px">${r.note}</span>` : '';
+
+    html += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:.4rem 1rem;font-weight:500;color:${nameColor};${indent}">${r.name}${noteTag}${subtitle}</td>
+      <td style="padding:.4rem .5rem;font-size:10px;color:var(--text3);font-family:var(--font-mono)">${r.sku}</td>
+      <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);color:var(--text)">${fmtG(r.needed)}<div style="font-size:9px;color:var(--text3)">${fmtLbs(r.needed)}</div></td>
+      <td style="padding:.4rem .5rem;text-align:right;font-family:var(--font-mono);color:var(--text2)">${fmtG(r.onHand)}<div style="font-size:9px;color:var(--text3)">${fmtLbs(r.onHand)}</div></td>
+      <td style="padding:.4rem .5rem;text-align:right;font-size:11px;font-weight:600;color:${statusColor}">${statusText}</td>
+      <td style="padding:.4rem 1rem;text-align:right;font-family:var(--font-mono)">${diffText}</td>
+    </tr>`;
+  }
 
   html += '</tbody></table></div>';
   el.innerHTML = html;
