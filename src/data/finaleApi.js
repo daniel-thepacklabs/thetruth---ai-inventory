@@ -62,6 +62,7 @@ async function fetchLiveProducts() {
             stockQuantityOnHandUnits
             stockReservationsUnits
             stockOnOrderUnits
+            productUrl
             stockAvailableToPromiseUnits
             stockRemainingAfterReservationsUnits
             salesLast7Days
@@ -312,6 +313,42 @@ export async function fetchOrderItems(orderIds) {
     });
   }
   return products;
+}
+
+async function fetchOpenPurchaseOrders(products) {
+  const poMap = {};
+  const onOrderProducts = products.filter(p =>
+    (num(p.stockOnOrderUnits) || 0) > 0 && p.productUrl
+  );
+  if (!onOrderProducts.length) {
+    console.log('  No products with on-order stock, skipping PO fetch');
+    return poMap;
+  }
+  console.log(`  Fetching POs for ${onOrderProducts.length} on-order products...`);
+  const BATCH = 10;
+  for (let i = 0; i < onOrderProducts.length; i += BATCH) {
+    const batch = onOrderProducts.slice(i, i + BATCH);
+    const urls = batch.map(p => `"${p.productUrl}"`).join(',');
+    try {
+      const data = await gql(`{ orderViewConnection(first: 200, product: [${urls}]) { edges { node { orderId type status itemList(first: 200) { edges { node { product { productId } quantity } } } } } } }`);
+      for (const edge of (data.orderViewConnection?.edges || [])) {
+        const o = edge.node;
+        if (o.type !== 'Purchase' || o.status !== 'Committed') continue;
+        for (const item of (o.itemList?.edges || [])) {
+          const pid = item.node.product?.productId;
+          const qty = parseInt((item.node.quantity || '0').toString().replace(/,/g, ''));
+          if (pid && qty > 0) {
+            if (!poMap[pid]) poMap[pid] = [];
+            if (!poMap[pid].find(p => p.po === o.orderId)) poMap[pid].push({ po: o.orderId, qty });
+          }
+        }
+      }
+    } catch (e) { console.warn('  PO batch error:', e.message); }
+  }
+  const totalPids = Object.keys(poMap).length;
+  const totalPOs = new Set(Object.values(poMap).flat().map(p => p.po)).size;
+  console.log(`  ${totalPOs} open POs across ${totalPids} products`);
+  return poMap;
 }
 
 function buildAvgPriceMap() {
@@ -596,6 +633,14 @@ export async function fetchAll() {
   const shopifyPriceMap = priceMapsData.shopify || {};
   const wholesalePriceMap = priceMapsData.wholesale || {};
 
+  console.log('Fetching purchase orders...');
+  let poMap = {};
+  try {
+    poMap = await fetchOpenPurchaseOrders(products);
+  } catch (err) {
+    console.warn('PO fetch failed:', err.message);
+  }
+
   console.log('Fetching shipped sales by state...');
   let salesByState = {};
   try {
@@ -612,7 +657,7 @@ export async function fetchAll() {
     console.warn('State sales fetch failed:', err.message);
   }
 
-  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, valuationMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState };
+  return { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, valuationMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState, poMap };
 }
 
 async function fetchAllStatic() {

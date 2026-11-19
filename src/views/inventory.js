@@ -215,7 +215,7 @@ export function render() {
             <span class="badge ${subBadge}" style="font-size:9px;opacity:.8">${item.subcat}</span>
             <span class="badge ${st.badge}">${st.label}</span>
             ${ov ? '<span class="badge badge-accent">adjusted</span>' : ''}
-            ${item.onOrder > 0 ? '<span class="badge badge-gray">PO open</span>' : ''}
+            ${item.onOrder > 0 ? (() => { const pos = (state.PO_MAP || {})[item.id]; return pos && pos.length ? pos.map(p => `<span class="badge badge-gray" style="font-size:8px">${p.po} (${fmt(p.qty)})</span>`).join('') : '<span class="badge badge-gray">PO open</span>'; })() : ''}
           </div>
           <div class="item-desc" title="${displayDesc}">${displayDesc}</div>
           <div style="display:flex;align-items:center;gap:1rem;margin-top:6px;flex-wrap:wrap">
@@ -259,7 +259,7 @@ export function render() {
           <div class="expand-stat"><div class="expand-label">Packaged (FIT)</div><div class="expand-val" style="color:var(--blue)">${fmt(Math.round(item.packagedGrams))}g</div></div>
           <div class="expand-stat"><div class="expand-label">Total flower</div><div class="expand-val" style="color:var(--green)">${fmt(Math.round(item.onHand + item.packagedGrams))}g</div></div>` : ''}
           <div class="expand-stat"><div class="expand-label">Reserved</div><div class="expand-val">${fmt(item.reserved || 0)}</div></div>
-          <div class="expand-stat"><div class="expand-label">On order</div><div class="expand-val">${fmt(item.onOrder)}</div></div>
+          <div class="expand-stat"><div class="expand-label">On order</div><div class="expand-val">${fmt(item.onOrder)}${(() => { const pos = (state.PO_MAP || {})[item.id]; return pos && pos.length ? '<div style="font-size:9px;color:var(--text3);margin-top:2px">' + pos.map(p => p.po + ': ' + fmt(p.qty)).join(', ') + '</div>' : ''; })()}</div></div>
           <div class="expand-stat" title="Total units consumed in the last 90 days"><div class="expand-label">90-day consumed</div><div class="expand-val">${fmt(item.consumed90)}</div></div>
           <div class="expand-stat" title="30-day run rate = consumed over 90 days ÷ 3"><div class="expand-label">30d run rate${item.hasConsumption ? ' 🔥' : ''}</div><div class="expand-val">${fmt(item.runRate30)}</div></div>
           <div class="expand-stat" title="${item.has30Consumption ? 'From your 30-day consumption file' : 'Falling back to sales last 30 days'}"><div class="expand-label">Last 30d consumption${item.has30Consumption ? ' 🔥' : ' *'}</div><div class="expand-val">${fmt(item.actual30)}</div></div>

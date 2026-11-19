@@ -136,7 +136,7 @@ window.syncFromFinale = async function syncFromFinale() {
 
   const d = window.__syncDeps;
   try {
-    const { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, valuationMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState } = await d.fetchAll();
+    const { stock, salesHistory, consume, consume30, salesOrder, monthlyTotals, productSalesData, costMap, valuationMap, priceMap, shopifyPriceMap, wholesalePriceMap, salesByState, poMap } = await d.fetchAll();
 
     if (!stock || !salesHistory) {
       console.warn('[sync] No stock/sales data returned');
@@ -188,6 +188,7 @@ window.syncFromFinale = async function syncFromFinale() {
     r.state.SHOPIFY_PRICE_MAP = shopifyPriceMap || {};
     r.state.WHOLESALE_PRICE_MAP = wholesalePriceMap || {};
     r.state.SALES_BY_STATE = salesByState || {};
+    r.state.PO_MAP = poMap || {};
 
     // Persist sync results to localStorage (only if we have recent data)
     try {
