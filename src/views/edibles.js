@@ -52,7 +52,7 @@ function buildEuphoriaTable(edibles) {
     if (!byFlavor[r.flavor][ctKey]) byFlavor[r.flavor][ctKey] = { ct, onHand: 0, onOrder: 0, sales: 0, skus: [] };
     const g = byFlavor[r.flavor][ctKey];
     const packMult = getPackMultiplier(r.id);
-    const avail = r.onHand - (r.reserved || 0);
+    const avail = r.available != null ? r.available : r.onHand - (r.reserved || 0);
     const singlesOnHand = avail * packMult;
     const singlesOnOrder = r.onOrder * packMult;
     const monthlySales = (r.s90 || 0) / 3;
@@ -67,7 +67,7 @@ function buildEuphoriaTable(edibles) {
   const rawByFlavor = {};
   edibles.filter(r => FLAVOR_LINE[r.flavor] === 'Euphoria' && r.packType === 'RAW').forEach(r => {
     if (!rawByFlavor[r.flavor]) rawByFlavor[r.flavor] = { onHand: 0, onOrder: 0 };
-    rawByFlavor[r.flavor].onHand += r.onHand;
+    rawByFlavor[r.flavor].onHand += r.available != null ? r.available : r.onHand;
     rawByFlavor[r.flavor].onOrder += r.onOrder;
   });
 
@@ -229,7 +229,7 @@ function buildMixALotTable(edibles) {
     if (!byFlavor[r.flavor][ctKey]) byFlavor[r.flavor][ctKey] = { ct, onHand: 0, onOrder: 0, sales: 0, skus: [] };
     const g = byFlavor[r.flavor][ctKey];
     const packMult = getPackMultiplier(r.id);
-    const avail = r.onHand - (r.reserved || 0);
+    const avail = r.available != null ? r.available : r.onHand - (r.reserved || 0);
     const singlesOnHand = avail * packMult;
     const singlesOnOrder = r.onOrder * packMult;
     const monthlySales = (r.s90 || 0) / 3;
@@ -380,13 +380,13 @@ function buildOtherLinesTable(edibles) {
       f.skus.push({ id: r.id, packType: 'RAW', onHand: r.onHand, onOrder: r.onOrder, sales: monthlySales, unitOnHand: r.onHand, unitOnOrder: r.onOrder, unitSales: monthlySales });
       return;
     }
-    const mult = getPiecesPerUnit(r.id, r.desc);
-    const avail = r.onHand - (r.reserved || 0);
-    f.onHand += avail * mult;
-    f.onOrder += r.onOrder * mult;
-    f.sales += monthlySales * mult;
-    f.totalInv += (avail + r.onOrder) * mult;
-    f.skus.push({ id: r.id, packType: r.packType || '—', onHand: avail, onOrder: r.onOrder, sales: monthlySales, unitOnHand: avail * mult, unitOnOrder: r.onOrder * mult, unitSales: monthlySales * mult });
+    const packMult = getPackMultiplier(r.id);
+    const avail = r.available != null ? r.available : r.onHand - (r.reserved || 0);
+    f.onHand += avail * packMult;
+    f.onOrder += r.onOrder * packMult;
+    f.sales += monthlySales * packMult;
+    f.totalInv += (avail + r.onOrder) * packMult;
+    f.skus.push({ id: r.id, packType: r.packType || '—', onHand: avail, onOrder: r.onOrder, sales: monthlySales, unitOnHand: avail * packMult, unitOnOrder: r.onOrder * packMult, unitSales: monthlySales * packMult });
   });
 
   const lineOrder = ['Froot Jam', 'Microdose', 'Crunchies', 'Mix-a-Lot', ''];
